@@ -6,4 +6,19 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Reference Include="Microsoft.Dynamics.Nav.AL.Common">
+      <HintPath>$(SolutionDir)/dll/Microsoft.Dynamics.Nav.AL.Common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Microsoft.Dynamics.Nav.CodeAnalysis">
+      <HintPath>$(SolutionDir)/dll/Microsoft.Dynamics.Nav.CodeAnalysis.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Microsoft.Dynamics.Nav.CodeAnalysis.Workspaces">
+      <HintPath>$(SolutionDir)/dll/Microsoft.Dynamics.Nav.CodeAnalysis.Workspaces.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
 </Project>

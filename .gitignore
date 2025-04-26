@@ -1,3 +1,6 @@
 /.vs
+/dll/*.dll
+/dll/*.dll.config
+/dll/*.pdb
 /src/*/bin
 /src/*/obj
