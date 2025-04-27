@@ -4,6 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+    <!-- because we have a "src" folder, the namespace is not completely the folder path -->
+    <NoWarn>IDE0130</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
