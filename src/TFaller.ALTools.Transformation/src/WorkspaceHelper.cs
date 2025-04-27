@@ -2,6 +2,7 @@ using Microsoft.Dynamics.Nav.CodeAnalysis;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Packaging;
 using Microsoft.Dynamics.Nav.CodeAnalysis.SymbolReference;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Syntax;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -31,12 +32,13 @@ public class WorkspaceHelper
         return comp;
     }
 
-    public static Compilation LoadFiles(Compilation comp, string path, ParseOptions parseOptions)
+    public static Compilation LoadFiles(Compilation comp, string path, ParseOptions parseOptions, Dictionary<string, SyntaxTree> files)
     {
         foreach (var file in Directory.GetFiles(path, "*.al", SearchOption.AllDirectories))
         {
             var content = File.ReadAllText(file, Encoding.UTF8);
             var syntaxTree = SyntaxTree.ParseObjectText(content, file, Encoding.UTF8, parseOptions);
+            files.Add(file, syntaxTree);
             comp = comp.AddSyntaxTrees(syntaxTree);
         }
 
