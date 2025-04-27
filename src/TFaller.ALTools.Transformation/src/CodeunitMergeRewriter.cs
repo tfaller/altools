@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace TFaller.ALTools.Transformation;
 
-class CodeunitMergeRewriter : SyntaxRewriter
+public class CodeunitMergeRewriter : SyntaxRewriter
 {
     private readonly SemanticModel _model;
     private readonly HashSet<string> _codeunits;
