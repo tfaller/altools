@@ -5,6 +5,10 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFaller.ALTools.Transformation", "src\TFaller.ALTools.Transformation\TFaller.ALTools.Transformation.csproj", "{27816A02-E4BB-4D67-B961-6474FAC62527}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4422EE1E-1DC1-43C6-993C-2702808CB8E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFaller.ALTools.OpenApiGenerator", "src\TFaller.ALTools.OpenApiGenerator\TFaller.ALTools.OpenApiGenerator.csproj", "{56FF0A92-9F7D-428A-9DEF-8158FE819476}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +22,12 @@ Global
 		{27816A02-E4BB-4D67-B961-6474FAC62527}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{27816A02-E4BB-4D67-B961-6474FAC62527}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{27816A02-E4BB-4D67-B961-6474FAC62527}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56FF0A92-9F7D-428A-9DEF-8158FE819476}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56FF0A92-9F7D-428A-9DEF-8158FE819476}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56FF0A92-9F7D-428A-9DEF-8158FE819476}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56FF0A92-9F7D-428A-9DEF-8158FE819476}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{56FF0A92-9F7D-428A-9DEF-8158FE819476} = {4422EE1E-1DC1-43C6-993C-2702808CB8E9}
 	EndGlobalSection
 EndGlobal
