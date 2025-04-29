@@ -1,5 +1,6 @@
 ﻿using Microsoft.OpenApi.Models;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Utilities;
+using System.Linq;
 
 namespace TFaller.ALTools.OpenApiGenerator;
 
@@ -11,7 +12,8 @@ public class TransformInlineTypes
     /// <param name="document"></param>
     public static void Transform(OpenApiDocument document)
     {
-        foreach (var schema in document.Components.Schemas)
+        // toArray(), because we are adding to the collection while iterating over it
+        foreach (var schema in document.Components.Schemas.ToArray())
         {
             TransformNested(document, schema.Key, schema.Value);
         }
