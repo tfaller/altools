@@ -12,25 +12,25 @@ public class GeneratorComplex(Generator generator) : IGenerator
         if (schema.Type != "object")
             return GenerationStatus.Nothing;
 
-        var status = GenerationStatus.Getter | GenerationStatus.Setter;
+        var alName = _generator.ALName(name);
+        var type = _generator.ALName(schema.Reference.Id);
 
-        CreateGetterCode(code, name, schema);
-        CreateSetterCode(code, name, schema);
+        CreateGetterCode(code, name, alName, type);
+        CreateSetterCode(code, name, alName, type);
+
+        var status = GenerationStatus.Getter | GenerationStatus.Setter;
 
         if (_generator.GenerateValidate)
         {
-            CreateValidateCode(code, name, schema, required);
+            CreateValidateCode(code, name, alName, type, schema, required);
             status |= GenerationStatus.Validate;
         }
 
         return status;
     }
 
-    private void CreateGetterCode(StringBuilder code, string name, OpenApiSchema schema)
+    private static void CreateGetterCode(StringBuilder code, string name, string alName, string type)
     {
-        var alName = _generator.ALName(name);
-        var type = _generator.ALName(schema.Reference.Id);
-
         code.Append($@"
             procedure Get{alName}(var {alName}: Codeunit {type})
             var 
@@ -44,11 +44,8 @@ public class GeneratorComplex(Generator generator) : IGenerator
         ");
     }
 
-    private void CreateSetterCode(StringBuilder code, string name, OpenApiSchema schema)
+    private static void CreateSetterCode(StringBuilder code, string name, string alName, string type)
     {
-        var alName = _generator.ALName(name);
-        var type = _generator.ALName(schema.Reference.Id);
-
         code.Append($@"
             procedure Set{alName}(var {alName}: Codeunit {type})
             var
@@ -63,11 +60,8 @@ public class GeneratorComplex(Generator generator) : IGenerator
         ");
     }
 
-    public void CreateValidateCode(StringBuilder code, string name, OpenApiSchema schema, bool required)
+    public static void CreateValidateCode(StringBuilder code, string name, string alName, string type, OpenApiSchema schema, bool required)
     {
-        var alName = _generator.ALName(name);
-        var type = _generator.ALName(schema.Reference.Id);
-
         code.AppendLine($@"
             procedure Validate{alName}(Path: Text) Error: Text
             var Token: JsonToken;
@@ -107,12 +101,10 @@ public class GeneratorComplex(Generator generator) : IGenerator
             }
         }
 
-        if (schema.Type == "object")
-        {
-            code.AppendLine($@"Get{alName}(Obj{alName});");
-            code.AppendLine($@"Error := Obj{alName}.Validate(Path + '.{name}');");
-            code.AppendLine("if Error <> '' then exit(Error);");
-        }
+        // validate the prop type itself
+        code.AppendLine($@"Get{alName}(Obj{alName});");
+        code.AppendLine($@"Error := Obj{alName}.Validate(Path + '.{name}');");
+        code.AppendLine("if Error <> '' then exit(Error);");
 
         code.AppendLine("end;");
     }
