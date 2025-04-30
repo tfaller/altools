@@ -1,4 +1,6 @@
 using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi.Models.Interfaces;
+using Microsoft.OpenApi.Models.References;
 using System.Text;
 
 namespace TFaller.ALTools.OpenApiGenerator;
@@ -7,13 +9,18 @@ public class GeneratorComplex(Generator generator) : IGenerator
 {
     private readonly Generator _generator = generator;
 
-    public GenerationStatus GenerateCode(StringBuilder code, string name, OpenApiSchema schema, bool required)
+    public GenerationStatus GenerateCode(StringBuilder code, string name, IOpenApiSchema schema, bool required)
     {
-        if (schema.Type != "object")
+        if (schema.Type != JsonSchemaType.Object && schema.Type != JsonSchemaType.Array)
             return GenerationStatus.Nothing;
 
         var alName = _generator.ALName(name);
-        var type = _generator.ALName(schema.Reference.Id);
+
+        var type = _generator.ALName(
+            schema.Type == JsonSchemaType.Object
+            ? ((OpenApiSchemaReference)schema).Reference.Id!
+            : _generator.ArrayTypeMapper(schema) + "Array"
+        );
 
         CreateGetterCode(code, name, alName, type);
         CreateSetterCode(code, name, alName, type);
@@ -60,7 +67,7 @@ public class GeneratorComplex(Generator generator) : IGenerator
         ");
     }
 
-    public static void CreateValidateCode(StringBuilder code, string name, string alName, string type, OpenApiSchema schema, bool required)
+    public static void CreateValidateCode(StringBuilder code, string name, string alName, string type, IOpenApiSchema schema, bool required)
     {
         code.AppendLine($@"
             procedure Validate{alName}(Path: Text) Error: Text
@@ -84,7 +91,7 @@ public class GeneratorComplex(Generator generator) : IGenerator
 
         code.AppendLine($@"J.Get('{name}', Token);");
 
-        if (type?.EndsWith("Array") ?? false)
+        if (schema.Type == JsonSchemaType.Array)
         {
             if (schema.MaxItems != null)
             {

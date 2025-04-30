@@ -1,5 +1,7 @@
 using Microsoft.Dynamics.Nav.CodeAnalysis.Utilities;
 using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi.Models.Interfaces;
+using Microsoft.OpenApi.Models.References;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -20,11 +22,11 @@ public class Generator
         "end",
         "to",
     };
-    private static readonly HashSet<string> _arraySupportedTypes = new(StringComparer.InvariantCultureIgnoreCase)
-    {
-        "object",
-        "string"
-    };
+    private static readonly HashSet<JsonSchemaType?> _arraySupportedTypes =
+    [
+        JsonSchemaType.Object,
+        JsonSchemaType.String,
+    ];
 
     public bool GenerateValidate { get; set; }
 
@@ -44,23 +46,23 @@ public class Generator
 
     public void AddComponents(OpenApiComponents components)
     {
-        foreach (var s in components.Schemas)
+        foreach (var s in components.Schemas!)
         {
-            if (s.Value.Type == "object")
+            if (s.Value.Type == JsonSchemaType.Object)
             {
                 AddObjectSchema(s.Key, s.Value);
             }
 
-            if (s.Value.Type == "array")
+            if (s.Value.Type == JsonSchemaType.Array)
             {
                 AddArraySchema(s.Value);
             }
         }
     }
 
-    private void AddObjectSchema(string name, OpenApiSchema schema)
+    private void AddObjectSchema(string name, IOpenApiSchema schema)
     {
-        if (schema.Type != "object")
+        if (schema.Type != JsonSchemaType.Object)
             throw new ArgumentException("schema must be an object");
 
         var code = _code;
@@ -87,42 +89,31 @@ public class Generator
 
         // object properties
 
-        var arrays = new HashSet<OpenApiSchema>();
+        var arrays = new HashSet<IOpenApiSchema>();
         var allProps = new HashSet<string>();
         var validateProps = new IdentifierDictionary<bool>();
 
-        foreach (var p in schema.Properties)
+        foreach (var p in schema.Properties!)
         {
             var prop = p;
-            var propRequired = schema.Required.Contains(prop.Key);
+            var propSchema = prop.Value;
+            var propRequired = schema.Required?.Contains(prop.Key) ?? false;
 
             allProps.Add(prop.Key);
 
-            if (prop.Value.Type == "array")
+            if (propSchema.Type == JsonSchemaType.Array)
             {
-                var type = prop.Value.Items.Type;
+                var type = propSchema.Items?.Type;
 
                 if (!_arraySupportedTypes.Contains(type))
                 {
                     continue;
                 }
 
-                type = ArrayTypeMapper(prop.Value);
-
                 arrays.Add(prop.Value);
-                prop = new KeyValuePair<string, OpenApiSchema>(prop.Key, new OpenApiSchema
-                {
-                    Type = "object",
-                    Reference = new OpenApiReference
-                    {
-                        Id = ALName(type) + "Array"
-                    },
-                    MinItems = prop.Value.MinItems,
-                    MaxItems = prop.Value.MaxItems,
-                });
             }
 
-            if (prop.Value.AnyOf.Count > 0)
+            if (propSchema.AnyOf?.Count > 0)
             {
                 // Not supported currently
                 continue;
@@ -216,25 +207,24 @@ public class Generator
         }
     }
 
-    private void AddArraySchema(OpenApiSchema schema)
+    private void AddArraySchema(IOpenApiSchema schema)
     {
-        if (schema.Type != "array")
+        if (schema.Type != JsonSchemaType.Array)
             throw new ArgumentException("schema must be an array");
 
-        var type = schema.Items.Type;
-
-        if (type == "array")
+        var items = schema.Items ?? throw new ArgumentException("schema must have items");
+        if (items.Type == JsonSchemaType.Array)
         {
             throw new ArgumentException("nested arrays are not supported");
         }
 
-        if (type != "object")
+        if (items.Type != JsonSchemaType.Object)
         {
             AddPrimitiveArraySchema(schema);
             return;
         }
 
-        type = ALName(schema.Items.Reference.Id);
+        var type = ArrayTypeMapper(schema);
 
         if (_arrayTypes.ContainsKey(type))
         {
@@ -311,38 +301,33 @@ public class Generator
         code.AppendLine($@"}}");
     }
 
-    private string ArrayTypeMapper(OpenApiSchema schema)
+    public string ArrayTypeMapper(IOpenApiSchema schema)
     {
-        if (schema.Type != "array")
+        if (schema.Type != JsonSchemaType.Array)
             throw new ArgumentException("schema must be an array");
 
-        return schema.Items.Type switch
+        var items = schema.Items ?? throw new ArgumentException("schema must have items");
+
+        return items.Type switch
         {
-            "string" => "Text",
-            "object" => ALName(schema.Items.Reference.Id),
+            JsonSchemaType.String => "Text",
+            JsonSchemaType.Object => ALName(((OpenApiSchemaReference)items).Reference.Id!),
             _ => throw new ArgumentException(string.Format("schame has unsupporetd typ {0}", schema.Items.Type)),
         };
     }
 
-    private void AddPrimitiveArraySchema(OpenApiSchema schema)
+    private void AddPrimitiveArraySchema(IOpenApiSchema schema)
     {
-        if (schema.Type != "array")
+        if (schema.Type != JsonSchemaType.Array)
             throw new ArgumentException("schema must be an array");
 
-        var type = schema.Items.Type;
-
-        switch (type)
+        var items = schema.Items ?? throw new ArgumentException("schema must have items");
+        if (items.Type == JsonSchemaType.Object)
         {
-            case "string":
-                type = "Text";
-                break;
-
-            default:
-                // not a primitive type
-                return;
+            throw new ArgumentException("not a primitive type");
         }
 
-        type = ALName(type);
+        var type = ArrayTypeMapper(schema);
 
         if (_arrayTypes.ContainsKey(type))
         {

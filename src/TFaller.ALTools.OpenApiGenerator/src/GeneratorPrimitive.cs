@@ -1,23 +1,25 @@
-using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi.Models.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace TFaller.ALTools.OpenApiGenerator;
 
 public class GeneratorPrimitive(Generator generator) : IGenerator
 {
-    public static readonly HashSet<string> SupportedTypes = [
-        "boolean",
-        "integer",
-        "string",
-        "number"
+    public static readonly HashSet<JsonSchemaType?> SupportedTypes = [
+        JsonSchemaType.Boolean,
+        JsonSchemaType.Integer,
+        JsonSchemaType.String,
+        JsonSchemaType.Number,
     ];
 
     private readonly Generator _generator = generator;
 
-    public GenerationStatus GenerateCode(StringBuilder code, string name, OpenApiSchema schema, bool required)
+    public GenerationStatus GenerateCode(StringBuilder code, string name, IOpenApiSchema schema, bool required)
     {
         if (!SupportedTypes.Contains(schema.Type))
             return GenerationStatus.Nothing;
@@ -36,7 +38,7 @@ public class GeneratorPrimitive(Generator generator) : IGenerator
         return status;
     }
 
-    private void CreateGetterCode(StringBuilder code, string name, OpenApiSchema schema)
+    private void CreateGetterCode(StringBuilder code, string name, IOpenApiSchema schema)
     {
         var alName = _generator.ALName(name);
         var type = GetALTypeDefintionBySchema(schema);
@@ -50,7 +52,7 @@ public class GeneratorPrimitive(Generator generator) : IGenerator
             end;
         ");
 
-        if (schema.Enum.Count > 0)
+        if (schema.Enum?.Count > 0)
         {
             foreach (var value in schema.Enum)
             {
@@ -66,7 +68,7 @@ public class GeneratorPrimitive(Generator generator) : IGenerator
         }
     }
 
-    private void CreateSetterCode(StringBuilder code, string name, OpenApiSchema schema)
+    private void CreateSetterCode(StringBuilder code, string name, IOpenApiSchema schema)
     {
         var alName = _generator.ALName(name);
         var type = GetALTypeDefintionBySchema(schema);
@@ -82,7 +84,7 @@ public class GeneratorPrimitive(Generator generator) : IGenerator
         ");
     }
 
-    public void CreateValidateCode(StringBuilder code, string name, OpenApiSchema schema, bool required)
+    public void CreateValidateCode(StringBuilder code, string name, IOpenApiSchema schema, bool required)
     {
         var alName = _generator.ALName(name);
         var type = GetALTypeDefintionBySchema(schema);
@@ -108,7 +110,7 @@ public class GeneratorPrimitive(Generator generator) : IGenerator
 
         code.AppendLine($@"J.Get('{name}', Token);");
 
-        if (schema.Enum.Count > 0)
+        if (schema.Enum?.Count > 0)
         {
             code.Append($@"if not (Token.AsValue().As{type}() in [");
 
@@ -127,51 +129,31 @@ public class GeneratorPrimitive(Generator generator) : IGenerator
         code.AppendLine($@"end;");
     }
 
-    private string GetALTypeDefintionBySchema(OpenApiSchema schema)
+    private static string GetALTypeDefintionBySchema(IOpenApiSchema schema)
     {
-        switch (schema.Type)
+        return schema.Type switch
         {
-            case "string":
-                return "Text";
-            case "integer":
-                return "Integer";
-            case "boolean":
-                return "Boolean";
-            case "number":
-                return "Decimal";
-        }
-        throw new ArgumentException(string.Format("schame has unsupporetd typ {0}", schema.Type));
+            JsonSchemaType.String => "Text",
+            JsonSchemaType.Integer => "Integer",
+            JsonSchemaType.Boolean => "Boolean",
+            JsonSchemaType.Number => "Decimal",
+            _ => throw new ArgumentException(string.Format("schame has unsupporetd typ {0}", schema.Type)),
+        };
     }
 
-    private string EnumLiteral(IOpenApiAny value)
+    private static string EnumLiteral(JsonNode value)
     {
-        if (value is OpenApiString str)
+        if (value is JsonValue v)
         {
-            return $"'{str.Value}'";
+            return v.GetValueKind() switch
+            {
+                JsonValueKind.String => $"'{v.GetValue<string>()}'",
+                JsonValueKind.Number => v.ToString(),
+                JsonValueKind.True => "true",
+                JsonValueKind.False => "false",
+                _ => throw new ArgumentException($"Unsupported enum value kind: {value.GetValueKind()}"),
+            };
         }
-        if (value is OpenApiBoolean boolean)
-        {
-            return boolean.Value ? "true" : "false";
-        }
-        if (value is OpenApiInteger integer)
-        {
-            return integer.Value.ToString();
-        }
-        if (value is OpenApiLong longValue)
-        {
-            return longValue.Value.ToString();
-        }
-        if (value is OpenApiDouble number)
-        {
-            return number.Value.ToString();
-        }
-        if (value is OpenApiFloat floatNumber)
-        {
-            return floatNumber.Value.ToString();
-        }
-        else
-        {
-            throw new ArgumentException(string.Format("enum value has unsupporetd type {0}", value.GetType()));
-        }
+        throw new ArgumentException(string.Format("enum value has unsupporetd type {0}", value.ToJsonString()));
     }
 }

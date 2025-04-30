@@ -1,4 +1,6 @@
 ﻿using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi.Models.Interfaces;
+using Microsoft.OpenApi.Models.References;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Utilities;
 using System.Linq;
 
@@ -13,15 +15,15 @@ public class TransformInlineTypes
     public static void Transform(OpenApiDocument document)
     {
         // toArray(), because we are adding to the collection while iterating over it
-        foreach (var schema in document.Components.Schemas.ToArray())
+        foreach (var schema in document.Components!.Schemas!.ToArray())
         {
             TransformNested(document, schema.Key, schema.Value);
         }
     }
 
-    private static void TransformNested(OpenApiDocument document, string objectPath, OpenApiSchema schema)
+    private static void TransformNested(OpenApiDocument document, string objectPath, IOpenApiSchema schema)
     {
-        if (schema.Type != "object")
+        if (schema.Type != JsonSchemaType.Object || schema.Properties is null)
         {
             return;
         }
@@ -30,22 +32,17 @@ public class TransformInlineTypes
         {
             var ps = prop.Value;
 
-            if (ps.Type == "array")
+            if (ps.Type == JsonSchemaType.Array)
             {
                 ps = ps.Items;
             }
 
-            if (ps.Type == "object" && ps.Reference == null)
+            if (ps?.Type == JsonSchemaType.Object && ps is not OpenApiSchemaReference)
             {
                 var name = objectPath + prop.Key.ToPascalCase(false);
 
-                ps.Reference = new OpenApiReference()
-                {
-                    Type = ReferenceType.Schema,
-                    Id = name
-                };
-
-                document.Components.Schemas.Add(name, ps);
+                document.AddComponent(name, ps);
+                schema.Properties[prop.Key] = new OpenApiSchemaReference(name, document);
 
                 TransformNested(document, name, ps);
             }

@@ -1,4 +1,4 @@
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi.Models.Interfaces;
 using System.Text;
 
 namespace TFaller.ALTools.OpenApiGenerator;
@@ -13,5 +13,5 @@ public interface IGenerator
     /// <param name="schema">The schema</param>
     /// <param name="required">Whether the property is required</param>
     /// <returns>Status about what code was generated.</returns>
-    public GenerationStatus GenerateCode(StringBuilder code, string name, OpenApiSchema schema, bool required);
+    public GenerationStatus GenerateCode(StringBuilder code, string name, IOpenApiSchema schema, bool required);
 }

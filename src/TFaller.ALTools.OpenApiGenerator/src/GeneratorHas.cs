@@ -1,4 +1,4 @@
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi.Models.Interfaces;
 using System.Text;
 
 namespace TFaller.ALTools.OpenApiGenerator;
@@ -7,7 +7,7 @@ public class GeneratorHas(Generator generator) : IGenerator
 {
     private readonly Generator _generator = generator;
 
-    public GenerationStatus GenerateCode(StringBuilder code, string name, OpenApiSchema schema, bool required)
+    public GenerationStatus GenerateCode(StringBuilder code, string name, IOpenApiSchema schema, bool required)
     {
         if (required)
         {
