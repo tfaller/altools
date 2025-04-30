@@ -90,16 +90,12 @@ public class Generator
         // object properties
 
         var arrays = new HashSet<IOpenApiSchema>();
-        var allProps = new HashSet<string>();
         var validateProps = new IdentifierDictionary<bool>();
 
-        foreach (var p in schema.Properties!)
+        foreach (var prop in schema.Properties!)
         {
-            var prop = p;
             var propSchema = prop.Value;
             var propRequired = schema.Required?.Contains(prop.Key) ?? false;
-
-            allProps.Add(prop.Key);
 
             if (propSchema.Type == JsonSchemaType.Array)
             {
@@ -178,11 +174,11 @@ public class Generator
             {
                 code.AppendLine("foreach PropKey in J.Keys() do begin");
 
-                if (allProps.Count > 0)
+                if (schema.Properties.Count > 0)
                 {
                     code.AppendLine("if not(PropKey in [");
 
-                    foreach (var p in allProps)
+                    foreach (var p in schema.Properties.Keys)
                     {
                         code.Append($"'{p}',");
                     }
