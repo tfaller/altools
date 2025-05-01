@@ -378,6 +378,30 @@ public class Generator
             end;
         ");
 
+        if (GenerateValidate)
+        {
+            code.AppendLine($@"
+                procedure Validate(Path: Text): Text
+                var
+                    I: Integer;
+                begin
+                    for I := 0 to J.Count() - 1 do
+                        if not ValidateItem(I) then
+                            exit(Path + '[' + Format(I) + ']: is not type {type}: ' + GetLastErrorText());
+                end;
+
+                [TryFunction]
+                local procedure ValidateItem(Index: Integer)
+                var
+                    T: JsonToken;
+                    V: {type};
+                begin
+                    J.Get(Index, T);
+                    V := T.AsValue().As{type}();
+                end;
+            ");
+        }
+
         code.AppendLine($@"}}");
     }
 
