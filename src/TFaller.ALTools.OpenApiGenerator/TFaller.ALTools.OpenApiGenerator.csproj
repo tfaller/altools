@@ -17,7 +17,7 @@
       Include="..\TFaller.ALTools.Transformation\TFaller.ALTools.Transformation.csproj" />
 
     <Reference Include="Microsoft.Dynamics.Nav.CodeAnalysis">
-      <HintPath>$(SolutionDir)/dll/Microsoft.Dynamics.Nav.CodeAnalysis.dll</HintPath>
+      <HintPath>../../dll/Microsoft.Dynamics.Nav.CodeAnalysis.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
