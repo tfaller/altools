@@ -25,7 +25,7 @@ public class TransformInlineTypes
     {
         if (schema.Type == JsonSchemaType.Array && schema is OpenApiSchema array)
         {
-            TransformNestedArray(document, objectPath, array);
+            TransformNestedArray(document, objectPath + "Item", array);
             return;
         }
 
@@ -38,12 +38,11 @@ public class TransformInlineTypes
         {
             var ps = prop.Value;
 
-            if (ps.Type == JsonSchemaType.Array)
+            if (ps.Type == JsonSchemaType.Array && ps is OpenApiSchema propArry)
             {
-                ps = ps.Items;
+                TransformNestedArray(document, objectPath + prop.Key.ToPascalCase(false), propArry);
             }
-
-            if (ps?.Type == JsonSchemaType.Object && ps is not OpenApiSchemaReference)
+            else if (ps?.Type == JsonSchemaType.Object && ps is not OpenApiSchemaReference)
             {
                 var name = objectPath + prop.Key.ToPascalCase(false);
 
@@ -64,11 +63,9 @@ public class TransformInlineTypes
             return;
         }
 
-        var name = objectPath + "Item";
+        document.AddComponent(objectPath, items);
+        schema.Items = new OpenApiSchemaReference(objectPath, document);
 
-        document.AddComponent(name, items);
-        schema.Items = new OpenApiSchemaReference(name, document);
-
-        TransformNested(document, name, items);
+        TransformNested(document, objectPath, items);
     }
 }
