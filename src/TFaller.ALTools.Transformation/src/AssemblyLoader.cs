@@ -28,6 +28,9 @@ public static class AssemblyLoader
         if (!Directory.Exists(binPath))
             throw new DirectoryNotFoundException($"Could not find bin directory at {binPath}");
 
+        // must be an absolute path
+        binPath = Path.GetFullPath(binPath);
+
         AppDomain.CurrentDomain.AssemblyResolve += (sender, eventArgs) =>
         {
             var name = eventArgs.Name.Split(",", 2)[0];
