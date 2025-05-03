@@ -5,3 +5,4 @@ DLLs required:
 * Microsoft.Dynamics.Nav.AL.Common.dll
 * Microsoft.Dynamics.Nav.CodeAnalysis.dll
 * Microsoft.Dynamics.Nav.CodeAnalysis.Workspaces.dll
+* Microsoft.Dynamics.Nav.EditorServices.Protocol.dll

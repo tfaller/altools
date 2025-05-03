@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFaller.ALTools.OpenApiGene
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFaller.ALTools.OpenApiGenerator.Tests", "test\TFaller.ALTools.OpenApiGenerator.Tests\TFaller.ALTools.OpenApiGenerator.Tests.csproj", "{BE82A45E-640F-4B7A-A557-51FAB7F977E6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFaller.ALTools.Transformation.Tests", "test\TFaller.ALTools.Transformation.Tests\TFaller.ALTools.Transformation.Tests.csproj", "{3118FA5B-F0C3-4EAC-A127-EA81AE18344F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{BE82A45E-640F-4B7A-A557-51FAB7F977E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE82A45E-640F-4B7A-A557-51FAB7F977E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE82A45E-640F-4B7A-A557-51FAB7F977E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3118FA5B-F0C3-4EAC-A127-EA81AE18344F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3118FA5B-F0C3-4EAC-A127-EA81AE18344F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3118FA5B-F0C3-4EAC-A127-EA81AE18344F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3118FA5B-F0C3-4EAC-A127-EA81AE18344F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

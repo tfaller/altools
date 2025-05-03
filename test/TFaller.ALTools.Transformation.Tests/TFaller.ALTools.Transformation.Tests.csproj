@@ -1,31 +1,36 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+
     <!-- because we have a "src" folder, the namespace is not completely the folder path -->
     <NoWarn>IDE0130</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="Microsoft.Dynamics.Nav.AL.Common">
-      <HintPath>../../dll/Microsoft.Dynamics.Nav.AL.Common.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
+    <ProjectReference
+      Include="..\..\src\TFaller.ALTools.Transformation\TFaller.ALTools.Transformation.csproj" />
+
+    <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+
     <Reference Include="Microsoft.Dynamics.Nav.CodeAnalysis">
       <HintPath>../../dll/Microsoft.Dynamics.Nav.CodeAnalysis.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Microsoft.Dynamics.Nav.CodeAnalysis.Workspaces">
-      <HintPath>../../dll/Microsoft.Dynamics.Nav.CodeAnalysis.Workspaces.dll</HintPath>
-      <Private>false</Private>
     </Reference>
     <Reference Include="Microsoft.Dynamics.Nav.EditorServices.Protocol">
       <HintPath>../../dll/Microsoft.Dynamics.Nav.EditorServices.Protocol.dll</HintPath>
-      <Private>false</Private>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
   </ItemGroup>
 
 </Project>
