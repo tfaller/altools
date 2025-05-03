@@ -14,6 +14,8 @@ public static class AssemblyLoader
         "DocumentFormat.OpenXml",
         "Microsoft.Dynamics.Nav.AL.Common",
         "Microsoft.Dynamics.Nav.CodeAnalysis",
+        "Microsoft.Dynamics.Nav.CodeAnalysis.Workspaces",
+        "Microsoft.Dynamics.Nav.EditorServices.Protocol"
     ];
 
     private static readonly Dictionary<string, Assembly> _loadedAlAssemblies = [];
