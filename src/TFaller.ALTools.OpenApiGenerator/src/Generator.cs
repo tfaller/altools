@@ -442,6 +442,6 @@ public class Generator
             return "Property" + name;
         }
 
-        return name;
+        return Formatter.QuoteIdentifier(name);
     }
 }
