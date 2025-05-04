@@ -32,4 +32,38 @@ public class FormatterTests
             }
             """, formattedCode, false, true);
     }
+
+    [Theory]
+    [InlineData("a", true)]
+    [InlineData("_", true)]
+    [InlineData("1", false)]
+    [InlineData(".", false)]
+    public void IdentifierRegexTest(string identifier, bool expected)
+    {
+        Assert.Equal(expected, Formatter.IdentifierRegex().IsMatch(identifier));
+    }
+
+    [Fact]
+    public void IdentifierRegexLongTest()
+    {
+        // limit is acutally at 120, this regexp is just here for the content
+        Assert.Matches(Formatter.IdentifierRegex(), new string('a', 121));
+    }
+
+    [Theory]
+    [InlineData("Hello", "Hello")]
+    [InlineData("HelloWorld", "hello", "world")]
+    [InlineData("\"Hello!\"", "hello", "\"!\"")]
+    public void CombineIdentifiersTest(string expected, params string[] identifiers)
+    {
+        Assert.Equal(expected, Formatter.CombineIdentifiers(identifiers));
+    }
+
+    [Theory]
+    [InlineData("Hello", "Hello")]
+    [InlineData("\"Hello!\"", "Hello!")]
+    public void QuoteIdentifierTest(string expected, string identifier)
+    {
+        Assert.Equal(expected, Formatter.QuoteIdentifier(identifier));
+    }
 }
