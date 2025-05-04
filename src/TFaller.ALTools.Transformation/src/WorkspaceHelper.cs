@@ -5,6 +5,7 @@ using Microsoft.Dynamics.Nav.CodeAnalysis.Syntax;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace TFaller.ALTools.Transformation;
 
@@ -34,14 +35,18 @@ public class WorkspaceHelper
 
     public static Compilation LoadFiles(Compilation comp, string path, ParseOptions parseOptions, Dictionary<string, SyntaxTree> files)
     {
+        return LoadFilesAsync(comp, path, parseOptions, files).Result;
+    }
+
+    public static async Task<Compilation> LoadFilesAsync(Compilation comp, string path, ParseOptions parseOptions, Dictionary<string, SyntaxTree> files)
+    {
         foreach (var file in Directory.GetFiles(path, "*.al", SearchOption.AllDirectories))
         {
-            var content = File.ReadAllText(file, Encoding.UTF8);
+            var content = await File.ReadAllTextAsync(file, Encoding.UTF8);
             var syntaxTree = SyntaxTree.ParseObjectText(content, file, Encoding.UTF8, parseOptions);
             files.Add(file, syntaxTree);
             comp = comp.AddSyntaxTrees(syntaxTree);
         }
-
         return comp;
     }
 }
