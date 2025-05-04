@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using TFaller.ALTools.Transformation;
 
 namespace TFaller.ALTools.OpenApiGenerator;
 
@@ -60,7 +61,7 @@ public class GeneratorPrimitive(Generator generator) : IGenerator
                 var k = _generator.ALName(v.Trim('\''));
 
                 code.AppendLine($@"
-                    procedure Enum{alName}{k}(): {type}
+                    procedure {Formatter.CombineIdentifiers("Enum", alName, k)}(): {type}
                     begin
                         exit({v});
                     end;");
