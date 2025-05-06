@@ -1,0 +1,47 @@
+{
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "definitions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "schemaFile": {
+                        "type": "string",
+                        "description": "Path to the OpenAPI schema file."
+                    },
+                    "mergedCodeunitFile": {
+                        "type": "string",
+                        "description": "Path to the merged codeunit file."
+                    },
+                    "mergedCodeunitId": {
+                        "type": "integer",
+                        "description": "Id of the codeunit to be generated."
+                    },
+                    "mergedCodeunitName": {
+                        "type": "string",
+                        "description": "Name of the codeunit to be generated."
+                    },
+                    "generateValidate": {
+                        "type": "boolean",
+                        "description": "If true, the generator will create a validation function for the schema."
+                    }
+                },
+                "required": [
+                    "schemaFile",
+                    "mergedCodeunitFile",
+                    "mergedCodeunitId",
+                    "mergedCodeunitName"
+                ]
+            }
+        },
+        "projectPath": {
+            "type": "string",
+            "description": "Location of the project folder. Can be ommited if the config file is in the project folder."
+        }
+    },
+    "required": [
+        "definitions"
+    ]
+}

@@ -9,13 +9,19 @@ namespace TFaller.ALTools.Transformation;
 
 public static class AssemblyLoader
 {
+    /// <summary>
+    /// Assemblies that are loaded/provided from the AL extension
+    /// </summary>
     private static readonly HashSet<string> _alAssemblies =
     [
         "DocumentFormat.OpenXml",
+        "Microsoft.CodeAnalysis",
+        "Microsoft.CodeAnalysis.CSharp",
         "Microsoft.Dynamics.Nav.AL.Common",
         "Microsoft.Dynamics.Nav.CodeAnalysis",
         "Microsoft.Dynamics.Nav.CodeAnalysis.Workspaces",
-        "Microsoft.Dynamics.Nav.EditorServices.Protocol"
+        "Microsoft.Dynamics.Nav.EditorServices.Protocol",
+        "Newtonsoft.Json",
     ];
 
     private static readonly Dictionary<string, Assembly> _loadedAlAssemblies = [];
