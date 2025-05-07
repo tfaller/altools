@@ -6,3 +6,6 @@
 /src/*/obj
 /test/*/bin
 /test/*/obj
+
+/extension/dist
+/extension/node_modules
