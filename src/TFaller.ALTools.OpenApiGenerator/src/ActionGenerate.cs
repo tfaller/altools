@@ -33,8 +33,7 @@ public class ActionGenerate
     {
         _config = config;
 
-        List<Diagnostic> diagnostics = [];
-        _projectManifest = ProjectLoader.LoadFromFolder(config.ProjectPath, diagnostics);
+        _projectManifest = LoadProjectManifest(config.ProjectPath);
         _parseOptions = new ParseOptions(_projectManifest.AppManifest.Runtime);
     }
 
@@ -150,5 +149,25 @@ public class ActionGenerate
     {
         schemaFile = Path.GetRelativePath(_config.ProjectPath, schemaFile);
         Console.WriteLine(string.Format("{0}: {1}", schemaFile, message));
+    }
+
+    private static ProjectManifest LoadProjectManifest(string projectPath)
+    {
+        var diagnostics = new List<Diagnostic>();
+        var projectManifest = ProjectLoader.LoadFromFolder(projectPath, diagnostics);
+
+        if (projectManifest == null)
+        {
+            Console.Error.WriteLine("Errors while loading project from path '" + projectPath + "':");
+
+            foreach (var diagnostic in diagnostics)
+            {
+                Console.Error.WriteLine(diagnostic.ToString());
+            }
+
+            throw new InvalidOperationException("Errors while loading project manifest");
+        }
+
+        return projectManifest;
     }
 }
