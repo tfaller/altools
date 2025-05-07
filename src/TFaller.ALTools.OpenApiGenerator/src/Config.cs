@@ -19,13 +19,21 @@ public class Config
     [JsonPropertyName("projectPath")]
     public string ProjectPath { get; private set; } = string.Empty;
 
+    public string ConfigPath { get; private set; } = string.Empty;
+
     public static Config LoadConfig(string file)
     {
+        // Make sure the file is an absolute path,
+        // makes things easier later on for us.
+        file = Path.GetFullPath(file);
+
         var json = File.ReadAllText(file)
             ?? throw new FileNotFoundException("no file found", file);
 
         var cfg = JsonSerializer.Deserialize<Config>(json, _jsonOptions)
             ?? throw new InvalidOperationException("no config found");
+
+        cfg.ConfigPath = file;
 
         if (cfg.ProjectPath == string.Empty)
         {
