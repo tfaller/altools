@@ -4,6 +4,7 @@
 /dll/*.pdb
 /src/*/bin
 /src/*/obj
+/src/*/Properties/launchSettings.json
 /test/*/bin
 /test/*/obj
 
