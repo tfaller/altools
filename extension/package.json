@@ -14,8 +14,9 @@
   "contributes": {
     "commands": [
       {
-        "command": "altools.helloWorld",
-        "title": "Hello World"
+        "command": "altools.openApiGenerate",
+        "title": "OpenAPI: Generate",
+        "category": "ALTools"
       }
     ]
   },
