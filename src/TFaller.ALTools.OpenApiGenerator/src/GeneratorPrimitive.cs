@@ -134,7 +134,12 @@ public class GeneratorPrimitive(Generator generator) : IGenerator
     {
         return schema.Type switch
         {
-            JsonSchemaType.String => "Text",
+            JsonSchemaType.String => schema.Format switch
+            {
+                "date" => "Date",
+                "date-time" => "DateTime",
+                _ => "Text",
+            },
             JsonSchemaType.Integer => "Integer",
             JsonSchemaType.Boolean => "Boolean",
             JsonSchemaType.Number => "Decimal",
