@@ -80,9 +80,7 @@ public class ActionGenerate
         var compUnit = SyntaxFactory.ParseCompilationUnit(symbolGen.GetCode(), 0, _parseOptions)
             ?? throw new InvalidOperationException("no codeunit found");
 
-        var generatedCodeunits = compUnit.Objects
-            .Where(o => o.Kind == SyntaxKind.CodeunitObject)
-            .Select(o => (CodeunitSyntax)o).ToArray();
+        var generatedCodeunits = compUnit.Objects.OfType<CodeunitSyntax>().ToArray();
 
         var merged = CodeunitMergeRewriter.Merge(definition.MergedCodeunitName, definition.MergedCodeunitId.Value, generatedCodeunits);
 
