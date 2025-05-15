@@ -10,4 +10,14 @@
     <NoWarn>IDE0130</NoWarn>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference
+      Include="..\TFaller.ALTools.Transformation\TFaller.ALTools.Transformation.csproj" />
+
+    <Reference Include="Microsoft.Dynamics.Nav.CodeAnalysis">
+      <HintPath>../../dll/Microsoft.Dynamics.Nav.CodeAnalysis.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
 </Project>
