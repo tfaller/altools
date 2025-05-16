@@ -5,11 +5,26 @@ using Microsoft.Dynamics.Nav.EditorServices.Protocol;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace TFaller.ALTools.Transformation;
 
 public sealed partial class Formatter : IDisposable
 {
+    public static readonly ImmutableHashSet<string> Keywords = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase)
+    {
+        "begin",
+        "end",
+        "exit",
+        "for",
+        "if",
+        "then",
+        "to",
+        "var",
+        "with"
+    }.ToImmutableHashSet();
+
     private readonly VsCodeWorkspace _workspace = new();
 
     public T Format<T>(T node) where T : SyntaxNode

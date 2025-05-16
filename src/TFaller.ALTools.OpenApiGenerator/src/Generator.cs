@@ -17,11 +17,6 @@ public class Generator
     private readonly StringBuilder _code = new();
     private readonly List<IGenerator> _generators;
     private readonly IdentifierDictionary<string> _arrayTypes = [];
-    private static readonly HashSet<string> _keywords = new(StringComparer.InvariantCultureIgnoreCase)
-    {
-        "end",
-        "to",
-    };
     private static readonly HashSet<JsonSchemaType?> _arraySupportedTypes =
     [
         JsonSchemaType.Object,
@@ -437,7 +432,7 @@ public class Generator
             name.StartsWith("AsJsonObject", ALStringComparison) ||
             name.StartsWith("AsJsonArray", ALStringComparison) ||
             name.StartsWith("Validate", ALStringComparison) ||
-            _keywords.Contains(name))
+            Formatter.Keywords.Contains(name))
         {
             return "Property" + name;
         }
