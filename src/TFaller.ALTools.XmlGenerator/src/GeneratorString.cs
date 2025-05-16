@@ -3,8 +3,10 @@ using System.Xml;
 
 namespace TFaller.ALTools.XmlGenerator;
 
-public class GeneratorString : IGenerator
+public class GeneratorString(Generator generator) : IGenerator
 {
+    private readonly Generator _generator = generator;
+
     public GenerationStatus GenerateCode(StringBuilder code, XmlElement element)
     {
         var type = element.GetAttribute("type");
@@ -17,7 +19,7 @@ public class GeneratorString : IGenerator
         var name = element.GetAttribute("name");
 
         code.AppendLine(@$"
-            procedure {name}(): Text
+            procedure {_generator.ALName(name)}(): Text
             begin
                 exit(GetElement('{name}').InnerText());
             end;

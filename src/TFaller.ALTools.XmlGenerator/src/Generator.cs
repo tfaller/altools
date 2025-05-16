@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
+using Microsoft.Dynamics.Nav.CodeAnalysis.Utilities;
+using TFaller.ALTools.Transformation;
 
 namespace TFaller.ALTools.XmlGenerator;
 
 public class Generator
 {
+    public static readonly StringComparison ALStringComparison = StringComparison.InvariantCultureIgnoreCase;
     private readonly StringBuilder _code = new();
     private readonly XmlNamespaceManager _manager;
     private readonly XmlDocument _document;
@@ -24,7 +27,7 @@ public class Generator
         _manager.AddNamespace("soap", "http://schemas.xmlsoap.org/wsdl/soap/");
 
         _generators = [
-            new GeneratorString(),
+            new GeneratorString(this),
         ];
     }
 
@@ -125,5 +128,34 @@ public class Generator
 
         _existingCodeunitIds.Add(_nextCodeunitId);
         return _nextCodeunitId++;
+    }
+
+    /// <summary>
+    /// Generates a valid AL name. E.g. for procedures, variables, parameters, object names
+    /// </summary>
+    /// <param name="name">The name which should be converted</param>
+    /// <returns>Valid AL Name</returns>
+    public string ALName(string name)
+    {
+        name = name.ToPascalCase(false)
+            .Replace(" ", "")
+            .Replace("&", "")
+            .Replace(".", "_")
+            .Replace(",", "_");
+
+        if (name.StartsWith("Get", ALStringComparison) ||
+            name.StartsWith("Set", ALStringComparison) ||
+            name.StartsWith("Has", ALStringComparison) ||
+            name.StartsWith("Remove", ALStringComparison) ||
+            name.StartsWith("Property", ALStringComparison) ||
+            name.StartsWith("FromXml", ALStringComparison) ||
+            name.StartsWith("AsXmlElement", ALStringComparison) ||
+            name.StartsWith("Validate", ALStringComparison) ||
+            Formatter.Keywords.Contains(name))
+        {
+            return "Property" + name;
+        }
+
+        return Formatter.QuoteIdentifier(name);
     }
 }
