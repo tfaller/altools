@@ -86,6 +86,17 @@ public class Generator
             {
                 GenerateSequence(element);
             }
+
+            if (element.Name == "xs:complexContent")
+            {
+                var extension = element.SelectSingleNode("xs:extension", _manager);
+                var sequence = extension?.SelectSingleNode("xs:sequence", _manager);
+
+                if (sequence is XmlElement sequenceElement)
+                {
+                    GenerateSequence(sequenceElement);
+                }
+            }
         }
 
         _code.AppendLine(@"
