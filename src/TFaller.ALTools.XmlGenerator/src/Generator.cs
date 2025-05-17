@@ -33,6 +33,7 @@ public class Generator
         _generators = [
             new GeneratorString(this),
             new GeneratorEvaluate(this),
+            new GeneratorOptional(this),
         ];
     }
 
