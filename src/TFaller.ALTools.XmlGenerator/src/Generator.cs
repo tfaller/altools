@@ -28,7 +28,7 @@ public class Generator
 
         _generators = [
             new GeneratorString(this),
-            new GeneratorDate(this),
+            new GeneratorEvaluate(this),
         ];
     }
 

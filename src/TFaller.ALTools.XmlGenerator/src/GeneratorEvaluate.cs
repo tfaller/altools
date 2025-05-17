@@ -3,15 +3,23 @@ using System.Xml;
 
 namespace TFaller.ALTools.XmlGenerator;
 
-public class GeneratorDate(Generator generator) : IGenerator
+public class GeneratorEvaluate(Generator generator) : IGenerator
 {
     private readonly Generator _generator = generator;
 
     public GenerationStatus GenerateCode(StringBuilder code, XmlElement element, string siblingsPath)
     {
         var type = element.GetAttribute("type");
+        var alType = type switch
+        {
+            "xs:boolean" => "Boolean",
+            "xs:date" => "Date",
+            "xs:dateTime" => "DateTime",
+            "xs:time" => "Time",
+            _ => "",
+        };
 
-        if (type != "xs:date")
+        if (string.IsNullOrEmpty(alType))
         {
             return GenerationStatus.Nothing;
         }
@@ -20,12 +28,12 @@ public class GeneratorDate(Generator generator) : IGenerator
         var alName = _generator.ALName(name);
 
         code.AppendLine(@$"
-            procedure {alName}() Date: Date
+            procedure {alName}() Value: {alType}
             begin
-                Evaluate(Date, GetElement('{name}').InnerText(), 9);
+                Evaluate(Value, GetElement('{name}').InnerText(), 9);
             end;
 
-            procedure {alName}(Value: Date)
+            procedure {alName}(Value: {alType})
             begin
                 SetElement('{siblingsPath}', XmlElement.Create('{name}', TargetNamespace(), Format(Value, 0, 9)));
             end;
