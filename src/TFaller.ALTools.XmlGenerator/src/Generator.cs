@@ -51,18 +51,23 @@ public class Generator
         {
             foreach (var complexType in element.SelectNodes("xs:complexType", _manager)!.Elements())
             {
-                GenerateComplexType(complexType);
+                GenerateComplexType(complexType, element.GetAttribute("targetNamespace"));
             }
         }
     }
 
-    private void GenerateComplexType(XmlElement complexType)
+    private void GenerateComplexType(XmlElement complexType, string targetNamespace)
     {
         var name = complexType.GetAttribute("name");
 
         _code.AppendLine(@$"
             Codeunit {GetFreeCodeunitId()} {name} {{
                 var E: XmlElement;
+
+                procedure TargetNamespace(): Text
+                begin
+                    exit('{targetNamespace}');
+                end;
 
                 procedure FromXml(Element: XmlElement)
                 begin
@@ -95,6 +100,37 @@ public class Generator
 
                 Elements.Get(0, Node);
                 exit(Node.AsXmlElement());
+            end;
+            
+            local procedure SetElement(SiblingsPath: Text; Element: XmlElement)
+            var
+                Nodes: XmlNodeList;
+                Node: XmlNode;
+            begin
+                Nodes := E.GetChildElements(Element.LocalName(), Element.NamespaceURI());
+
+                case Nodes.Count() of
+                    0:;
+                    1: begin
+                        Nodes.Get(0, Node);
+                        Node.ReplaceWith(Element);
+                        exit;
+                    end;
+                    else
+                        Error('Invalid XML: %1, expected 0 or 1, got %2 elements', Element.LocalName(), Nodes.Count());
+                end;
+
+                case true of
+                    SiblingsPath = '',
+                    not E.SelectNodes(SiblingsPath, Nodes):
+                        begin
+                            E.AddFirst(Element);
+                            exit;
+                        end;
+                end;
+
+                Nodes.Get(Nodes.Count() - 1, Node);
+                Node.AddAfterSelf(Element);
             end;"
         );
 
@@ -103,6 +139,8 @@ public class Generator
 
     public void GenerateSequence(XmlElement sequence)
     {
+        var siblingsPath = new StringBuilder();
+
         foreach (var element in sequence.ChildElements())
         {
             if (element.Name == "xs:element")
@@ -111,13 +149,19 @@ public class Generator
 
                 foreach (var generator in _generators)
                 {
-                    generated |= generator.GenerateCode(_code, element);
+                    generated |= generator.GenerateCode(_code, element, siblingsPath.ToString());
                 }
 
                 if (generated == GenerationStatus.Nothing)
                 {
                     Console.WriteLine("Unsupported type: " + element.GetAttribute("type"));
                 }
+
+                if (siblingsPath.Length != 0)
+                {
+                    siblingsPath.Append('|');
+                }
+                siblingsPath.Append(element.GetAttribute("name"));
             }
         }
     }
@@ -151,6 +195,7 @@ public class Generator
             name.StartsWith("Property", ALStringComparison) ||
             name.StartsWith("FromXml", ALStringComparison) ||
             name.StartsWith("AsXmlElement", ALStringComparison) ||
+            name.StartsWith("TargetNamespace", ALStringComparison) ||
             name.StartsWith("Validate", ALStringComparison) ||
             Formatter.Keywords.Contains(name))
         {

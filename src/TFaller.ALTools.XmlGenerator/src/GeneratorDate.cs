@@ -7,7 +7,7 @@ public class GeneratorDate(Generator generator) : IGenerator
 {
     private readonly Generator _generator = generator;
 
-    public GenerationStatus GenerateCode(StringBuilder code, XmlElement element)
+    public GenerationStatus GenerateCode(StringBuilder code, XmlElement element, string siblingsPath)
     {
         var type = element.GetAttribute("type");
 
@@ -17,11 +17,17 @@ public class GeneratorDate(Generator generator) : IGenerator
         }
 
         var name = element.GetAttribute("name");
+        var alName = _generator.ALName(name);
 
         code.AppendLine(@$"
-            procedure {_generator.ALName(name)}() Date: Date
+            procedure {alName}() Date: Date
             begin
                 Evaluate(Date, GetElement('{name}').InnerText(), 9);
+            end;
+
+            procedure {alName}(Value: Date)
+            begin
+                SetElement('{siblingsPath}', XmlElement.Create('{name}', TargetNamespace(), Format(Value, 0, 9)));
             end;
         ");
 

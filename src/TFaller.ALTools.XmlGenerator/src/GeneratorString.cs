@@ -7,7 +7,7 @@ public class GeneratorString(Generator generator) : IGenerator
 {
     private readonly Generator _generator = generator;
 
-    public GenerationStatus GenerateCode(StringBuilder code, XmlElement element)
+    public GenerationStatus GenerateCode(StringBuilder code, XmlElement element, string siblingsPath)
     {
         var type = element.GetAttribute("type");
 
@@ -17,11 +17,17 @@ public class GeneratorString(Generator generator) : IGenerator
         }
 
         var name = element.GetAttribute("name");
+        var alName = _generator.ALName(name);
 
         code.AppendLine(@$"
-            procedure {_generator.ALName(name)}(): Text
+            procedure {alName}(): Text
             begin
                 exit(GetElement('{name}').InnerText());
+            end;
+
+            procedure {alName}(Value: Text)
+            begin
+                SetElement('{siblingsPath}', XmlElement.Create('{name}', TargetNamespace(), Value));
             end;
         ");
 
