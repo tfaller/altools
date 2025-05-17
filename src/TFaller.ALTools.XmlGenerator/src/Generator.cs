@@ -15,11 +15,15 @@ public class Generator
     private readonly XmlDocument _document;
     private int _nextCodeunitId = 1;
     private readonly HashSet<int> _existingCodeunitIds = [];
+    private readonly Dictionary<string, Dictionary<string, string>> _typeNames = [];
+    private readonly Dictionary<string, List<Replacer>> _typeNamerReplacers;
+    private readonly HashSet<string> _generatedTypeNames = new(StringComparer.InvariantCultureIgnoreCase);
     private readonly List<IGenerator> _generators;
 
-    public Generator(XmlDocument document)
+    public Generator(XmlDocument document, Dictionary<string, List<Replacer>>? replacers = null)
     {
         _document = document;
+        _typeNamerReplacers = replacers ?? [];
 
         _manager = new XmlNamespaceManager(document.NameTable);
         _manager.AddNamespace("xs", "http://www.w3.org/2001/XMLSchema");
@@ -58,7 +62,7 @@ public class Generator
 
     private void GenerateComplexType(XmlElement complexType, string targetNamespace)
     {
-        var name = complexType.GetAttribute("name");
+        var name = TypeName(targetNamespace, complexType.GetAttribute("name"));
 
         _code.AppendLine(@$"
             Codeunit {GetFreeCodeunitId()} {name} {{
@@ -184,6 +188,45 @@ public class Generator
 
         _existingCodeunitIds.Add(_nextCodeunitId);
         return _nextCodeunitId++;
+    }
+
+    public string TypeName(string namespaceUri, string name)
+    {
+        if (!_typeNames.TryGetValue(namespaceUri, out var types))
+        {
+            _typeNames.Add(namespaceUri, types = []);
+        }
+
+        if (types.TryGetValue(name, out var typeName))
+        {
+            return typeName;
+        }
+
+        typeName = name;
+
+        if (_typeNamerReplacers.TryGetValue(namespaceUri, out var replacers))
+        {
+            foreach (var replacer in replacers)
+            {
+                typeName = replacer.Replace(name);
+                if (typeName != name)
+                {
+                    break;
+                }
+            }
+        }
+
+        if (_generatedTypeNames.Contains(typeName))
+        {
+            if (typeName == name)
+            {
+                throw new InvalidOperationException($"Type '{name}' already exists, please rename with 'typeRenamePatterns'");
+            }
+            throw new InvalidOperationException($"Type '{name}' was renamed in already existing '{typeName}', please rename differently with 'typeRenamePatterns'");
+        }
+
+        _generatedTypeNames.Add(typeName);
+        return typeName;
     }
 
     /// <summary>

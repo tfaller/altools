@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace TFaller.ALTools.XmlGenerator;
 
@@ -57,4 +58,38 @@ public class Definition
 
     [JsonPropertyName("mergedCodeunitFile")]
     public string? MergedCodeunitFile { get; set; }
+
+    [JsonPropertyName("schemaSettings")]
+    public Dictionary<string, SchemaSettings> SchemaSettings { get; set; } = [];
+}
+
+public class SchemaSettings
+{
+    [JsonPropertyName("typeRenamePatterns")]
+    public List<Replacer> TypeRenamePatterns { get; set; } = [];
+}
+
+public class Replacer
+{
+    private Regex? _regex = null;
+
+    [JsonPropertyName("pattern")]
+    public string Pattern
+    {
+        get => _regex?.ToString() ?? string.Empty;
+        set => _regex = string.IsNullOrWhiteSpace(value) ? null : new Regex(value, RegexOptions.Compiled);
+    }
+
+    [JsonPropertyName("replacement")]
+    public string Replacement { get; set; } = string.Empty;
+
+    public string Replace(string input)
+    {
+        if (_regex == null)
+        {
+            return input;
+        }
+
+        return _regex.Replace(input, Replacement);
+    }
 }

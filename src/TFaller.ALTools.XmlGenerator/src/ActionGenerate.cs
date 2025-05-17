@@ -72,7 +72,7 @@ public class ActionGenerate
 
         // generate the all codeunits
 
-        var symbolGen = new Generator(document);
+        var symbolGen = new Generator(document, definition.SchemaSettings.Select(s => (s.Key, s.Value.TypeRenamePatterns)).ToDictionary());
         symbolGen.Generate();
 
         // merge all codeunits to a single one
