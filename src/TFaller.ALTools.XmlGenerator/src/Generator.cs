@@ -225,6 +225,7 @@ public class Generator
             throw new InvalidOperationException($"Type '{name}' was renamed in already existing '{typeName}', please rename differently with 'typeRenamePatterns'");
         }
 
+        types.Add(name, typeName);
         _generatedTypeNames.Add(typeName);
         return typeName;
     }
