@@ -66,4 +66,12 @@ public class FormatterTests
     {
         Assert.Equal(expected, Formatter.QuoteIdentifier(identifier));
     }
+
+    [Theory]
+    [InlineData("Hello", "Hello")]
+    [InlineData("Hello!", "\"Hello!\"")]
+    public void UnquoteIdentifierTest(string expected, string identifier)
+    {
+        Assert.Equal(expected, Formatter.UnquoteIdentifier(identifier));
+    }
 }

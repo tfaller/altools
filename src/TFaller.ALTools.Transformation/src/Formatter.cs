@@ -53,4 +53,12 @@ public sealed partial class Formatter : IDisposable
 
         return "\"" + identifier + "\"";
     }
+
+    public static string UnquoteIdentifier(string identifier)
+    {
+        if (identifier.StartsWith('"') && identifier.EndsWith('"'))
+            return identifier[1..^1];
+
+        return identifier;
+    }
 }
