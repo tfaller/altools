@@ -35,6 +35,7 @@ public class Generator
         _generators = [
             new GeneratorString(this),
             new GeneratorEvaluate(this),
+            new GeneratorComplex(this),
             new GeneratorOptional(this),
         ];
 
@@ -58,6 +59,16 @@ public class Generator
 
         foreach (var element in wsdlTypes[0]!.ChildNodes.Elements())
         {
+            _manager.PushScope();
+
+            foreach (var attr in element.Attributes)
+            {
+                if (attr is XmlAttribute attribute && attribute.Prefix == "xmlns")
+                {
+                    _manager.AddNamespace(attribute.LocalName, attribute.Value);
+                }
+            }
+
             var targetNamespace = element.GetAttribute("targetNamespace");
 
             foreach (var complexType in element.SelectNodes("xs:complexType", _manager)!.Elements())
@@ -69,6 +80,8 @@ public class Generator
             {
                 _generatorEnum.GenerateCode(_code, simpleElement, targetNamespace);
             }
+
+            _manager.PopScope();
         }
     }
 
