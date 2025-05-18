@@ -9,6 +9,7 @@ namespace TFaller.ALTools.XmlGenerator;
 
 public class Generator
 {
+    public static readonly string XSNamespace = "http://www.w3.org/2001/XMLSchema";
     public static readonly StringComparison ALStringComparison = StringComparison.InvariantCultureIgnoreCase;
     private readonly StringBuilder _code = new();
     private readonly XmlNamespaceManager _manager;
@@ -19,6 +20,7 @@ public class Generator
     private readonly Dictionary<string, List<Replacer>> _typeNamerReplacers;
     private readonly HashSet<string> _generatedTypeNames = new(StringComparer.InvariantCultureIgnoreCase);
     private readonly List<IGenerator> _generators;
+    private readonly GeneratorEnum _generatorEnum;
 
     public Generator(XmlDocument document, Dictionary<string, List<Replacer>>? replacers = null)
     {
@@ -26,7 +28,7 @@ public class Generator
         _typeNamerReplacers = replacers ?? [];
 
         _manager = new XmlNamespaceManager(document.NameTable);
-        _manager.AddNamespace("xs", "http://www.w3.org/2001/XMLSchema");
+        _manager.AddNamespace("xs", XSNamespace);
         _manager.AddNamespace("wsdl", "http://schemas.xmlsoap.org/wsdl/");
         _manager.AddNamespace("soap", "http://schemas.xmlsoap.org/wsdl/soap/");
 
@@ -35,6 +37,8 @@ public class Generator
             new GeneratorEvaluate(this),
             new GeneratorOptional(this),
         ];
+
+        _generatorEnum = new(this);
     }
 
     public XmlNamespaceManager Manager => _manager;
@@ -54,9 +58,16 @@ public class Generator
 
         foreach (var element in wsdlTypes[0]!.ChildNodes.Elements())
         {
+            var targetNamespace = element.GetAttribute("targetNamespace");
+
             foreach (var complexType in element.SelectNodes("xs:complexType", _manager)!.Elements())
             {
-                GenerateComplexType(complexType, element.GetAttribute("targetNamespace"));
+                GenerateComplexType(complexType, targetNamespace);
+            }
+
+            foreach (var simpleElement in element.SelectNodes("xs:simpleType", _manager)!.Elements())
+            {
+                _generatorEnum.GenerateCode(_code, simpleElement, targetNamespace);
             }
         }
     }
@@ -182,7 +193,7 @@ public class Generator
         }
     }
 
-    private int GetFreeCodeunitId()
+    public int GetFreeCodeunitId()
     {
         while (_existingCodeunitIds!.Contains(_nextCodeunitId))
             _nextCodeunitId++;
@@ -244,7 +255,8 @@ public class Generator
             .Replace(".", "_")
             .Replace(",", "_");
 
-        if (name.StartsWith("Get", ALStringComparison) ||
+        if (name.StartsWith('_') ||
+            name.StartsWith("Get", ALStringComparison) ||
             name.StartsWith("Set", ALStringComparison) ||
             name.StartsWith("Has", ALStringComparison) ||
             name.StartsWith("Remove", ALStringComparison) ||
