@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using System.Xml;
 
@@ -76,6 +77,14 @@ class GeneratorEnum(Generator generator)
 
             var value = e.GetAttribute("value");
             var alValueName = _generator.ALName(value);
+
+            if (StringComparer.CurrentCultureIgnoreCase.Equals(alValueName, "Error"))
+            {
+                // We use the Error function in the generated enum codeunit.
+                // Until we can use "this" in newer AL versions, we need to rename
+                // the Error value to avoid conflicts
+                alValueName = "PropertyError";
+            }
 
             code.AppendLine(@$"
                 procedure {alValueName}(var Value: Codeunit {alName})
