@@ -43,7 +43,7 @@ public class CodeunitMergeRewriter : SyntaxRewriter
         var compilation = Compilation.Create("temp").AddSyntaxTrees(compilationUnit.SyntaxTree);
         var model = compilation.GetSemanticModel(compilationUnit.SyntaxTree);
 
-        var rewriter = new CodeunitMergeRewriter(model, name, [.. codeunits.Select(c => c.Name.Identifier.Text)]);
+        var rewriter = new CodeunitMergeRewriter(model, name, [.. codeunits.Select(c => Formatter.UnquoteIdentifier(c.Name.Identifier.Text))]);
         var rewritten = rewriter.Visit(compilationUnit.SyntaxTree.GetRoot());
 
         var merged = SyntaxFactory.Codeunit(SyntaxFactory.ObjectId(id), name);
@@ -73,9 +73,9 @@ public class CodeunitMergeRewriter : SyntaxRewriter
 
         if ((kind == SymbolKind.GlobalVariable || kind == SymbolKind.Method)
             && symbol.ContainingType is ICodeunitTypeSymbol codeunit
-            && _codeunits.Contains(codeunit.Name))
+            && _codeunits.Contains(Formatter.UnquoteIdentifier(codeunit.Name)))
         {
-            node = node.WithIdentifier(SyntaxFactory.Identifier(codeunit.Name + "_" + symbol.Name));
+            node = node.WithIdentifier(SyntaxFactory.Identifier(Formatter.CombineIdentifiers(codeunit.Name, "_", symbol.Name)));
         }
 
         return base.VisitIdentifierName(node);
