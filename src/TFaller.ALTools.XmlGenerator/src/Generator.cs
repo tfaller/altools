@@ -237,6 +237,12 @@ public class Generator
             throw new InvalidOperationException($"Type '{name}' was renamed in already existing '{typeName}', please rename differently with 'typeRenamePatterns'");
         }
 
+        if (typeName.Length > 30)
+        {
+            throw new InvalidOperationException(
+                $"Type '{typeName}' {(name != typeName ? $"(original '${name})'" : "")} is too long (max. 30 chars), please rename with 'typeRenamePatterns'");
+        }
+
         types.Add(name, typeName);
         _generatedTypeNames.Add(typeName);
         return typeName;
