@@ -74,7 +74,7 @@ public class Generator
 
     private void GenerateComplexType(XmlElement complexType, string targetNamespace)
     {
-        var name = TypeName(targetNamespace, complexType.GetAttribute("name"));
+        var name = Formatter.QuoteIdentifier(TypeName(targetNamespace, complexType.GetAttribute("name")));
 
         _code.AppendLine(@$"
             Codeunit {GetFreeCodeunitId()} {name} {{
