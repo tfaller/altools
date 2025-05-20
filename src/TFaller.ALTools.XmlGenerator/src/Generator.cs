@@ -139,7 +139,7 @@ public class Generator
                 if (Elements.Count <> 1) then
                     Error('Invalid XML: %1, expected 1, got %2 elements', name, Elements.Count);
 
-                Elements.Get(0, Node);
+                Elements.Get(1, Node);
                 exit(Node.AsXmlElement());
             end;
             
@@ -153,7 +153,7 @@ public class Generator
                 case Nodes.Count() of
                     0:;
                     1: begin
-                        Nodes.Get(0, Node);
+                        Nodes.Get(1, Node);
                         Node.ReplaceWith(Element);
                         exit;
                     end;
@@ -170,7 +170,7 @@ public class Generator
                         end;
                 end;
 
-                Nodes.Get(Nodes.Count() - 1, Node);
+                Nodes.Get(Nodes.Count(), Node);
                 Node.AddAfterSelf(Element);
             end;"
         );
