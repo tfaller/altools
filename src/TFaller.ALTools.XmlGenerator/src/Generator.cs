@@ -202,7 +202,9 @@ public class Generator
                 {
                     siblingsPath.Append('|');
                 }
+                siblingsPath.Append("(*[local-name()=''");
                 siblingsPath.Append(element.GetAttribute("name"));
+                siblingsPath.Append("''])");
             }
         }
     }
