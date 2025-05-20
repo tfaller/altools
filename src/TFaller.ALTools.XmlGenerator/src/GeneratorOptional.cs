@@ -24,7 +24,7 @@ public class GeneratorOptional(Generator generator) : IGenerator
             var
                 Nodes: XmlNodeList;
             begin
-                Nodes := E.GetChildElements('{name}');
+                Nodes := _E.GetChildElements('{name}');
                 exit(Nodes.Count > 0);
             end;
 
@@ -32,7 +32,7 @@ public class GeneratorOptional(Generator generator) : IGenerator
             var 
                 Node: XmlNode;
             begin
-                foreach Node in E.GetChildElements('{name}') do
+                foreach Node in _E.GetChildElements('{name}') do
                     Node.Remove();
             end;
         ");

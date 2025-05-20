@@ -91,7 +91,8 @@ public class Generator
 
         _code.AppendLine(@$"
             Codeunit {GetFreeCodeunitId()} {name} {{
-                var E: XmlElement;
+                var _E: XmlElement;
+                var _I: Boolean;
 
                 procedure TargetNamespace(): Text
                 begin
@@ -100,12 +101,12 @@ public class Generator
 
                 procedure FromXml(Element: XmlElement)
                 begin
-                    E := Element;
+                    _E := Element;
                 end;
 
                 procedure AsXmlElement(): XmlElement
                 begin
-                    exit(E);
+                    exit(_E);
                 end;
         ");
 
@@ -134,7 +135,7 @@ public class Generator
                 Elements: XmlNodeList;
                 Node: XmlNode;
             begin
-                Elements := E.GetChildElements(name);
+                Elements := _E.GetChildElements(name);
                 if (Elements.Count <> 1) then
                     Error('Invalid XML: %1, expected 1, got %2 elements', name, Elements.Count);
 
@@ -147,7 +148,7 @@ public class Generator
                 Nodes: XmlNodeList;
                 Node: XmlNode;
             begin
-                Nodes := E.GetChildElements(Element.LocalName(), Element.NamespaceURI());
+                Nodes := _E.GetChildElements(Element.LocalName(), Element.NamespaceURI());
 
                 case Nodes.Count() of
                     0:;
@@ -162,9 +163,9 @@ public class Generator
 
                 case true of
                     SiblingsPath = '',
-                    not E.SelectNodes(SiblingsPath, Nodes):
+                    not _E.SelectNodes(SiblingsPath, Nodes):
                         begin
-                            E.AddFirst(Element);
+                            _E.AddFirst(Element);
                             exit;
                         end;
                 end;
