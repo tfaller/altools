@@ -8,7 +8,7 @@ public class GeneratorComplex(Generator generator) : IGenerator
 {
     private readonly Generator _generator = generator;
 
-    public GenerationStatus GenerateCode(StringBuilder code, XmlElement element, string siblingsPath)
+    public GenerationStatus GenerateCode(StringBuilder code, XmlElement element, GenerationContext context)
     {
         var type = element.GetAttribute("type");
         if (type.Split(':') is not [var typePrefix, var typeName])
@@ -37,7 +37,7 @@ public class GeneratorComplex(Generator generator) : IGenerator
 
             procedure Set{alName}(Value: Codeunit {alType})
             begin
-                SetElement('{siblingsPath}', Value.AsXmlElement());
+                SetElement('{context.SiblingsPath}', Value.AsXmlElement());
             end;
         ");
 

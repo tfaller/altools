@@ -8,7 +8,7 @@ public class GeneratorOptional(Generator generator) : IGenerator
 {
     private readonly Generator _generator = generator;
 
-    public GenerationStatus GenerateCode(StringBuilder code, XmlElement element, string siblingsPath)
+    public GenerationStatus GenerateCode(StringBuilder code, XmlElement element, GenerationContext context)
     {
         var minOccurs = element.GetAttribute("minOccurs");
         if (minOccurs != "0")

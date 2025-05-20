@@ -11,5 +11,5 @@ public interface IGenerator
     /// <param name="code">The generated code</param>
     /// <param name="element">The element</param>
     /// <returns>Status about what code was generated.</returns>
-    public GenerationStatus GenerateCode(StringBuilder code, XmlElement element, string siblingsPath);
+    public GenerationStatus GenerateCode(StringBuilder code, XmlElement element, GenerationContext context);
 }

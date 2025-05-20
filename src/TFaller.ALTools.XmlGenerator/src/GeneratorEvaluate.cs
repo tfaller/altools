@@ -7,7 +7,7 @@ public class GeneratorEvaluate(Generator generator) : IGenerator
 {
     private readonly Generator _generator = generator;
 
-    public GenerationStatus GenerateCode(StringBuilder code, XmlElement element, string siblingsPath)
+    public GenerationStatus GenerateCode(StringBuilder code, XmlElement element, GenerationContext context)
     {
         var type = element.GetAttribute("type");
         var alType = type switch
@@ -35,7 +35,7 @@ public class GeneratorEvaluate(Generator generator) : IGenerator
 
             procedure {alName}(Value: {alType})
             begin
-                SetElement('{siblingsPath}', XmlElement.Create('{name}', TargetNamespace(), Format(Value, 0, 9)));
+                SetElement('{context.SiblingsPath}', XmlElement.Create('{name}', {(context.ElementFormQualified ? "TargetNamespace()" : "''")}, Format(Value, 0, 9)));
             end;
         ");
 

@@ -70,10 +70,11 @@ public class Generator
             }
 
             var targetNamespace = element.GetAttribute("targetNamespace");
+            var elementFormDefault = element.GetAttribute("elementFormDefault");
 
             foreach (var complexType in element.SelectNodes("xs:complexType", _manager)!.Elements())
             {
-                GenerateComplexType(complexType, targetNamespace);
+                GenerateComplexType(complexType, targetNamespace, elementFormDefault == "qualified");
             }
 
             foreach (var simpleElement in element.SelectNodes("xs:simpleType", _manager)!.Elements())
@@ -85,7 +86,7 @@ public class Generator
         }
     }
 
-    private void GenerateComplexType(XmlElement complexType, string targetNamespace)
+    private void GenerateComplexType(XmlElement complexType, string targetNamespace, bool elementFormDefault)
     {
         var name = complexType.GetAttribute("name");
         var alName = Formatter.QuoteIdentifier(TypeName(targetNamespace, name));
@@ -115,7 +116,7 @@ public class Generator
         {
             if (element.Name == "xs:sequence")
             {
-                GenerateSequence(element);
+                GenerateSequence(element, elementFormDefault);
             }
 
             if (element.Name == "xs:complexContent")
@@ -125,7 +126,7 @@ public class Generator
 
                 if (sequence is XmlElement sequenceElement)
                 {
-                    GenerateSequence(sequenceElement);
+                    GenerateSequence(sequenceElement, elementFormDefault);
                 }
             }
         }
@@ -185,7 +186,7 @@ public class Generator
         _code.AppendLine("}");
     }
 
-    public void GenerateSequence(XmlElement sequence)
+    public void GenerateSequence(XmlElement sequence, bool elementFormDefault)
     {
         var siblingsPath = new StringBuilder();
 
@@ -195,9 +196,18 @@ public class Generator
             {
                 var generated = GenerationStatus.Nothing;
 
+                var context = new GenerationContext
+                {
+                    SiblingsPath = siblingsPath.ToString(),
+
+                    ElementFormQualified = element.HasAttribute("form")
+                        ? element.GetAttribute("form") == "qualified"
+                        : elementFormDefault,
+                };
+
                 foreach (var generator in _generators)
                 {
-                    generated |= generator.GenerateCode(_code, element, siblingsPath.ToString());
+                    generated |= generator.GenerateCode(_code, element, context);
                 }
 
                 if (generated == GenerationStatus.Nothing)

@@ -7,7 +7,7 @@ public class GeneratorString(Generator generator) : IGenerator
 {
     private readonly Generator _generator = generator;
 
-    public GenerationStatus GenerateCode(StringBuilder code, XmlElement element, string siblingsPath)
+    public GenerationStatus GenerateCode(StringBuilder code, XmlElement element, GenerationContext context)
     {
         var type = element.GetAttribute("type");
 
@@ -27,7 +27,7 @@ public class GeneratorString(Generator generator) : IGenerator
 
             procedure {alName}(Value: Text)
             begin
-                SetElement('{siblingsPath}', XmlElement.Create('{name}', TargetNamespace(), Value));
+                SetElement('{context.SiblingsPath}', XmlElement.Create('{name}', {(context.ElementFormQualified ? "TargetNamespace()" : "''")}, Value));
             end;
         ");
 
