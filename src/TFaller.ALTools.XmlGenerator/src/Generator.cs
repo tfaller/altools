@@ -87,10 +87,11 @@ public class Generator
 
     private void GenerateComplexType(XmlElement complexType, string targetNamespace)
     {
-        var name = Formatter.QuoteIdentifier(TypeName(targetNamespace, complexType.GetAttribute("name")));
+        var name = complexType.GetAttribute("name");
+        var alName = Formatter.QuoteIdentifier(TypeName(targetNamespace, name));
 
         _code.AppendLine(@$"
-            Codeunit {GetFreeCodeunitId()} {name} {{
+            Codeunit {GetFreeCodeunitId()} {alName} {{
                 var _E: XmlElement;
                 var _I: Boolean;
 
@@ -129,7 +130,7 @@ public class Generator
             }
         }
 
-        _code.AppendLine(@"
+        _code.AppendLine(@$"
             local procedure GetElement(name: Text): XmlElement
             var
                 Elements: XmlNodeList;
@@ -148,6 +149,12 @@ public class Generator
                 Nodes: XmlNodeList;
                 Node: XmlNode;
             begin
+                if not _I then begin
+                    _E := XmlElement.Create('{name}', TargetNamespace(), Element);
+                    _I := true;
+                    exit;
+                end;
+
                 Nodes := _E.GetChildElements(Element.LocalName(), Element.NamespaceURI());
 
                 case Nodes.Count() of
@@ -161,17 +168,17 @@ public class Generator
                         Error('Invalid XML: %1, expected 0 or 1, got %2 elements', Element.LocalName(), Nodes.Count());
                 end;
 
-                case true of
-                    SiblingsPath = '',
-                    not _E.SelectNodes(SiblingsPath, Nodes):
-                        begin
-                            _E.AddFirst(Element);
-                            exit;
-                        end;
+                if SiblingsPath <> '' then begin
+                    _E.SelectNodes(SiblingsPath, Nodes);
+
+                    if Nodes.Count() > 0 then begin
+                        Nodes.Get(Nodes.Count(), Node);
+                        Node.AddAfterSelf(Element);
+                        exit;
+                    end;
                 end;
 
-                Nodes.Get(Nodes.Count(), Node);
-                Node.AddAfterSelf(Element);
+                _E.AddFirst(Element);
             end;"
         );
 
