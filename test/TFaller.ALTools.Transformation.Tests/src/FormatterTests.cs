@@ -74,4 +74,13 @@ public class FormatterTests
     {
         Assert.Equal(expected, Formatter.UnquoteIdentifier(identifier));
     }
+
+    [Theory]
+    [InlineData(true, "begin")]
+    [InlineData(true, "To")]
+    [InlineData(false, "hello")]
+    public void KeywordsTest(bool exists, string keyword)
+    {
+        Assert.Equal(exists, Formatter.Keywords.Contains(keyword));
+    }
 }

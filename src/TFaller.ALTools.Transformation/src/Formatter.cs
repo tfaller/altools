@@ -12,7 +12,7 @@ namespace TFaller.ALTools.Transformation;
 
 public sealed partial class Formatter : IDisposable
 {
-    public static readonly ImmutableHashSet<string> Keywords = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase)
+    public static readonly ImmutableHashSet<string> Keywords = new HashSet<string>()
     {
         "begin",
         "end",
@@ -23,7 +23,7 @@ public sealed partial class Formatter : IDisposable
         "to",
         "var",
         "with"
-    }.ToImmutableHashSet();
+    }.ToImmutableHashSet(StringComparer.InvariantCultureIgnoreCase);
 
     private readonly VsCodeWorkspace _workspace = new();
 
