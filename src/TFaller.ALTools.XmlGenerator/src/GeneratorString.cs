@@ -10,8 +10,13 @@ public class GeneratorString(Generator generator) : IGenerator
     public GenerationStatus GenerateCode(StringBuilder code, XmlElement element, GenerationContext context)
     {
         var type = element.GetAttribute("type");
+        if (type.Split(':') is not [var typePrefix, var typeName])
+        {
+            return GenerationStatus.Nothing;
+        }
 
-        if (type != "xs:string")
+        var typeNamespace = _generator.Manager.LookupNamespace(typePrefix);
+        if (typeNamespace != Generator.XSNamespace || typeName != "string")
         {
             return GenerationStatus.Nothing;
         }
