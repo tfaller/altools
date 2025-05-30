@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { spawn } from 'node:child_process';
-import { createOutputChannel } from './PooledOutputChannel';
+import { createOutputChannel } from './pooledOutputChannel';
 
 export const execCommand = (name: string, command: string, args?: string[]) => {
     const outputChannel = createOutputChannel(name);
