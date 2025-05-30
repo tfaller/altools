@@ -16,7 +16,7 @@ public class GeneratorString(Generator generator) : IGenerator
         }
 
         var typeNamespace = _generator.Manager.LookupNamespace(typePrefix);
-        if (typeNamespace != Generator.XSNamespace || typeName != "string")
+        if (typeNamespace != Generator.XSNamespace || (typeName != "string" && typeName != "base64Binary"))
         {
             return GenerationStatus.Nothing;
         }
