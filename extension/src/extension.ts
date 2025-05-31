@@ -8,7 +8,7 @@ import { execCommand } from './exec';
 export function activate(context: vscode.ExtensionContext) {
 
 	const openApiGenerateDisposable = vscode.commands.registerCommand('altools.openApiGenerate', () => {
-		execCommand('ALTools', openApiExecutable(context), ['generate', 'altools-openapi-generator.json'])
+		execCommand('ALTools', openApiExecutable(context), ['openapi', 'generate', 'altools-openapi-generator.json'])
 	});
 
 	context.subscriptions.push(openApiGenerateDisposable);
@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() { }
 
 const openApiExecutable = (context: vscode.ExtensionContext) =>
-	context.asAbsolutePath(executable("bin/TFaller.ALTools.OpenApiGenerator"))
+	context.asAbsolutePath(executable("bin/TFaller.ALTools.Cli"))
 
 const executable = (exe: string) =>
 	process.platform === 'win32' ? `${exe}.exe` : exe
