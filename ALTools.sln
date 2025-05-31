@@ -3,15 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFaller.ALTools.Transformation", "src\TFaller.ALTools.Transformation\TFaller.ALTools.Transformation.csproj", "{27816A02-E4BB-4D67-B961-6474FAC62527}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TFaller.ALTools.Transformation", "src\TFaller.ALTools.Transformation\TFaller.ALTools.Transformation.csproj", "{27816A02-E4BB-4D67-B961-6474FAC62527}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFaller.ALTools.OpenApiGenerator", "src\TFaller.ALTools.OpenApiGenerator\TFaller.ALTools.OpenApiGenerator.csproj", "{56FF0A92-9F7D-428A-9DEF-8158FE819476}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TFaller.ALTools.OpenApiGenerator", "src\TFaller.ALTools.OpenApiGenerator\TFaller.ALTools.OpenApiGenerator.csproj", "{56FF0A92-9F7D-428A-9DEF-8158FE819476}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFaller.ALTools.OpenApiGenerator.Tests", "test\TFaller.ALTools.OpenApiGenerator.Tests\TFaller.ALTools.OpenApiGenerator.Tests.csproj", "{BE82A45E-640F-4B7A-A557-51FAB7F977E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TFaller.ALTools.OpenApiGenerator.Tests", "test\TFaller.ALTools.OpenApiGenerator.Tests\TFaller.ALTools.OpenApiGenerator.Tests.csproj", "{BE82A45E-640F-4B7A-A557-51FAB7F977E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFaller.ALTools.Transformation.Tests", "test\TFaller.ALTools.Transformation.Tests\TFaller.ALTools.Transformation.Tests.csproj", "{3118FA5B-F0C3-4EAC-A127-EA81AE18344F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TFaller.ALTools.Transformation.Tests", "test\TFaller.ALTools.Transformation.Tests\TFaller.ALTools.Transformation.Tests.csproj", "{3118FA5B-F0C3-4EAC-A127-EA81AE18344F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TFaller.ALTools.XmlGenerator", "src\TFaller.ALTools.XmlGenerator\TFaller.ALTools.XmlGenerator.csproj", "{2ADA6CCB-9BD5-43E2-8DE7-EACC0E076BD9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TFaller.ALTools.XmlGenerator", "src\TFaller.ALTools.XmlGenerator\TFaller.ALTools.XmlGenerator.csproj", "{2ADA6CCB-9BD5-43E2-8DE7-EACC0E076BD9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TFaller.ALTools.Cli", "src\TFaller.ALTools.Cli\TFaller.ALTools.Cli.csproj", "{316B3B3A-CC5F-4B03-8EB3-9617AE1BDED3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{2ADA6CCB-9BD5-43E2-8DE7-EACC0E076BD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2ADA6CCB-9BD5-43E2-8DE7-EACC0E076BD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2ADA6CCB-9BD5-43E2-8DE7-EACC0E076BD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{316B3B3A-CC5F-4B03-8EB3-9617AE1BDED3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{316B3B3A-CC5F-4B03-8EB3-9617AE1BDED3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{316B3B3A-CC5F-4B03-8EB3-9617AE1BDED3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{316B3B3A-CC5F-4B03-8EB3-9617AE1BDED3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

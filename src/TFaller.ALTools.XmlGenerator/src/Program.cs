@@ -4,7 +4,7 @@ using TFaller.ALTools.Transformation;
 
 namespace TFaller.ALTools.XmlGenerator;
 
-internal class Program
+public class Program
 {
     enum ExitCodes : int
     {
@@ -13,7 +13,7 @@ internal class Program
         InvalidOperation = 2,
     }
 
-    static async Task Main(string[] args)
+    public static async Task Main(string[] args)
     {
         AssemblyLoader.RegisterLoader();
 
