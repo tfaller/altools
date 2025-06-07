@@ -17,6 +17,11 @@
         "command": "altools.openApiGenerate",
         "title": "OpenAPI: Generate",
         "category": "ALTools"
+      },
+      {
+        "command": "altools.xmlGenerate",
+        "title": "XML: Generate",
+        "category": "ALTools"
       }
     ]
   },

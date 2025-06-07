@@ -10,8 +10,12 @@ export function activate(context: vscode.ExtensionContext) {
 	const openApiGenerateDisposable = vscode.commands.registerCommand('altools.openApiGenerate', () => {
 		execCommand('ALTools', openApiExecutable(context), ['openapi', 'generate', 'altools-openapi-generator.json'])
 	});
-
 	context.subscriptions.push(openApiGenerateDisposable);
+
+	const xmlGenerateDisposable = vscode.commands.registerCommand('altools.xmlGenerate', () => {
+		execCommand('ALTools', openApiExecutable(context), ['xml', 'generate', 'altools-xml-generator.json'])
+	});
+	context.subscriptions.push(xmlGenerateDisposable);
 }
 
 // This method is called when your extension is deactivated
