@@ -4,6 +4,7 @@ using System.Text;
 using System.Xml;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Utilities;
 using TFaller.ALTools.Transformation;
+using TFaller.ALTools.XmlGenerator.Xml;
 
 namespace TFaller.ALTools.XmlGenerator;
 
@@ -67,6 +68,12 @@ public class Generator
                 {
                     _manager.AddNamespace(attribute.LocalName, attribute.Value);
                 }
+            }
+
+            foreach (var sequence in element.SelectNodes("xs:complexType/xs:sequence", _manager)!.Elements())
+            {
+                // make sure we don't have nested/inline complex types
+                TransformInlineTypes.SequenceRefactorInlineComplexTypes(sequence, _manager);
             }
 
             var targetNamespace = element.GetAttribute("targetNamespace");
