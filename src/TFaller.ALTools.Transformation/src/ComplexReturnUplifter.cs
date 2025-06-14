@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Dynamics.Nav.CodeAnalysis;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Syntax;
+using TFaller.ALTools.Transformation.Rewriter;
 
 namespace TFaller.ALTools.Transformation;
 
@@ -10,9 +11,9 @@ namespace TFaller.ALTools.Transformation;
 /// The method must not have already a return value.
 /// The paremter must be first be assigned or cleared, before otherwise used.
 /// </summary>
-public class ComplexReturnUplifter : SyntaxRewriter
+public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
 {
-    private readonly SemanticModel _model;
+    private SemanticModel _model = null!;
     private readonly HashSet<IMethodSymbol> _upliftedMethods = [];
     private readonly SyntaxToken _closeParenthesisToken = SyntaxFactory.Token(SyntaxKind.CloseParenToken);
     private readonly SyntaxToken _openParenthesisToken = SyntaxFactory.Token(SyntaxKind.OpenParenToken);
@@ -22,9 +23,15 @@ public class ComplexReturnUplifter : SyntaxRewriter
     private bool _returnUsedBeforeInitialization;
     private bool _returnUsed;
 
-    public ComplexReturnUplifter(SemanticModel model)
+    public SyntaxNode Rewrite(SyntaxNode node, SemanticModel model)
     {
         _model = model;
+        return Visit(node);
+    }
+
+    public IReuseableRewriter Clone()
+    {
+        return new ComplexReturnUplifter();
     }
 
     public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax node)
