@@ -27,6 +27,19 @@ public sealed partial class Formatter : IDisposable
 
     private readonly VsCodeWorkspace _workspace = new();
 
+    /// <summary>
+    /// Formats a given node to the common AL formatting style. Don't
+    /// run this in parallel on multiples nodes. You could, its thread-safe.
+    /// However, it won't be faster than running one after another, because
+    /// the formater itself is highly parallelized. Parallel formating steals
+    /// resources from the other running formaters and it evens out.
+    /// </summary>
+    /// <typeparam name="T">A type of SyntaxNode</typeparam>
+    /// <param name="node">A node that sould be formated</param>
+    /// <returns>
+    /// The formated SyntaxNode. If it already was formatted,
+    /// the same instance is returned.
+    /// </returns>
     public T Format<T>(T node) where T : SyntaxNode
     {
         return (T)ALFormatter.Format(node, _workspace);
