@@ -2,8 +2,10 @@ using Microsoft.Dynamics.Nav.CodeAnalysis;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Packaging;
 using Microsoft.Dynamics.Nav.CodeAnalysis.SymbolReference;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Syntax;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -38,15 +40,46 @@ public class WorkspaceHelper
         return LoadFilesAsync(comp, path, parseOptions, files).Result;
     }
 
+    /// <summary>
+    /// Loads AL files as string. Yields for each loaded file.
+    /// The loading order is random.
+    /// </summary>
+    /// <param name="path">Path where files should be searched</param>
+    /// <returns>Loaded files as string</returns>
+    public static async IAsyncEnumerable<ValueTuple<string, string>> LoadFilesAsStringAsync(string path)
+    {
+        var sources = Directory.GetFiles(path, "*.al", SearchOption.AllDirectories).Select(async file =>
+                new ValueTuple<string, string>(file, await File.ReadAllTextAsync(file, Encoding.UTF8))
+        ).ToLinkedList();
+
+        while (sources.Count > 0)
+        {
+            var completedTask = await Task.WhenAny(sources);
+            sources.Remove(completedTask);
+            yield return await completedTask;
+        }
+    }
+
     public static async Task<Compilation> LoadFilesAsync(Compilation comp, string path, ParseOptions parseOptions, Dictionary<string, SyntaxTree> files)
     {
-        foreach (var file in Directory.GetFiles(path, "*.al", SearchOption.AllDirectories))
+        if (files.Count > 0)
         {
-            var content = await File.ReadAllTextAsync(file, Encoding.UTF8);
-            var syntaxTree = SyntaxTree.ParseObjectText(content, file, Encoding.UTF8, parseOptions);
-            files.Add(file, syntaxTree);
-            comp = comp.AddSyntaxTrees(syntaxTree);
+            throw new ArgumentException("files dictionary must be empty", nameof(files));
         }
-        return comp;
+
+        await Parallel.ForEachAsync(LoadFilesAsStringAsync(path), (kvp, token) =>
+        {
+            var file = kvp.Item1;
+            var syntaxTree = SyntaxTree.ParseObjectText(kvp.Item2, file, Encoding.UTF8, parseOptions, token);
+
+            lock (files)
+            {
+                files.Add(file, syntaxTree);
+            }
+
+            return new ValueTask();
+        });
+
+        return comp.AddSyntaxTrees(files.Values);
     }
 }
