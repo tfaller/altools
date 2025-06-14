@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Dynamics.Nav.CodeAnalysis;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Syntax;
 using TFaller.ALTools.Transformation.Rewriter;
@@ -37,6 +38,7 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
     public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax node)
     {
         if (node.ReturnValue is not null || // has already a return value
+            node.Attributes.Any(a => "EventSubscriber".EqualsOrdinalIgnoreCase(a.Name.Identifier.ValueText)) ||
             node.ParameterList.Parameters.Count == 0 ||
             node.ParameterList.Parameters[^1] is not ParameterSyntax lastParameter ||
             lastParameter.VarKeyword.Kind != SyntaxKind.VarKeyword ||
