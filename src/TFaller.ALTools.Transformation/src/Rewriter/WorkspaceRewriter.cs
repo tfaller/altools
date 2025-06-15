@@ -29,13 +29,15 @@ public class WorkspaceRewriter(List<IConcurrentRewriter> rewriters, ParseOptions
         foreach (var rewriter in rewriters)
         {
             var rewriterComp = comp;
+            var emptyContext = rewriter.EmptyContext;
 
             // however, we can run a rewriter in parrallel over all files
             await Parallel.ForEachAsync(files, async (kvp, token) =>
             {
                 var syntaxTree = kvp.Value;
                 var model = rewriterComp.GetSemanticModel(syntaxTree);
-                var newSyntaxTree = rewriter.Rewrite(await syntaxTree.GetRootAsync(token), model).SyntaxTree;
+                var context = emptyContext.WithModel(model);
+                var newSyntaxTree = rewriter.Rewrite(await syntaxTree.GetRootAsync(token), ref context).SyntaxTree;
 
                 if (syntaxTree == newSyntaxTree)
                     // no change, no need to update

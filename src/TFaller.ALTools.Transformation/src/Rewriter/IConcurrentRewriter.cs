@@ -11,5 +11,10 @@ public interface IConcurrentRewriter
     /// Rewrites the given syntax node using the provided semantic model.
     /// This method will be called concurrently, so it must be thread-safe.
     /// </summary>
-    public SyntaxNode Rewrite(SyntaxNode node, SemanticModel model);
+    public SyntaxNode Rewrite(SyntaxNode node, ref IRewriterContext metadata);
+
+    /// <summary>
+    /// An empty context that can be used for rewriting.
+    /// </summary>
+    public IRewriterContext EmptyContext { get; }
 }

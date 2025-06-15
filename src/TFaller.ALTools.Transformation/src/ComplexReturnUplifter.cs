@@ -24,9 +24,9 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
     private bool _returnUsedBeforeInitialization;
     private bool _returnUsed;
 
-    public SyntaxNode Rewrite(SyntaxNode node, SemanticModel model)
+    public SyntaxNode Rewrite(SyntaxNode node, ref IRewriterContext context)
     {
-        _model = model;
+        _model = context.Model;
         return Visit(node);
     }
 
@@ -34,6 +34,8 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
     {
         return new ComplexReturnUplifter();
     }
+
+    public IRewriterContext EmptyContext => new RewriterContext();
 
     public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax node)
     {

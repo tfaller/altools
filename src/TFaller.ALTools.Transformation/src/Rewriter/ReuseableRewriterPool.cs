@@ -11,7 +11,7 @@ public class ReuseableRewriterPool(IReuseableRewriter baseRewriter) : IConcurren
 {
     private readonly Stack<IReuseableRewriter> _pool = new();
 
-    public SyntaxNode Rewrite(SyntaxNode node, SemanticModel model)
+    public SyntaxNode Rewrite(SyntaxNode node, ref IRewriterContext context)
     {
         IReuseableRewriter rewriter;
 
@@ -22,7 +22,7 @@ public class ReuseableRewriterPool(IReuseableRewriter baseRewriter) : IConcurren
 
         try
         {
-            return rewriter.Rewrite(node, model);
+            return rewriter.Rewrite(node, ref context);
         }
         finally
         {
@@ -32,4 +32,6 @@ public class ReuseableRewriterPool(IReuseableRewriter baseRewriter) : IConcurren
             }
         }
     }
+
+    public IRewriterContext EmptyContext => baseRewriter.EmptyContext;
 }

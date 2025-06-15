@@ -147,7 +147,8 @@ public class ComplexReturnUplifterTests
         var model = compilation.GetSemanticModel(compilationUnit.SyntaxTree);
 
         var rewriter = new ComplexReturnUplifter();
-        var result = rewriter.Rewrite(compilationUnit, model);
+        var context = rewriter.EmptyContext.WithModel(model);
+        var result = rewriter.Rewrite(compilationUnit, ref context);
         Assert.Equal(expected, result.ToFullString(), ignoreAllWhiteSpace: true, ignoreLineEndingDifferences: true);
     }
 }

@@ -14,9 +14,9 @@ public interface IReuseableRewriter
     /// Use Clone() to create a new instance for each concurrent call if needed.
     /// </summary>
     /// <param name="node">Node that sould be rewritten</param>
-    /// <param name="model">Semantic model to use for rewriting</param>
+    /// <param name="context">Context to use for rewriting</param>
     /// <returns>Rewritten node</returns>
-    public SyntaxNode Rewrite(SyntaxNode node, SemanticModel model);
+    public SyntaxNode Rewrite(SyntaxNode node, ref IRewriterContext context);
 
     /// <summary>
     /// A clone of itself, so that a (parallel) Rewrite() on the clone works independently of the original.
@@ -24,4 +24,9 @@ public interface IReuseableRewriter
     /// </summary>
     /// <returns>A clone of the rewriter</returns>
     public IReuseableRewriter Clone();
+
+    /// <summary>
+    /// An empty context that can be used for rewriting.
+    /// </summary>
+    public IRewriterContext EmptyContext { get; }
 }
