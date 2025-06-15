@@ -7,6 +7,8 @@ using TFaller.ALTools.Transformation.Rewriter;
 
 namespace TFaller.ALTools.Transformation;
 
+using Context = RewriterContextWithState<HashSet<IMethodSymbol>>;
+
 /// <summary>
 /// Uplifts a method var codeunit parameter to a complex return value.
 /// The method must not have already a return value.
@@ -14,8 +16,11 @@ namespace TFaller.ALTools.Transformation;
 /// </summary>
 public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
 {
+    private Context _context = null!;
     private SemanticModel _model = null!;
-    private readonly HashSet<IMethodSymbol> _upliftedMethods = [];
+    private HashSet<IMethodSymbol> _upliftedMethods = null!;
+    private bool _firstRun = false;
+    private readonly HashSet<SyntaxTree> _dependencies = [];
     private readonly SyntaxToken _closeParenthesisToken = SyntaxFactory.Token(SyntaxKind.CloseParenToken);
     private readonly SyntaxToken _openParenthesisToken = SyntaxFactory.Token(SyntaxKind.OpenParenToken);
     private readonly SyntaxToken _semicolon = SyntaxFactory.Token(SyntaxKind.SemicolonToken);
@@ -26,8 +31,36 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
 
     public SyntaxNode Rewrite(SyntaxNode node, ref IRewriterContext context)
     {
+        _dependencies.Clear();
+
+        _context = (Context)context;
         _model = context.Model;
-        return Visit(node);
+        _firstRun = _context.State == null;
+        _upliftedMethods = [.. _context.Contexts.SelectMany(c => ((Context)c.Value).State)];
+
+        var rewritten = Visit(node);
+
+        if (!_firstRun)
+        {
+            // make sure we dont run again
+            _dependencies.Clear();
+        }
+        else
+        {
+            if (_upliftedMethods.Count > 0)
+            {
+                // we have to visit this tree again, to rewrite in second run
+                _dependencies.Add(node.SyntaxTree);
+            }
+        }
+
+        context = _context
+            .WithState(_upliftedMethods)
+            .WithDependencies(_dependencies);
+
+        // make sure we return the original node in the first run
+        // otherwise the model would be broken the next time we run
+        return _firstRun ? node : rewritten;
     }
 
     public IReuseableRewriter Clone()
@@ -35,7 +68,7 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
         return new ComplexReturnUplifter();
     }
 
-    public IRewriterContext EmptyContext => new RewriterContext();
+    public IRewriterContext EmptyContext => new Context();
 
     public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax node)
     {
@@ -188,14 +221,22 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
         node = (ExpressionStatementSyntax)base.VisitExpressionStatement(node);
 
         if (node.Expression is not InvocationExpressionSyntax invocation ||
+            invocation.ArgumentList is not ArgumentListSyntax argumentList ||
+            argumentList.Arguments.Count == 0 ||
             _model.GetSymbolInfo(invocation.Expression).Symbol is not IMethodSymbol method ||
-            !_upliftedMethods.Contains(method))
+            method.DeclaringSyntaxReference is not SyntaxReference reference)
         {
             // not an invocation, or not a method we uplifted
             return node;
         }
 
-        var argumentList = invocation.ArgumentList;
+        if (!_upliftedMethods.Contains(method))
+        {
+            // maybe gets rewritten later
+            _dependencies.Add(reference.SyntaxTree);
+            return node;
+        }
+
         var target = argumentList.Arguments[^1];
 
         invocation = invocation.WithArgumentList(
