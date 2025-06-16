@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Dynamics.Nav.CodeAnalysis;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Syntax;
 
@@ -32,6 +33,8 @@ public class RewriterContextWithState<T> : RewriterContext
         T state
     )
     {
+        AssertContextType<RewriterContextWithState<T>>(contexts);
+
         return new RewriterContextWithState<T>
         {
             Model = model,
@@ -39,5 +42,11 @@ public class RewriterContextWithState<T> : RewriterContext
             Contexts = contexts,
             State = state
         };
+    }
+
+    public bool TryGetContext(SyntaxTree tree, [NotNullWhen(true)] out RewriterContextWithState<T>? context)
+    {
+        return (Contexts.TryGetValue(tree, out var ctx) && (context = (RewriterContextWithState<T>)ctx) is not null)
+           || (context = null) is not null;
     }
 }

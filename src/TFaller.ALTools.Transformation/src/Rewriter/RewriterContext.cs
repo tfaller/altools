@@ -1,5 +1,8 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Microsoft.Dynamics.Nav.CodeAnalysis;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Syntax;
 
@@ -49,11 +52,25 @@ public class RewriterContext : IRewriterContext
         ContextsDictionary contexts
     )
     {
+        AssertContextType<RewriterContext>(contexts);
+
         return new RewriterContext
         {
             Model = model,
             Dependencies = dependencies,
             Contexts = contexts
         };
+    }
+
+    public bool TryGetContext(SyntaxTree tree, [NotNullWhen(true)] out RewriterContext? context)
+    {
+        return (Contexts.TryGetValue(tree, out var ctx) && (context = (RewriterContext)ctx) is not null)
+            || (context = null) is not null;
+    }
+
+    [Conditional("DEBUG")]
+    protected virtual void AssertContextType<T>(ContextsDictionary contexts)
+    {
+        Debug.Assert(contexts.Values.All(c => c is T), $"All contexts must be of type {typeof(T)}");
     }
 }

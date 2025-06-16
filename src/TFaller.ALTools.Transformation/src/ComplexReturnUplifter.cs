@@ -36,7 +36,7 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
         _context = (Context)context;
         _model = context.Model;
         _firstRun = _context.State == null;
-        _upliftedMethods = [.. _context.Contexts.SelectMany(c => ((Context)c.Value).State)];
+        _upliftedMethods = _context.State ?? [];
 
         var rewritten = Visit(node);
 
@@ -230,10 +230,13 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
             return node;
         }
 
-        if (!_upliftedMethods.Contains(method))
+        var refSyntaxTree = reference.SyntaxTree;
+
+        if (!_upliftedMethods.Contains(method) &&
+            !(_context.TryGetContext(refSyntaxTree, out var refContext) && refContext.State.Contains(method)))
         {
             // maybe gets rewritten later
-            _dependencies.Add(reference.SyntaxTree);
+            _dependencies.Add(refSyntaxTree);
             return node;
         }
 
