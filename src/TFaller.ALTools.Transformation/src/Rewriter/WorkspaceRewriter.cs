@@ -25,6 +25,7 @@ public class WorkspaceRewriter(List<IConcurrentRewriter> rewriters, ParseOptions
         var files = new Dictionary<string, SyntaxTree>();
         var filesChanged = new HashSet<string>();
 
+        comp = WorkspaceHelper.LoadReferences(comp, workspace + "/.alpackages");
         comp = await WorkspaceHelper.LoadFilesAsync(comp, workspace, parseOptions, files);
 
         var originalFiles = files.ToImmutableDictionary();

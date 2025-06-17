@@ -10,6 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.IO.Packaging" Version="9.0.4" />
+
     <Reference Include="Microsoft.Dynamics.Nav.AL.Common">
       <HintPath>../../dll/Microsoft.Dynamics.Nav.AL.Common.dll</HintPath>
       <Private>false</Private>
