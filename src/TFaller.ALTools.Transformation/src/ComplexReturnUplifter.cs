@@ -112,13 +112,13 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
                     SyntaxFactory.ReturnValue(lastParameter.Name, lastParameter.Type)
                     .WithTrailingTrivia(parameterList.GetTrailingTrivia())
                 );
+
+            // we actually uplifted the method, note it so call sites can be rewritten
+            _upliftedMethods.Add(methodSymbol);
         }
 
         // we are not anymore in rewrite procdure
         _returnName = null;
-
-        // we actually uplifted the method, note it so call sites can be rewritten
-        _upliftedMethods.Add(methodSymbol);
 
         return node;
     }

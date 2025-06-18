@@ -166,6 +166,39 @@ public class ComplexReturnUplifterTests
         }
         """
     )]
+    // Input parameter with Usage (unchanged)
+    [InlineData(
+        """
+        codeunit 1 A
+        {
+        procedure Something()
+        var 
+            A: Codeunit A;
+        begin
+            Test(A);
+        end;
+        procedure Test(var A: Codeunit A)
+        begin
+            A.Something();
+        end
+        }
+        """,
+        """
+        codeunit 1 A
+        {
+        procedure Something()
+        var 
+            A: Codeunit A;
+        begin
+            Test(A);
+        end;
+        procedure Test(var A: Codeunit A)
+        begin
+            A.Something();
+        end
+        }
+        """
+    )]
     public void RewriteTest(string input, string expected)
     {
         var compilationUnit = SyntaxFactory.ParseCompilationUnit(input);
