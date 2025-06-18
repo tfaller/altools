@@ -193,24 +193,27 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
         return node;
     }
 
+    public override SyntaxNode VisitParameterList(ParameterListSyntax node)
+    {
+        // we don't have to visit parameters
+        return node;
+    }
+
     public override SyntaxNode VisitIdentifierName(IdentifierNameSyntax node)
     {
         // determine the usage of the return parameter
-
-        if (_model.GetSymbolInfo(node).Symbol is IVariableSymbol variable &&
-            string.Equals(variable.Name, _returnName, StringComparison.CurrentCultureIgnoreCase))
+        if (_model.GetSymbolInfo(node).Symbol is IParameterSymbol param &&
+            param.Name.EqualsOrdinalIgnoreCase(_returnName))
         {
-            if (node.Parent is not ParameterSyntax)
-            {
-                _returnUsed = true;
-            }
+            _returnUsed = true;
+
             if (!_returnInitialized)
             {
                 _returnUsedBeforeInitialization = true;
             }
         }
 
-        return base.VisitIdentifierName(node);
+        return node;
     }
 
     public override SyntaxNode VisitExpressionStatement(ExpressionStatementSyntax node)

@@ -1,5 +1,4 @@
 using Microsoft.Dynamics.Nav.CodeAnalysis;
-using Microsoft.Dynamics.Nav.CodeAnalysis.Syntax;
 
 namespace TFaller.ALTools.Transformation.Tests;
 
@@ -136,6 +135,33 @@ public class ComplexReturnUplifterTests
         [EventSubscriber(ObjectType::Codeunit, Codeunit::A, 'OnTest', '', false, false)]
         procedure Test(var Return: Codeunit A)
         begin
+        end
+        }
+        """
+    )]
+    // Input parameter (unchanged)
+    [InlineData(
+        """
+        codeunit 1 A
+        {
+        procedure Something()
+        begin
+        end;
+        procedure Test(var A: Codeunit A)
+        begin
+            A.Something();
+        end
+        }
+        """,
+        """
+        codeunit 1 A
+        {
+        procedure Something()
+        begin
+        end;
+        procedure Test(var A: Codeunit A)
+        begin
+            A.Something();
         end
         }
         """
