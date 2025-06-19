@@ -28,8 +28,6 @@ public class WorkspaceRewriter(List<IConcurrentRewriter> rewriters, ParseOptions
         comp = WorkspaceHelper.LoadReferences(comp, workspace + "/.alpackages");
         comp = await WorkspaceHelper.LoadFilesAsync(comp, workspace, parseOptions, files);
 
-        var originalFiles = files.ToImmutableDictionary();
-
         // we cant run rewriters in parallel, because they might break each other
         foreach (var rewriter in rewriters)
         {
@@ -42,6 +40,7 @@ public class WorkspaceRewriter(List<IConcurrentRewriter> rewriters, ParseOptions
 
                 var rewriterComp = comp;
                 var emptyContext = rewriter.EmptyContext;
+                var originalTrees = files.ToImmutableDictionary();
                 var batch = new Dictionary<string, SyntaxTree>(files);
                 var dependencies = new Dictionary<string, HashSet<string>>();
                 var contexts = new ConcurrentDictionary<SyntaxTree, IRewriterContext>();
@@ -53,12 +52,12 @@ public class WorkspaceRewriter(List<IConcurrentRewriter> rewriters, ParseOptions
                     {
                         var fileName = kvp.Key;
                         var syntaxTree = kvp.Value;
-                        var originalSyntaxTree = originalFiles[fileName];
+                        var originalSyntaxTree = originalTrees[fileName];
 
                         if (!contexts.TryGetValue(originalSyntaxTree, out var context))
                         {
                             // we did not yet run the rewriter on this file, so we need to create a new context
-                            context = emptyContext.WithModel(rewriterComp.GetSemanticModel(syntaxTree));
+                            context = emptyContext.WithModel(rewriterComp.GetSemanticModel(originalSyntaxTree));
                         }
 
                         // make latest contexts available to the rewriter
