@@ -199,6 +199,27 @@ public class ComplexReturnUplifterTests
         }
         """
     )]
+    // recursive - 1 level (unchanged)
+    [InlineData(
+    """
+    codeunit 1 A
+    {
+    procedure Test(var A: Codeunit A)
+    begin
+        Test(A);
+    end
+    }
+    """,
+    """
+    codeunit 1 A
+    {
+    procedure Test(var A: Codeunit A)
+    begin
+        Test(A);
+    end
+    }
+    """
+    )]
     public void RewriteTest(string input, string expected)
     {
         var compilationUnit = SyntaxFactory.ParseCompilationUnit(input);
