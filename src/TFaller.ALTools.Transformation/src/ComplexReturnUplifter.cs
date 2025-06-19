@@ -47,7 +47,7 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
         }
         else
         {
-            if (_upliftedMethods.Count > 0)
+            if (_upliftedMethods.Count > 0 || _dependencies.Count > 0)
             {
                 // we have to visit this tree again, to rewrite in second run
                 _dependencies.Add(node.SyntaxTree);
