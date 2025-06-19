@@ -132,7 +132,9 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
         }
 
         node = (BlockSyntax)base.VisitBlock(node);
-        var rewrittenList = new SyntaxList<StatementSyntax>();
+
+        var rewrittenList = new List<StatementSyntax>(node.Statements.Count);
+        var changedList = false;
 
         foreach (var stmt in node.Statements)
         {
@@ -147,17 +149,20 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
             {
                 // swap the assigment and exit stmts with a single exit stmt
 
-                rewrittenList = rewrittenList.Remove(assignment);
+                rewrittenList.Remove(assignment);
+
                 newStmt = exit
                     .WithExitValue(assignment.Source)
                     .WithOpenParenthesisToken(_openParenthesisToken)
                     .WithCloseParenthesisToken(_closeParenthesisToken);
+
+                changedList = true;
             }
 
-            rewrittenList = rewrittenList.Add(newStmt);
+            rewrittenList.Add(newStmt);
         }
 
-        return node.WithStatements(rewrittenList);
+        return changedList ? node.WithStatements(SyntaxFactory.List(rewrittenList)) : node;
     }
 
     public override SyntaxNode VisitInvocationExpression(InvocationExpressionSyntax node)
