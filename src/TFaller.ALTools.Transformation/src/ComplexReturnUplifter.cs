@@ -70,6 +70,8 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
 
     public IRewriterContext EmptyContext => new Context();
 
+    public bool RerunUntilNoChanges => true;
+
     public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax node)
     {
         if (node.ReturnValue is not null || // has already a return value

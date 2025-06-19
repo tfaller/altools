@@ -6,7 +6,7 @@ namespace TFaller.ALTools.Transformation.Rewriter;
 /// A rewriter that can be reused for multiple rewrites without creating new instances each time.
 /// By convention, it is not thread-safe, so it must not be used concurrently. Use IConcurrentRewriter for that purpose.
 /// </summary>
-public interface IReuseableRewriter
+public interface IReuseableRewriter : IRewriter
 {
     /// <summary>
     /// Rewrites the given syntax node using the provided semantic model.
@@ -16,7 +16,7 @@ public interface IReuseableRewriter
     /// <param name="node">Node that sould be rewritten</param>
     /// <param name="context">Context to use for rewriting</param>
     /// <returns>Rewritten node</returns>
-    public SyntaxNode Rewrite(SyntaxNode node, ref IRewriterContext context);
+    public new SyntaxNode Rewrite(SyntaxNode node, ref IRewriterContext context);
 
     /// <summary>
     /// A clone of itself, so that a (parallel) Rewrite() on the clone works independently of the original.
@@ -24,9 +24,4 @@ public interface IReuseableRewriter
     /// </summary>
     /// <returns>A clone of the rewriter</returns>
     public IReuseableRewriter Clone();
-
-    /// <summary>
-    /// An empty context that can be used for rewriting.
-    /// </summary>
-    public IRewriterContext EmptyContext { get; }
 }

@@ -34,4 +34,6 @@ public class ReuseableRewriterPool(IReuseableRewriter baseRewriter) : IConcurren
     }
 
     public IRewriterContext EmptyContext => baseRewriter.EmptyContext;
+
+    public bool RerunUntilNoChanges => baseRewriter.RerunUntilNoChanges;
 }

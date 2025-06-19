@@ -33,80 +33,91 @@ public class WorkspaceRewriter(List<IConcurrentRewriter> rewriters, ParseOptions
         // we cant run rewriters in parallel, because they might break each other
         foreach (var rewriter in rewriters)
         {
-            var rewriterComp = comp;
-            var emptyContext = rewriter.EmptyContext;
-            var batch = new Dictionary<string, SyntaxTree>(files);
-            var dependencies = new Dictionary<string, HashSet<string>>();
-            var contexts = new ConcurrentDictionary<SyntaxTree, IRewriterContext>();
+            var rerunUntilNoChanges = rewriter.RerunUntilNoChanges;
+            bool changedFilesInRun;
 
-            while (batch.Count > 0)
+            do
             {
-                // however, we can run a rewriter in parrallel over all files
-                await Parallel.ForEachAsync(batch, async (kvp, token) =>
+                changedFilesInRun = false;
+
+                var rewriterComp = comp;
+                var emptyContext = rewriter.EmptyContext;
+                var batch = new Dictionary<string, SyntaxTree>(files);
+                var dependencies = new Dictionary<string, HashSet<string>>();
+                var contexts = new ConcurrentDictionary<SyntaxTree, IRewriterContext>();
+
+                while (batch.Count > 0)
                 {
-                    var fileName = kvp.Key;
-                    var syntaxTree = kvp.Value;
-                    var originalSyntaxTree = originalFiles[fileName];
-
-                    if (!contexts.TryGetValue(originalSyntaxTree, out var context))
+                    // however, we can run a rewriter in parrallel over all files
+                    await Parallel.ForEachAsync(batch, async (kvp, token) =>
                     {
-                        // we did not yet run the rewriter on this file, so we need to create a new context
-                        context = emptyContext.WithModel(rewriterComp.GetSemanticModel(syntaxTree));
-                    }
+                        var fileName = kvp.Key;
+                        var syntaxTree = kvp.Value;
+                        var originalSyntaxTree = originalFiles[fileName];
 
-                    // make latest contexts available to the rewriter
-                    context = context.WithContexts(contexts.ToImmutableDictionary());
-
-                    // actually rewrite the syntax tree
-                    var newSyntaxTree = rewriter.Rewrite(await syntaxTree.GetRootAsync(token), ref context).SyntaxTree;
-
-                    // save context, maybe we visit the file again, or other rewriters need it
-                    contexts[originalSyntaxTree] = context;
-
-                    lock (dependencies)
-                    {
-                        foreach (var dep in context.Dependencies)
+                        if (!contexts.TryGetValue(originalSyntaxTree, out var context))
                         {
-                            var depName = dep.FilePath;
-                            if (depName != string.Empty)
+                            // we did not yet run the rewriter on this file, so we need to create a new context
+                            context = emptyContext.WithModel(rewriterComp.GetSemanticModel(syntaxTree));
+                        }
+
+                        // make latest contexts available to the rewriter
+                        context = context.WithContexts(contexts.ToImmutableDictionary());
+
+                        // actually rewrite the syntax tree
+                        var newSyntaxTree = rewriter.Rewrite(await syntaxTree.GetRootAsync(token), ref context).SyntaxTree;
+
+                        // save context, maybe we visit the file again, or other rewriters need it
+                        contexts[originalSyntaxTree] = context;
+
+                        lock (dependencies)
+                        {
+                            foreach (var dep in context.Dependencies)
                             {
-                                if (!dependencies.TryGetValue(depName, out var depSet))
+                                var depName = dep.FilePath;
+                                if (depName != string.Empty)
                                 {
-                                    dependencies[depName] = depSet = [];
+                                    if (!dependencies.TryGetValue(depName, out var depSet))
+                                    {
+                                        dependencies[depName] = depSet = [];
+                                    }
+                                    depSet.Add(fileName);
                                 }
-                                depSet.Add(fileName);
                             }
                         }
-                    }
 
-                    if (syntaxTree == newSyntaxTree)
-                        // no change, no need to update
-                        return;
+                        if (syntaxTree == newSyntaxTree)
+                            // no change, no need to update
+                            return;
 
-                    lock (files)
+                        lock (files)
+                        {
+                            // we need to lock here, because multiple threads might write to the same dictionary
+                            // this is not a problem, because we only update the syntax tree, not the file name
+                            files[fileName] = newSyntaxTree;
+                            filesChanged.Add(fileName);
+                        }
+
+                        changedFilesInRun = true;
+                    });
+
+                    batch.Clear();
+                    foreach (var deps in dependencies)
                     {
-                        // we need to lock here, because multiple threads might write to the same dictionary
-                        // this is not a problem, because we only update the syntax tree, not the file name
-                        files[fileName] = newSyntaxTree;
-                        filesChanged.Add(fileName);
+                        // if the file was changed, we need to reprocess all dependants
+                        foreach (var dep in deps.Value)
+                        {
+                            batch[dep] = files[dep];
+                        }
                     }
-                });
-
-                batch.Clear();
-                foreach (var deps in dependencies)
-                {
-                    // if the file was changed, we need to reprocess all dependants
-                    foreach (var dep in deps.Value)
-                    {
-                        batch[dep] = files[dep];
-                    }
+                    dependencies.Clear();
                 }
-                dependencies.Clear();
-            }
 
-            comp = comp
-                .RemoveAllSyntaxTrees()
-                .AddSyntaxTrees(files.Values);
+                comp = comp
+                    .RemoveAllSyntaxTrees()
+                    .AddSyntaxTrees(files.Values);
+
+            } while (rerunUntilNoChanges && changedFilesInRun);
         }
 
         var formattedFiles = new Dictionary<string, string>();

@@ -5,16 +5,11 @@ namespace TFaller.ALTools.Transformation.Rewriter;
 /// <summary>
 /// A rewriter that can be executed concurrently.
 /// </summary>
-public interface IConcurrentRewriter
+public interface IConcurrentRewriter : IRewriter
 {
     /// <summary>
     /// Rewrites the given syntax node using the provided semantic model.
     /// This method will be called concurrently, so it must be thread-safe.
     /// </summary>
-    public SyntaxNode Rewrite(SyntaxNode node, ref IRewriterContext metadata);
-
-    /// <summary>
-    /// An empty context that can be used for rewriting.
-    /// </summary>
-    public IRewriterContext EmptyContext { get; }
+    public new SyntaxNode Rewrite(SyntaxNode node, ref IRewriterContext metadata);
 }
