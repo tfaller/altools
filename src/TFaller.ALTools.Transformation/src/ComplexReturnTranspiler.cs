@@ -1,20 +1,28 @@
+using System;
+using System.Collections.Generic;
 using Microsoft.Dynamics.Nav.CodeAnalysis;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Syntax;
 using TFaller.ALTools.Transformation.Rewriter;
 
 namespace TFaller.ALTools.Transformation;
 
+using Context = RewriterContextWithState<HashSet<IMethodSymbol>>;
+
 /// <summary>
 /// Transpiles the new support for complex returns into classic "var return"
 /// </summary>
 public class ComplexReturnTranspiler : SyntaxRewriter, IReuseableRewriter
 {
+    private bool _firstRun = false;
+    private Context _context = null!;
     private string? _returnName;
+    private HashSet<IMethodSymbol> _transpiledMethods = null!;
     private SemanticModel _model = null!;
+    private readonly HashSet<SyntaxTree> _dependencies = [];
     private readonly SyntaxToken _semicolon;
     private readonly ExitStatementSyntax _emptyExit;
 
-    public IRewriterContext EmptyContext => new RewriterContext();
+    public IRewriterContext EmptyContext => new Context();
 
     public bool RerunUntilNoChanges => false;
 
@@ -35,18 +43,26 @@ public class ComplexReturnTranspiler : SyntaxRewriter, IReuseableRewriter
             return base.VisitMethodDeclaration(node);
         }
 
+        _transpiledMethods.Add((IMethodSymbol)(_model.GetDeclaredSymbol(node)
+            ?? throw new InvalidOperationException("Method symbol not found")));
+
+        _returnName = returnValue.Name?.Identifier.ValueText ?? "Return";
+
+        node = (MethodDeclarationSyntax)base.VisitMethodDeclaration(node);
+
         node = node
         .WithReturnValue(null)
-        .WithParameterList(node.ParameterList.AddParameters(
-            SyntaxFactory.Parameter(
-                _returnName = returnValue.Name?.Identifier.ValueText ?? "Return",
-                simpleType
-            ).WithVarKeyword(SyntaxFactory.Token(SyntaxKind.VarKeyword))
-        ));
+        .WithParameterList(
+            node.ParameterList.AddParameters(
+                SyntaxFactory.Parameter(
+                    _returnName,
+                    simpleType.WithoutTrailingTrivia()
+                ).WithVarKeyword(SyntaxFactory.Token(SyntaxKind.VarKeyword))
+            ).WithTrailingTrivia(simpleType.GetTrailingTrivia())
+        );
 
-        var result = base.VisitMethodDeclaration(node);
         _returnName = null;
-        return result;
+        return node;
     }
 
     public override SyntaxNode VisitBlock(BlockSyntax node)
@@ -69,9 +85,11 @@ public class ComplexReturnTranspiler : SyntaxRewriter, IReuseableRewriter
                     SyntaxFactory.AssignmentStatement(
                         SyntaxFactory.IdentifierName(_returnName),
                         exit.ExitValue
-                    ).WithSemicolonToken(_semicolon)
+                    )
+                    .WithSemicolonToken(_semicolon)
+                    .WithTrailingTrivia(SyntaxFactory.CarriageReturnLinefeed)
                 )
-                .Add(_emptyExit);
+                .Add(_emptyExit.WithTrailingTrivia(exit.GetTrailingTrivia()));
             }
             else
             {
@@ -86,7 +104,8 @@ public class ComplexReturnTranspiler : SyntaxRewriter, IReuseableRewriter
     {
         if (node.Source is not InvocationExpressionSyntax source ||
             _model.GetSymbolInfo(source).Symbol is not IMethodSymbol symbol ||
-            symbol.ReturnValueSymbol.ReturnType.Kind != SymbolKind.Codeunit)
+            symbol.DeclaringSyntaxReference?.SyntaxTree is not SyntaxTree syntaxReference ||
+            (!_transpiledMethods.Contains(symbol) && !(_context.TryGetContext(syntaxReference, out var context) && context.State.Contains(symbol))))
         {
             // not an invocation, nothing to do
             return base.VisitAssignmentStatement(node);
@@ -99,8 +118,32 @@ public class ComplexReturnTranspiler : SyntaxRewriter, IReuseableRewriter
 
     public SyntaxNode Rewrite(SyntaxNode node, ref IRewriterContext context)
     {
-        _model = context.Model;
-        return Visit(node);
+        _dependencies.Clear();
+
+        _context = (Context)context;
+        _model = _context.Model;
+        _firstRun = _context.State is null;
+        _transpiledMethods = _context.State ?? [];
+
+        var result = Visit(node);
+
+        if (!_firstRun)
+        {
+            _dependencies.Clear();
+        }
+        else
+        {
+            if (_transpiledMethods.Count > 0 || _dependencies.Count > 0)
+            {
+                _dependencies.Add(node.SyntaxTree);
+            }
+        }
+
+        context = _context
+            .WithState(_transpiledMethods)
+            .WithDependencies(_dependencies);
+
+        return _firstRun ? node : result;
     }
 
     public IReuseableRewriter Clone()
