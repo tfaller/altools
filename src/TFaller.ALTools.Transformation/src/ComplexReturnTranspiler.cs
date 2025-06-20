@@ -1,21 +1,25 @@
 using Microsoft.Dynamics.Nav.CodeAnalysis;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Syntax;
+using TFaller.ALTools.Transformation.Rewriter;
 
 namespace TFaller.ALTools.Transformation;
 
 /// <summary>
 /// Transpiles the new support for complex returns into classic "var return"
 /// </summary>
-public class ComplexReturnTranspiler : SyntaxRewriter
+public class ComplexReturnTranspiler : SyntaxRewriter, IReuseableRewriter
 {
     private string? _returnName;
+    private SemanticModel _model = null!;
     private readonly SyntaxToken _semicolon;
     private readonly ExitStatementSyntax _emptyExit;
-    private readonly SemanticModel _model;
 
-    public ComplexReturnTranspiler(SemanticModel model)
+    public IRewriterContext EmptyContext => new RewriterContext();
+
+    public bool RerunUntilNoChanges => false;
+
+    public ComplexReturnTranspiler()
     {
-        _model = model;
         _semicolon = SyntaxFactory.Token(SyntaxKind.SemicolonToken);
         _emptyExit = SyntaxFactory.ExitStatement().WithSemicolonToken(_semicolon);
     }
@@ -91,5 +95,16 @@ public class ComplexReturnTranspiler : SyntaxRewriter
         return SyntaxFactory
             .ExpressionStatement(source.AddArgumentListArguments(node.Target))
             .WithSemicolonToken(node.SemicolonToken);
+    }
+
+    public SyntaxNode Rewrite(SyntaxNode node, ref IRewriterContext context)
+    {
+        _model = context.Model;
+        return Visit(node);
+    }
+
+    public IReuseableRewriter Clone()
+    {
+        return new ComplexReturnTranspiler();
     }
 }

@@ -124,8 +124,9 @@ public class ComplexReturnTranspilerTests
         var compilation = Compilation.Create("temp").AddSyntaxTrees(compilationUnit.SyntaxTree);
         var model = compilation.GetSemanticModel(compilationUnit.SyntaxTree);
 
-        var rewriter = new ComplexReturnTranspiler(model);
-        var result = rewriter.Visit(compilationUnit).NormalizeWhiteSpace();
+        var rewriter = new ComplexReturnTranspiler();
+        var context = rewriter.EmptyContext.WithModel(model);
+        var result = rewriter.Rewrite(compilationUnit, ref context).NormalizeWhiteSpace();
         Assert.Equal(expected, result.ToFullString(), ignoreAllWhiteSpace: true, ignoreLineEndingDifferences: true);
     }
 }
