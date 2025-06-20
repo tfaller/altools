@@ -257,7 +257,7 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
         );
 
         return SyntaxFactory
-            .AssignmentStatement(target, invocation)
+            .AssignmentStatement(target, invocation.WithoutTrivia())
             .WithSemicolonToken(_semicolon)
             .WithTriviaFrom(node);
     }

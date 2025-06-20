@@ -118,6 +118,39 @@ public class ComplexReturnUplifterTests
         }
         """
     )]
+    // Usage with comment
+    [InlineData(
+         """
+        codeunit 1 A
+        {
+        procedure Test(var Return: Codeunit A)
+        begin
+        end;
+        procedure Usage()
+        var
+            A: Codeunit A;
+        begin
+            // some comment that must stay here
+            Test(A);
+        end;
+        }
+        """,
+        """
+        codeunit 1 A
+        {
+        procedure Test() Return: Codeunit A
+        begin
+        end;
+        procedure Usage()
+        var
+            A: Codeunit A;
+        begin
+            // some comment that must stay here
+            A := Test();
+        end;
+        }
+        """
+    )]
     // Event subscriber (unchanged)
     [InlineData(
         """
