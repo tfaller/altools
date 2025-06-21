@@ -16,12 +16,14 @@ public class ComplexReturnTranspiler : SyntaxRewriter, IReuseableRewriter
     private bool _firstRun = false;
     private Context _context = null!;
     private string? _returnName;
+    private ISymbol? _returnSymbol;
     private HashSet<IMethodSymbol> _transpiledMethods = null!;
     private SemanticModel _model = null!;
     private readonly HashSet<SyntaxTree> _dependencies = [];
     private readonly SyntaxToken _semicolon;
     private readonly SyntaxToken _varKeyword = SyntaxFactory.Token(SyntaxKind.VarKeyword);
     private readonly ExitStatementSyntax _emptyExit;
+    private readonly VarUsageAnalyzer _varUsageAnalyzer = new(null!);
 
     public IRewriterContext EmptyContext => new Context();
 
@@ -47,6 +49,8 @@ public class ComplexReturnTranspiler : SyntaxRewriter, IReuseableRewriter
         _transpiledMethods.Add((IMethodSymbol)(_model.GetDeclaredSymbol(node)
             ?? throw new InvalidOperationException("Method symbol not found")));
 
+        _returnSymbol = _model.GetDeclaredSymbol(returnValue)!;
+        _varUsageAnalyzer.Watch(_returnSymbol);
         _returnName = returnValue.Name?.Identifier.ValueText ?? "Return";
 
         node = (MethodDeclarationSyntax)base.VisitMethodDeclaration(node);
@@ -78,6 +82,24 @@ public class ComplexReturnTranspiler : SyntaxRewriter, IReuseableRewriter
         node = (BlockSyntax)base.VisitBlock(node);
         var rewrittenList = new SyntaxList<StatementSyntax>();
 
+        if (node.Parent is MethodDeclarationSyntax)
+        {
+            var usage = _varUsageAnalyzer.GetUsage(_returnSymbol!);
+            if ((usage & VarUsageAnalyzer.Usage.Initialized) == 0)
+            {
+                // make sure the parameter is cleared
+                rewrittenList = rewrittenList.Add(
+                     SyntaxFactory.ExpressionStatement(
+                        SyntaxFactory.InvocationExpression(
+                            SyntaxFactory.IdentifierName("Clear"),
+                            SyntaxFactory.ArgumentList().AddArguments(SyntaxFactory.IdentifierName(_returnName))
+                        ),
+                        _semicolon
+                     ).WithTrailingTrivia(SyntaxFactory.CarriageReturnLinefeed)
+                );
+            }
+        }
+
         foreach (var stmt in node.Statements)
         {
             if (stmt is ExitStatementSyntax exit && exit.ExitValue is not null)
@@ -102,8 +124,16 @@ public class ComplexReturnTranspiler : SyntaxRewriter, IReuseableRewriter
         return node.WithStatements(rewrittenList);
     }
 
+    public override SyntaxNode VisitInvocationExpression(InvocationExpressionSyntax node)
+    {
+        _varUsageAnalyzer.VisitInvocationExpression(node);
+        return base.VisitInvocationExpression(node);
+    }
+
     public override SyntaxNode VisitAssignmentStatement(AssignmentStatementSyntax node)
     {
+        _varUsageAnalyzer.VisitAssignmentStatement(node);
+
         if (node.Source is not InvocationExpressionSyntax source ||
             _model.GetSymbolInfo(source).Symbol is not IMethodSymbol symbol ||
             symbol.DeclaringSyntaxReference?.SyntaxTree is not SyntaxTree syntaxReference)
@@ -125,6 +155,24 @@ public class ComplexReturnTranspiler : SyntaxRewriter, IReuseableRewriter
             .WithTriviaFrom(node);
     }
 
+    public override SyntaxNode VisitIdentifierName(IdentifierNameSyntax node)
+    {
+        _varUsageAnalyzer.VisitIdentifierName(node);
+        return base.VisitIdentifierName(node);
+    }
+
+    public override SyntaxNode VisitExitStatement(ExitStatementSyntax node)
+    {
+        var result = base.VisitExitStatement(node);
+
+        if (_returnSymbol is not null && node.ExitValue is not null)
+        {
+            _varUsageAnalyzer.Initialized(_returnSymbol);
+        }
+
+        return result;
+    }
+
     public SyntaxNode Rewrite(SyntaxNode node, ref IRewriterContext context)
     {
         _dependencies.Clear();
@@ -133,6 +181,7 @@ public class ComplexReturnTranspiler : SyntaxRewriter, IReuseableRewriter
         _model = _context.Model;
         _firstRun = _context.State is null;
         _transpiledMethods = _context.State ?? [];
+        _varUsageAnalyzer.Clear(_model);
 
         var result = Visit(node);
 

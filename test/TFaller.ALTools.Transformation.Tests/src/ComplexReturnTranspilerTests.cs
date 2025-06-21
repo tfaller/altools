@@ -20,6 +20,7 @@ public class ComplexReturnTranspilerTests
         {
         procedure Test(var Return: Codeunit A)
         begin
+            Clear(Return);
         end
         }
         """
@@ -39,6 +40,7 @@ public class ComplexReturnTranspilerTests
         {
         procedure Test(var A: Codeunit A)
         begin
+            Clear(A);
         end
         }
         """
@@ -59,6 +61,7 @@ public class ComplexReturnTranspilerTests
         {
         procedure Test(var Return: Codeunit A)
         begin
+            Clear(Return);
             exit;
         end
         }
@@ -80,8 +83,60 @@ public class ComplexReturnTranspilerTests
         {
         procedure Test(var A: Codeunit A)
         begin
+            Clear(A);
             A := A;
             exit;
+        end
+        }
+        """
+    )]
+    // Initialized exit
+    [InlineData(
+        """
+        codeunit 1 A
+        {
+        procedure Test(): Codeunit A
+        var
+            A: Codeunit A;
+        begin
+            exit(A);
+        end
+        }
+        """,
+        """
+        codeunit 1 A
+        {
+        procedure Test(var Return: Codeunit A)
+        var
+            A: Codeunit A;
+        begin
+            Return := A;
+            exit;
+        end
+        }
+        """
+    )]
+    // Named initialized exit
+    [InlineData(
+        """
+        codeunit 1 A
+        {
+        procedure Test() Result: Codeunit A
+        var
+            A: Codeunit A;
+        begin
+            Result := A;
+        end
+        }
+        """,
+        """
+        codeunit 1 A
+        {
+        procedure Test(var Result: Codeunit A)
+        var
+            A: Codeunit A;
+        begin
+            Result := A;
         end
         }
         """
@@ -101,6 +156,7 @@ public class ComplexReturnTranspilerTests
         {
         procedure Test(Param: Integer; B: Integer; var Return: Codeunit A)
         begin
+            Clear(Return);
         end
         }
         """
@@ -126,6 +182,7 @@ public class ComplexReturnTranspilerTests
         {
         procedure Test(var Return: Codeunit A)
         begin
+            Clear(Return);
         end;
         procedure Usage()
         var 
@@ -158,6 +215,7 @@ public class ComplexReturnTranspilerTests
         {
         procedure Test(var Return: Codeunit A)
         begin
+            Clear(Return);
         end;
         procedure Usage()
         var 
@@ -166,6 +224,34 @@ public class ComplexReturnTranspilerTests
             // This is a comment
             Test(A);
         end;
+        }
+        """
+    )]
+    // Return value used without assignment
+    [InlineData(
+        """
+        codeunit 1 A
+        {
+        procedure Something()
+        begin
+        end;
+        procedure Test() A: Codeunit A
+        begin
+            A.Something();
+        end
+        }
+        """,
+        """
+        codeunit 1 A
+        {
+        procedure Something()
+        begin
+        end;
+        procedure Test(var A: Codeunit A)
+        begin
+            Clear(A);
+            A.Something();
+        end
         }
         """
     )]

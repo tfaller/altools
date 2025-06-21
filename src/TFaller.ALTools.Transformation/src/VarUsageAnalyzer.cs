@@ -84,6 +84,12 @@ public class VarUsageAnalyzer(SemanticModel model)
     {
         if (!_watches) return;
 
+        if (node.Parent is ReturnValueSyntax)
+        {
+            // this is the declaration of a return value, not any kind of usage
+            return;
+        }
+
         if (!TryGetSymbolUsage(node, out var symbol, out var usage))
         {
             // not a symbol we are watching
@@ -122,6 +128,25 @@ public class VarUsageAnalyzer(SemanticModel model)
             !TryGetSymbolUsage(argIdent, out var symbol, out var usage))
         {
             // not a clear, basic flow
+            return;
+        }
+
+        if (usage == Usage.Unused)
+        {
+            _usage[symbol] = Usage.Initialized | Usage.Used;
+        }
+    }
+
+    /// <summary>
+    /// Mark manually a symbol as initialized.
+    /// </summary>
+    public void Initialized(ISymbol symbol)
+    {
+        if (!_watches) return;
+
+        if (!_usage.TryGetValue(symbol, out var usage))
+        {
+            // not a symbol we are watching
             return;
         }
 
