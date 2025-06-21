@@ -136,6 +136,39 @@ public class ComplexReturnTranspilerTests
         }
         """
     )]
+    // Usage with comment
+    [InlineData(
+        """
+        codeunit 1 A
+        {
+        procedure Test(): Codeunit A
+        begin
+        end;
+        procedure Usage()
+        var 
+            A: Codeunit A;
+        begin
+            // This is a comment
+            A := Test();
+        end;
+        }
+        """,
+        """
+        codeunit 1 A
+        {
+        procedure Test(var Return: Codeunit A)
+        begin
+        end;
+        procedure Usage()
+        var 
+            A: Codeunit A;
+        begin
+            // This is a comment
+            Test(A);
+        end;
+        }
+        """
+    )]
     public void RewriteTest(string input, string expected)
     {
         var compilationUnit = SyntaxFactory.ParseCompilationUnit(input);

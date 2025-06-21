@@ -114,8 +114,9 @@ public class ComplexReturnTranspiler : SyntaxRewriter, IReuseableRewriter
         }
 
         return SyntaxFactory
-            .ExpressionStatement(source.AddArgumentListArguments(node.Target))
-            .WithSemicolonToken(node.SemicolonToken);
+            .ExpressionStatement(source.AddArgumentListArguments(node.Target.WithoutTrivia()))
+            .WithSemicolonToken(node.SemicolonToken)
+            .WithTriviaFrom(node);
     }
 
     public SyntaxNode Rewrite(SyntaxNode node, ref IRewriterContext context)
