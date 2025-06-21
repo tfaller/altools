@@ -17,6 +17,7 @@ namespace TFaller.ALTools.Transformation.Rewriter;
 /// <param name="parseOptions">Options of the AL file parser</param>
 public class WorkspaceRewriter(List<IConcurrentRewriter> rewriters, ParseOptions parseOptions)
 {
+    public static readonly UTF8Encoding Encoding = new(false, true);
     private readonly Formatter _formatter = new();
 
     public async Task Rewrite(string workspace)
@@ -131,7 +132,7 @@ public class WorkspaceRewriter(List<IConcurrentRewriter> rewriters, ParseOptions
         }
 
         await Task.WhenAll(formattedFiles.Select(kvp =>
-            File.WriteAllTextAsync(kvp.Key, kvp.Value, Encoding.UTF8)
+            File.WriteAllTextAsync(kvp.Key, kvp.Value, Encoding)
         ));
     }
 }
