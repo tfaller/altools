@@ -106,11 +106,17 @@ public class ComplexReturnTranspiler : SyntaxRewriter, IReuseableRewriter
     {
         if (node.Source is not InvocationExpressionSyntax source ||
             _model.GetSymbolInfo(source).Symbol is not IMethodSymbol symbol ||
-            symbol.DeclaringSyntaxReference?.SyntaxTree is not SyntaxTree syntaxReference ||
-            (!_transpiledMethods.Contains(symbol) && !(_context.TryGetContext(syntaxReference, out var context) && context.State.Contains(symbol))))
+            symbol.DeclaringSyntaxReference?.SyntaxTree is not SyntaxTree syntaxReference)
         {
             // not an invocation, nothing to do
-            return base.VisitAssignmentStatement(node);
+            return node;
+        }
+
+        if (!_transpiledMethods.Contains(symbol) &&
+            !(_context.TryGetContext(syntaxReference, out var context) && context.State.Contains(symbol)))
+        {
+            _dependencies.Add(syntaxReference);
+            return node;
         }
 
         return SyntaxFactory
