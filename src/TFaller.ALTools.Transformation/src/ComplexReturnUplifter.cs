@@ -24,10 +24,9 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
     private readonly SyntaxToken _closeParenthesisToken = SyntaxFactory.Token(SyntaxKind.CloseParenToken);
     private readonly SyntaxToken _openParenthesisToken = SyntaxFactory.Token(SyntaxKind.OpenParenToken);
     private readonly SyntaxToken _semicolon = SyntaxFactory.Token(SyntaxKind.SemicolonToken);
+    private readonly VarUsageAnalyzer _varUsageAnalyzer = new(null!);
     private string? _returnName;
-    private bool _returnInitialized;
-    private bool _returnUsedBeforeInitialization;
-    private bool _returnUsed;
+    private ISymbol? _returnSymbol;
 
     public SyntaxNode Rewrite(SyntaxNode node, ref IRewriterContext context)
     {
@@ -37,6 +36,7 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
         _model = context.Model;
         _firstRun = _context.State == null;
         _upliftedMethods = _context.State ?? [];
+        _varUsageAnalyzer.Clear(_model);
 
         var rewritten = Visit(node);
 
@@ -87,17 +87,18 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
             return base.VisitMethodDeclaration(node);
         }
 
-        _returnName = lastParameter.Name.Identifier.ValueText;
-        _returnInitialized = false;
-        _returnUsedBeforeInitialization = false;
-        _returnUsed = false;
+        _returnSymbol = _model.GetDeclaredSymbol(lastParameter)!;
+        _returnName = _returnSymbol.Name;
+        _varUsageAnalyzer.Watch(_returnSymbol);
 
         // save our own symbol now, breaks if some rewriter changes our method syntax 
         var methodSymbol = (IMethodSymbol)_model.GetDeclaredSymbol(node)!;
 
         node = (MethodDeclarationSyntax)base.VisitMethodDeclaration(node);
 
-        if ((_returnInitialized && !_returnUsedBeforeInitialization) || !_returnUsed)
+        var usage = _varUsageAnalyzer.GetUsage(_returnSymbol);
+
+        if (usage == VarUsageAnalyzer.Usage.Unused || (usage & VarUsageAnalyzer.Usage.Initialized) > 0)
         {
             var parameterList = node.ParameterList;
             var parameters = parameterList.Parameters;
@@ -121,6 +122,7 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
 
         // we are not anymore in rewrite procdure
         _returnName = null;
+        _varUsageAnalyzer.Clear();
 
         return node;
     }
@@ -169,35 +171,20 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
 
     public override SyntaxNode VisitInvocationExpression(InvocationExpressionSyntax node)
     {
-        if (node.Expression is not IdentifierNameSyntax ident ||
-            !string.Equals(ident.Identifier.ValueText, "Clear") ||
-            node.ArgumentList.Arguments.Count != 1 ||
-            node.ArgumentList.Arguments[0] is not IdentifierNameSyntax argIdent ||
-            !string.Equals(argIdent.Identifier.ValueText, _returnName, StringComparison.CurrentCultureIgnoreCase))
+        if (_returnSymbol is not null)
         {
-            // not a clear, basic flow
-            return base.VisitInvocationExpression(node);
+            _varUsageAnalyzer.VisitInvocationExpression(node);
         }
-
-        // the return parameter was intialized by Clear()
-        _returnInitialized = true;
-
-        return node;
+        return base.VisitInvocationExpression(node);
     }
 
     public override SyntaxNode VisitAssignmentStatement(AssignmentStatementSyntax node)
     {
-        if (node.Target is not IdentifierNameSyntax ident ||
-            !string.Equals(ident.Identifier.ValueText, _returnName, StringComparison.CurrentCultureIgnoreCase))
+        if (_returnSymbol is not null)
         {
-            // not an assignment to the return value
-            return base.VisitAssignmentStatement(node);
+            _varUsageAnalyzer.VisitAssignmentStatement(node);
         }
-
-        // the return parameter was intialized by assignment
-        _returnInitialized = true;
-
-        return node;
+        return base.VisitAssignmentStatement(node);
     }
 
     public override SyntaxNode VisitParameterList(ParameterListSyntax node)
@@ -208,18 +195,10 @@ public class ComplexReturnUplifter : SyntaxRewriter, IReuseableRewriter
 
     public override SyntaxNode VisitIdentifierName(IdentifierNameSyntax node)
     {
-        // determine the usage of the return parameter
-        if (_model.GetSymbolInfo(node).Symbol is IParameterSymbol param &&
-            param.Name.EqualsOrdinalIgnoreCase(_returnName))
+        if (_returnSymbol is not null)
         {
-            _returnUsed = true;
-
-            if (!_returnInitialized)
-            {
-                _returnUsedBeforeInitialization = true;
-            }
+            _varUsageAnalyzer.VisitIdentifierName(node);
         }
-
         return node;
     }
 
