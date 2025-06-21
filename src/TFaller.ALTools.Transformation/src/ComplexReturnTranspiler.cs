@@ -20,6 +20,7 @@ public class ComplexReturnTranspiler : SyntaxRewriter, IReuseableRewriter
     private SemanticModel _model = null!;
     private readonly HashSet<SyntaxTree> _dependencies = [];
     private readonly SyntaxToken _semicolon;
+    private readonly SyntaxToken _varKeyword = SyntaxFactory.Token(SyntaxKind.VarKeyword);
     private readonly ExitStatementSyntax _emptyExit;
 
     public IRewriterContext EmptyContext => new Context();
@@ -54,10 +55,11 @@ public class ComplexReturnTranspiler : SyntaxRewriter, IReuseableRewriter
         .WithReturnValue(null)
         .WithParameterList(
             node.ParameterList.AddParameters(
+                _semicolon,
                 SyntaxFactory.Parameter(
                     _returnName,
                     simpleType.WithoutTrailingTrivia()
-                ).WithVarKeyword(SyntaxFactory.Token(SyntaxKind.VarKeyword))
+                ).WithVarKeyword(_varKeyword)
             ).WithTrailingTrivia(simpleType.GetTrailingTrivia())
         );
 

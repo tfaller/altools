@@ -1,5 +1,4 @@
 using Microsoft.Dynamics.Nav.CodeAnalysis;
-using Microsoft.Dynamics.Nav.CodeAnalysis.Syntax;
 
 namespace TFaller.ALTools.Transformation.Tests;
 
@@ -83,6 +82,25 @@ public class ComplexReturnTranspilerTests
         begin
             A := A;
             exit;
+        end
+        }
+        """
+    )]
+    // Other parameter
+    [InlineData(
+        """
+        codeunit 1 A
+        {
+        procedure Test(Param: Integer; B: Integer): Codeunit A
+        begin
+        end
+        }
+        """,
+        """
+        codeunit 1 A
+        {
+        procedure Test(Param: Integer; B: Integer; var Return: Codeunit A)
+        begin
         end
         }
         """
