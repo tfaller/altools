@@ -22,6 +22,11 @@
         "command": "altools.xmlGenerate",
         "title": "XML: Generate",
         "category": "ALTools"
+      },
+      {
+        "command": "altools.workspaceInit",
+        "title": "Initialize Workspace",
+        "category": "ALTools"
       }
     ]
   },
