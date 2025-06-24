@@ -54,6 +54,7 @@
     "@vscode/test-electron": "^2.5.2"
   },
   "extensionDependencies": [
-    "ms-dynamics-smb.al"
+    "ms-dynamics-smb.al",
+    "vscode.git"
   ]
 }
