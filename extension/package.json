@@ -27,6 +27,11 @@
         "command": "altools.workspaceInit",
         "title": "Initialize Workspace",
         "category": "ALTools"
+      },
+      {
+        "command": "altools.workspaceOpen",
+        "title": "Open Workspace",
+        "category": "ALTools"
       }
     ]
   },

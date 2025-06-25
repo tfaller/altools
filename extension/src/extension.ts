@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import { execCommand } from './exec';
 import { workspaceInit } from './cmd/workspaceInit';
+import { workspaceOpen } from './cmd/workspaceOpen';
 import { GitExtension } from './git';
 
 // This method is called when your extension is activated
@@ -25,6 +26,11 @@ export function activate(context: vscode.ExtensionContext) {
 		await workspaceInit(git);
 	})
 	context.subscriptions.push(openWorkspaceDisposable);
+
+	const openWorkspaceOpenDisposable = vscode.commands.registerCommand('altools.workspaceOpen', async () => {
+		await workspaceOpen(git);
+	});
+	context.subscriptions.push(openWorkspaceOpenDisposable);
 }
 
 // This method is called when your extension is deactivated
