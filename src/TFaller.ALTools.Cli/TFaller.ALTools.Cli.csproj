@@ -16,6 +16,11 @@
 
     <ProjectReference
       Include="..\TFaller.ALTools.XmlGenerator\TFaller.ALTools.XmlGenerator.csproj" />
+
+    <Reference Include="Microsoft.Dynamics.Nav.CodeAnalysis">
+      <HintPath>../../dll/Microsoft.Dynamics.Nav.CodeAnalysis.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
 </Project>

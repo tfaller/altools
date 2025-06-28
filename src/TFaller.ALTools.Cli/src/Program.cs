@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading.Tasks;
+using TFaller.ALTools.Transformation;
 
 public class Program
 {
@@ -19,11 +20,14 @@ public class Program
             Environment.Exit(1);
         };
 
+        AssemblyLoader.RegisterLoader();
+
         return args[0] switch
         {
             "openapi" => OpenApiGenerator.Program.Main(args[1..]),
             "xml" => XmlGenerator.Program.Main(args[1..]),
-            _ => throw new ArgumentException($"Unknown command: {args[0]}, please use 'openapi|xml'"),
+            "workspace-transformation" => WorkspaceTransformation.Transform(args[1..]),
+            _ => throw new ArgumentException($"Unknown command: {args[0]}, please use 'openapi|xml|workspace-transformation'"),
         };
     }
 }
