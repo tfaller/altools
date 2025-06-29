@@ -28,9 +28,8 @@ public static class AssemblyLoader
 
     public static void RegisterLoader()
     {
-        var alExtensionPath = FindAlExtension();
-        if (alExtensionPath == null)
-            throw new DirectoryNotFoundException("Could not find AL extension");
+        var alExtensionPath = FindAlExtension()
+            ?? throw new DirectoryNotFoundException("Could not find AL extension");
 
         var binPath = Path.Combine(alExtensionPath, "bin", OsPath());
         if (!Directory.Exists(binPath))
@@ -46,11 +45,13 @@ public static class AssemblyLoader
             if (!_alAssemblies.Contains(name))
                 return null;
 
-            if (_loadedAlAssemblies.TryGetValue(name, out var assembly))
-                return assembly;
+            lock (_loadedAlAssemblies)
+            {
+                if (!_loadedAlAssemblies.TryGetValue(name, out var assembly))
+                    _loadedAlAssemblies.Add(name, assembly = Assembly.LoadFile(Path.Combine(binPath, name + ".dll")));
 
-            _loadedAlAssemblies.Add(name, assembly = Assembly.LoadFile(Path.Combine(binPath, name + ".dll")));
-            return assembly;
+                return assembly;
+            }
         };
     }
 
