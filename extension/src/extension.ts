@@ -5,6 +5,7 @@ import { execCommand } from './exec';
 import { workspaceInit } from './cmd/workspaceInit';
 import { workspaceOpen } from './cmd/workspaceOpen';
 import { GitExtension } from './git';
+import { cliExecutable } from './workspace';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -13,17 +14,23 @@ export function activate(context: vscode.ExtensionContext) {
 	const git = gitExtension?.exports?.getAPI(1)!;
 
 	const openApiGenerateDisposable = vscode.commands.registerCommand('altools.openApiGenerate', () => {
-		execCommand('ALTools', openApiExecutable(context), ['openapi', 'generate', 'altools-openapi-generator.json'])
+		execCommand('ALTools', cliExecutable(context), ['openapi', 'generate', 'altools-openapi-generator.json'])
 	});
 	context.subscriptions.push(openApiGenerateDisposable);
 
 	const xmlGenerateDisposable = vscode.commands.registerCommand('altools.xmlGenerate', () => {
-		execCommand('ALTools', openApiExecutable(context), ['xml', 'generate', 'altools-xml-generator.json'])
+		execCommand('ALTools', cliExecutable(context), ['xml', 'generate', 'altools-xml-generator.json'])
 	});
 	context.subscriptions.push(xmlGenerateDisposable);
 
 	const openWorkspaceDisposable = vscode.commands.registerCommand('altools.workspaceInit', async () => {
-		await workspaceInit(git);
+		await vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification,
+			title: "ALTools workspace initialization",
+			cancellable: false
+		}, async () => {
+			await workspaceInit(context, git);
+		})
 	})
 	context.subscriptions.push(openWorkspaceDisposable);
 
@@ -35,9 +42,3 @@ export function activate(context: vscode.ExtensionContext) {
 
 // This method is called when your extension is deactivated
 export function deactivate() { }
-
-const openApiExecutable = (context: vscode.ExtensionContext) =>
-	context.asAbsolutePath(executable("bin/TFaller.ALTools.Cli"))
-
-const executable = (exe: string) =>
-	process.platform === 'win32' ? `${exe}.exe` : exe

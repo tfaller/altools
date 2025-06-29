@@ -2,13 +2,14 @@ import { existsSync } from 'node:fs';
 import { join, basename, dirname, relative } from 'node:path';
 import * as child_process from 'node:child_process';
 import { promisify } from 'node:util';
-import { Uri, window, workspace } from 'vscode';
+import { ExtensionContext, Uri, window, workspace } from 'vscode';
 import { API } from '../git';
-import { getAlWorkspaceUri } from '../workspace';
+import { cliExecutable, getAlWorkspaceUri } from '../workspace';
+import { symlink } from 'node:fs/promises';
 
 const exec = promisify(child_process.exec);
 
-export async function workspaceInit(git: API) {
+export async function workspaceInit(context: ExtensionContext, git: API) {
     const alWorkspaceUri = getAlWorkspaceUri();
     if (!alWorkspaceUri) {
         return;
@@ -31,11 +32,11 @@ export async function workspaceInit(git: API) {
 
     const alWorkspaceName = basename(alWorkspaceUri.fsPath);
     const alWorkspaceParent = dirname(alWorkspaceUri.fsPath);
-    const alToolsWorkspacePath = join(alWorkspaceParent, alWorkspaceName + 'ALTools');
+    const alToolsWorktreePath = join(alWorkspaceParent, alWorkspaceName + 'ALTools');
 
-    if (existsSync(alToolsWorkspacePath)) {
+    if (existsSync(alToolsWorktreePath)) {
         // TODO: maybe later open the existing workspace
-        window.showErrorMessage(`The AL workspace '${alToolsWorkspacePath}' already exists.`);
+        window.showErrorMessage(`The AL workspace '${alToolsWorktreePath}' already exists.`);
         return;
     }
 
@@ -46,23 +47,34 @@ export async function workspaceInit(git: API) {
         return;
     }
 
-    await exec(`git worktree add --no-checkout -b ${branch} "${alToolsWorkspacePath}"`, { cwd: alWorkspaceParent });
+    await exec(`git worktree add --no-checkout -b ${branch} "${alToolsWorktreePath}"`, { cwd: alWorkspaceParent });
 
     const alWorkspaceRepoPath = relative(repo.rootUri.fsPath, alWorkspaceUri.fsPath);
-    await exec(`git sparse-checkout set "${alWorkspaceRepoPath}"`, { cwd: alToolsWorkspacePath });
+    await exec(`git sparse-checkout set "${alWorkspaceRepoPath}"`, { cwd: alToolsWorktreePath });
 
     // git repo extension seems to not find the worktree correctly to checkout it
     // do it also by executing git command directly
-    await exec(`git checkout`, { cwd: alToolsWorkspacePath });
+    await exec(`git checkout`, { cwd: alToolsWorktreePath });
+
+    // make symbols available in the new workspace
+    const alToolsWorkspacePath = join(alToolsWorktreePath, alWorkspaceRepoPath)
+    await symlink(join(alWorkspaceUri.fsPath, '.alpackages'), join(alToolsWorkspacePath, '.alpackages'));
+
+    // uplift the code
+    await exec(`${cliExecutable(context)} workspace-transformation "${alToolsWorkspacePath}" complex-return-uplifter`);
+
+    // commit all uplifted files, so that the user does not have to worry about it
+    const alToolsRepo = (await git.openRepository(Uri.file(alToolsWorktreePath)))!;
+    alToolsRepo.commit(`${alWorkspaceName}ALTools: Uplift workspace`, { all: true })
 
     // finaly we can open the new workspace
     workspace.updateWorkspaceFolders(
         workspace.workspaceFolders?.length ?? 0, 0,
         {
-            uri: Uri.file(join(alToolsWorkspacePath, alWorkspaceRepoPath)),
+            uri: Uri.file(alToolsWorkspacePath),
             name: alWorkspaceName + 'ALTools'
         }
-    )
+    );
 }
 
 function branchNameForWorkspaceName(workspaceName: string): string {

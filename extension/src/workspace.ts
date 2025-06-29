@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { window, workspace } from "vscode";
+import { ExtensionContext, window, workspace } from "vscode";
 
 export function getAlWorkspaceUri() {
     const editor = window.activeTextEditor;
@@ -22,3 +22,9 @@ export function getAlWorkspaceUri() {
 
     return workspaceFolder.uri;
 }
+
+export const cliExecutable = (context: ExtensionContext) =>
+    context.asAbsolutePath(executable("bin/TFaller.ALTools.Cli"))
+
+const executable = (exe: string) =>
+    process.platform === 'win32' ? `${exe}.exe` : exe
