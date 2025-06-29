@@ -52,9 +52,9 @@ export async function workspaceInit(context: ExtensionContext, git: API) {
     const alWorkspaceRepoPath = relative(repo.rootUri.fsPath, alWorkspaceUri.fsPath);
     await exec(`git sparse-checkout set "${alWorkspaceRepoPath}"`, { cwd: alToolsWorktreePath });
 
-    // git repo extension seems to not find the worktree correctly to checkout it
-    // do it also by executing git command directly
-    await exec(`git checkout`, { cwd: alToolsWorktreePath });
+    // do the sparse checkout
+    const alToolsRepo = (await git.openRepository(Uri.file(alToolsWorktreePath)))!;
+    await alToolsRepo.checkout(branch);
 
     // make symbols available in the new workspace
     const alToolsWorkspacePath = join(alToolsWorktreePath, alWorkspaceRepoPath)
@@ -64,8 +64,7 @@ export async function workspaceInit(context: ExtensionContext, git: API) {
     await exec(`${cliExecutable(context)} workspace-transformation "${alToolsWorkspacePath}" complex-return-uplifter`);
 
     // commit all uplifted files, so that the user does not have to worry about it
-    const alToolsRepo = (await git.openRepository(Uri.file(alToolsWorktreePath)))!;
-    alToolsRepo.commit(`${alWorkspaceName}ALTools: Uplift workspace`, { all: true })
+    await alToolsRepo.commit(`${alWorkspaceName}ALTools: Uplift workspace`, { all: true })
 
     // finaly we can open the new workspace
     workspace.updateWorkspaceFolders(
