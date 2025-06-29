@@ -3,6 +3,10 @@ import { join } from "node:path";
 import { ExtensionContext, window, workspace } from "vscode";
 
 export function getAlWorkspaceUri() {
+    if (workspace.workspaceFolders?.length === 1) {
+        return workspace.workspaceFolders[0].uri;
+    }
+
     const editor = window.activeTextEditor;
     if (!editor) {
         window.showErrorMessage('No active editor found.');

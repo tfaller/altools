@@ -5,7 +5,7 @@ import { promisify } from 'node:util';
 import { ExtensionContext, Uri, window, workspace } from 'vscode';
 import { API } from '../git';
 import { cliExecutable, getAlWorkspaceUri } from '../workspace';
-import { symlink } from 'node:fs/promises';
+import { readFile, symlink, writeFile } from 'node:fs/promises';
 
 const exec = promisify(child_process.exec);
 
@@ -62,6 +62,7 @@ export async function workspaceInit(context: ExtensionContext, git: API) {
 
     // uplift the code
     await exec(`${cliExecutable(context)} workspace-transformation "${alToolsWorkspacePath}" complex-return-uplifter`);
+    await patchAppJson(alToolsWorkspacePath);
 
     // commit all uplifted files, so that the user does not have to worry about it
     await alToolsRepo.commit(`${alWorkspaceName}ALTools: Uplift workspace`, { all: true })
@@ -82,4 +83,25 @@ function branchNameForWorkspaceName(workspaceName: string): string {
     }
     // just keep safe characters for branch names
     return 'altools-' + workspaceName.replace(/[^a-zA-Z0-9\-]/g, '');
+}
+
+async function patchAppJson(workspacePath: string) {
+    const appFilePath = join(workspacePath, 'app.json');
+
+    const fileRaw = await readFile(appFilePath, 'utf8');
+    const app = JSON.parse(fileRaw);
+
+    app.name = app.name + 'ALTools';
+    app.runtime = "15.1";
+
+    if (app.target === "Internal") {
+        app.target = "OnPrem";
+    }
+
+    app.suppressWarnings = [
+        ...(app.suppressWarnings ?? []),
+        "AL0667" // deprecation warnings - could be invalid for transpiled code to older runtime 
+    ];
+
+    await writeFile(appFilePath, JSON.stringify(app, null, 4), 'utf8')
 }
