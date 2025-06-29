@@ -1,11 +1,11 @@
 import { existsSync } from 'node:fs';
-import { join, basename, dirname, relative } from 'node:path';
+import { join, basename, dirname, relative, isAbsolute } from 'node:path';
 import * as child_process from 'node:child_process';
 import { promisify } from 'node:util';
 import { ExtensionContext, Uri, window, workspace } from 'vscode';
 import { API } from '../git';
 import { cliExecutable, getAlWorkspaceUri } from '../workspace';
-import { readFile, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, symlink, writeFile } from 'node:fs/promises';
 
 const exec = promisify(child_process.exec);
 
@@ -58,11 +58,13 @@ export async function workspaceInit(context: ExtensionContext, git: API) {
 
     // make symbols available in the new workspace
     const alToolsWorkspacePath = join(alToolsWorktreePath, alWorkspaceRepoPath)
+    const alToolsWorkspaceUri = Uri.file(alToolsWorkspacePath)
     await symlink(join(alWorkspaceUri.fsPath, '.alpackages'), join(alToolsWorkspacePath, '.alpackages'));
 
     // uplift the code
     await exec(`${cliExecutable(context)} workspace-transformation "${alToolsWorkspacePath}" complex-return-uplifter`);
     await patchAppJson(alToolsWorkspacePath);
+    await initConfig(alWorkspaceUri, alToolsWorkspaceUri);
 
     // commit all uplifted files, so that the user does not have to worry about it
     await alToolsRepo.commit(`${alWorkspaceName}ALTools: Uplift workspace`, { all: true })
@@ -71,7 +73,7 @@ export async function workspaceInit(context: ExtensionContext, git: API) {
     workspace.updateWorkspaceFolders(
         workspace.workspaceFolders?.length ?? 0, 0,
         {
-            uri: Uri.file(alToolsWorkspacePath),
+            uri: alToolsWorkspaceUri,
             name: alWorkspaceName + 'ALTools'
         }
     );
@@ -104,4 +106,31 @@ async function patchAppJson(workspacePath: string) {
     ];
 
     await writeFile(appFilePath, JSON.stringify(app, null, 4), 'utf8')
+}
+
+async function initConfig(alWorkspaceUri: Uri, altoolsWorkspaceUri: Uri) {
+    const config = workspace.getConfiguration("al", alWorkspaceUri)
+
+    if (!config.has('assemblyProbingPaths')) {
+        return;
+    }
+
+    const assemblyProbingPaths = config.get<string[]>('assemblyProbingPaths', []).map(p => {
+        if (isAbsolute(p)) {
+            return p;
+        }
+        return relative(altoolsWorkspaceUri.fsPath, join(alWorkspaceUri.fsPath, p));
+    })
+
+    // folder .vscode is required for the workspace settings to be applied
+    // because the workspace isn't opened in the VS Code,
+    // we have to create it manually, while not using the configuration API
+    const vscodeFolder = join(altoolsWorkspaceUri.fsPath, '.vscode');
+    await mkdir(vscodeFolder, { recursive: true });
+
+    const alToolsConfig = {
+        "al.assemblyProbingPaths": assemblyProbingPaths,
+    };
+
+    await writeFile(join(vscodeFolder, 'settings.json'), JSON.stringify(alToolsConfig, null, 4), 'utf8');
 }
