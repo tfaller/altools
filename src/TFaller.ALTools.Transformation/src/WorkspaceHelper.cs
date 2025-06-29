@@ -20,7 +20,7 @@ public class WorkspaceHelper
 
         foreach (var package in Directory.GetFiles(alpackagesPath, "*.app"))
         {
-            using var appStream = File.Open(package, FileMode.Open);
+            using var appStream = File.Open(package, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var reader = NavAppPackageReader.Create(appStream);
 
             var info = reader.ReadNavAppManifest();
