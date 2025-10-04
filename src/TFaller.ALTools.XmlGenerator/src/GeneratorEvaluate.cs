@@ -15,6 +15,7 @@ public class GeneratorEvaluate(Generator generator) : IGenerator
             "xs:boolean" => "Boolean",
             "xs:date" => "Date",
             "xs:dateTime" => "DateTime",
+            "xs:int" => "Integer",
             "xs:time" => "Time",
             _ => "",
         };
