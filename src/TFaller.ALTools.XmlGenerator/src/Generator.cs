@@ -205,7 +205,7 @@ public class Generator
 
         // The inherited elements
 
-        var baseElement = element.OwnerDocument.SelectSingleNode($"//xs:complexType[@name='{baseTypeLocalName}']", _manager);
+        var baseElement = element.ParentElement()?.ParentElement()?.SelectSingleNode($"xs:complexType[@name='{baseTypeLocalName}']", _manager);
         if (baseElement is XmlElement baseComplexType)
         {
             GenerateComplexTypeChildren(baseComplexType, siblingsPath, elementFormDefault);

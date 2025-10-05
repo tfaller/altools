@@ -15,4 +15,9 @@ public static class Extensions
     {
         return nodeList.OfType<XmlElement>();
     }
+
+    public static XmlElement? ParentElement(this XmlElement element)
+    {
+        return (XmlElement?)element.ParentNode;
+    }
 }
