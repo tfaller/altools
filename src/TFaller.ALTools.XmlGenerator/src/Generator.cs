@@ -119,24 +119,7 @@ public class Generator
                 end;
         ");
 
-        foreach (var element in complexType.ChildElements())
-        {
-            if (element.Name == "xs:sequence")
-            {
-                GenerateSequence(element, elementFormDefault);
-            }
-
-            if (element.Name == "xs:complexContent")
-            {
-                var extension = element.SelectSingleNode("xs:extension", _manager);
-                var sequence = extension?.SelectSingleNode("xs:sequence", _manager);
-
-                if (sequence is XmlElement sequenceElement)
-                {
-                    GenerateSequence(sequenceElement, elementFormDefault);
-                }
-            }
-        }
+        GenerateComplexTypeChildren(complexType, new StringBuilder(), elementFormDefault);
 
         _code.AppendLine(@$"
             local procedure GetElement(name: Text): XmlElement
@@ -193,10 +176,52 @@ public class Generator
         _code.AppendLine("}");
     }
 
-    public void GenerateSequence(XmlElement sequence, bool elementFormDefault)
+    private void GenerateComplexTypeChildren(XmlElement complexType, StringBuilder siblingsPath, bool elementFormDefault)
     {
-        var siblingsPath = new StringBuilder();
+        foreach (var element in complexType.ChildElements())
+        {
+            if (element.Name == "xs:sequence")
+            {
+                GenerateSequence(element, siblingsPath, elementFormDefault);
+            }
 
+            if (element.Name == "xs:complexContent")
+            {
+                GenerateComplexContent(element, siblingsPath, elementFormDefault);
+            }
+        }
+    }
+
+    private void GenerateComplexContent(XmlElement element, StringBuilder siblingsPath, bool elementFormDefault)
+    {
+        var extension = element.SelectSingleNode("xs:extension", _manager);
+
+        var baseType = extension?.Attributes?["base"]?.Value;
+        if (baseType?.Split(':') is not [var baseTypePrefix, var baseTypeLocalName])
+        {
+            Console.WriteLine("Invalid base type: " + baseType);
+            return;
+        }
+
+        // The inherited elements
+
+        var baseElement = element.OwnerDocument.SelectSingleNode($"//xs:complexType[@name='{baseTypeLocalName}']", _manager);
+        if (baseElement is XmlElement baseComplexType)
+        {
+            GenerateComplexTypeChildren(baseComplexType, siblingsPath, elementFormDefault);
+        }
+
+        // The own, non inherited elements
+
+        var sequence = extension?.SelectSingleNode("xs:sequence", _manager);
+        if (sequence is XmlElement sequenceElement)
+        {
+            GenerateSequence(sequenceElement, siblingsPath, elementFormDefault);
+        }
+    }
+
+    private void GenerateSequence(XmlElement sequence, StringBuilder siblingsPath, bool elementFormDefault)
+    {
         foreach (var element in sequence.ChildElements())
         {
             if (element.Name == "xs:element")
