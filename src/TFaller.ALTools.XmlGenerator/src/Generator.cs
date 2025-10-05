@@ -230,7 +230,7 @@ public class Generator
 
                 var context = new GenerationContext
                 {
-                    SiblingsPath = siblingsPath.ToString(),
+                    SiblingsPath = siblingsPath,
 
                     ElementFormQualified = element.HasAttribute("form")
                         ? element.GetAttribute("form") == "qualified"
