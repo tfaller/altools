@@ -102,6 +102,7 @@ public class Generator
             Codeunit {GetFreeCodeunitId()} {alName} {{
                 var _E: XmlElement;
                 var _I: Boolean;
+                var _A: Boolean;
 
                 procedure TargetNamespace(): Text
                 begin
@@ -111,6 +112,15 @@ public class Generator
                 procedure FromXml(Element: XmlElement)
                 begin
                     _E := Element;
+                    _I := true;
+                    _A := true;
+                end;
+
+                procedure FromXmlInternal(Element: XmlElement; Accessed: Boolean)
+                begin
+                    _E := Element;
+                    _I := true;
+                    _A := Accessed;
                 end;
 
                 procedure AsXmlElement(): XmlElement
@@ -202,6 +212,20 @@ public class Generator
             Console.WriteLine("Invalid base type: " + baseType);
             return;
         }
+
+        var baseTypeAlName = TypeName(_manager.LookupNamespace(baseTypePrefix) ?? "", baseTypeLocalName);
+
+        // Cast method
+        _code.AppendLine(@$"
+            procedure CastAs{baseTypeAlName}(var Casted: Codeunit {baseTypeAlName})
+            begin
+                Clear(Casted);
+                _E.Add(XmlAttribute.CreateNamespaceDeclaration('ns', TargetNamespace()));
+                _E.SetAttribute('type', 'http://www.w3.org/2001/XMLSchema-instance', 'ns:{element.ParentElement()!.GetAttribute("name")}');
+                Casted.FromXmlInternal(_E, _A);
+                _A := true; // delegate access to base object
+            end;
+        ");
 
         // The inherited elements
 
