@@ -52,6 +52,11 @@ class GeneratorEnum(Generator generator)
                     exit(XmlElement.Create('{name}', '', Value()));
                 end;
 
+                procedure AsXmlElementWithName(LocalName: Text; NamespaceUri: Text): XmlElement
+                begin
+                    exit(XmlElement.Create(LocalName, NamespaceUri, Value()));
+                end;
+
                 procedure Value(): {baseAlType}
                 begin
                     if not _S then

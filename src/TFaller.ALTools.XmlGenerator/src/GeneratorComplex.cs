@@ -37,7 +37,7 @@ public class GeneratorComplex(Generator generator) : IGenerator
 
             procedure Set{alName}(Value: Codeunit {alType})
             begin
-                SetElement('{context.SiblingsPath}', Value.AsXmlElement());
+                SetElement('{context.SiblingsPath}', Value.AsXmlElementWithName('{name}', {(context.ElementFormQualified ? "TargetNamespace()" : "''")}));
             end;
         ");
 

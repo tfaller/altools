@@ -125,6 +125,40 @@ public class Generator
 
                 procedure AsXmlElement(): XmlElement
                 begin
+                    _A := true;
+                    exit(_E);
+                end;
+
+                procedure AsXmlElementWithName(LocalName: Text; NamespaceUri: Text): XmlElement
+                var
+                    Attributes: XmlAttributeCollection;
+                    Attribute: XmlAttribute;
+                    Nodes: XmlNodeList;
+                    Node: XmlNode;
+                begin
+                    if not _I then begin
+                        _I := true;
+                        _E := XmlElement.Create(LocalName, NamespaceUri);
+                    end;
+
+                    if (_E.LocalName() <> LocalName) then
+                        if _A then
+                            Error('Element already accessed with different name')
+                        else begin
+                            Nodes := _E.GetChildNodes();
+                            Attributes := _E.Attributes();
+                            _E := XmlElement.Create(LocalName, NamespaceUri);
+                            foreach Node in Nodes do begin
+                                Node.Remove();
+                                _E.Add(Node);
+                            end;
+                            foreach Attribute in Attributes do begin
+                                Attribute.Remove();
+                                _E.Add(Attribute);
+                            end;
+                        end;
+
+                    _A := true;
                     exit(_E);
                 end;
         ");
