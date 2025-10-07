@@ -29,4 +29,9 @@ public enum GenerationStatus : int
     /// A validate procedure was generated
     /// </summary>
     Validate = 8,
+
+    /// <summary>
+    /// Array methods (Add, Get, Count, RemoveAt, Set) were generated
+    /// </summary>
+    Array = 16,
 }

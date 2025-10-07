@@ -38,6 +38,7 @@ public class Generator
             new GeneratorEvaluate(this),
             new GeneratorComplex(this),
             new GeneratorOptional(this),
+            new GeneratorArray(this),
         ];
 
         _generatorEnum = new(this);
