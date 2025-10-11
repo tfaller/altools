@@ -127,6 +127,25 @@ public class GeneratorPrimitive(Generator generator) : IGenerator
                 ");
         }
 
+        if (schema.Type == JsonSchemaType.String)
+        {
+            if (schema.MaxLength.HasValue)
+            {
+                code.AppendLine($@"
+                    if StrLen(Token.AsValue().As{type}()) > {schema.MaxLength.Value} then
+                        exit(Path + '.{name} length is greater than {schema.MaxLength.Value}');
+                ");
+            }
+
+            if (schema.MinLength.HasValue)
+            {
+                code.AppendLine($@"
+                    if StrLen(Token.AsValue().As{type}()) < {schema.MinLength.Value} then
+                        exit(Path + '.{name} length is less than {schema.MinLength.Value}');
+                ");
+            }
+        }
+
         code.AppendLine($@"end;");
     }
 
