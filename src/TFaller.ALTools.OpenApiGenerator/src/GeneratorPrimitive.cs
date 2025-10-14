@@ -111,6 +111,12 @@ public class GeneratorPrimitive(Generator generator) : IGenerator
 
         code.AppendLine($@"J.Get('{name}', Token);");
 
+        if (!required)
+        {
+            // because we treat null as missing value, we skip all other checks if value is null
+            code.Append($@"if Token.AsValue().IsNull() then exit('');");
+        }
+
         if (schema.Enum?.Count > 0)
         {
             code.Append($@"if not (Token.AsValue().As{type}() in [");
