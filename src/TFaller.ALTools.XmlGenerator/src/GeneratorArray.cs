@@ -64,7 +64,7 @@ public class GeneratorArray(Generator generator) : IGenerator
             begin
                 Nodes := _E.GetChildElements('{name}');
                 
-                if (Index < 0) or (Index >= Nodes.Count()) then
+                if (Index < 1) or (Index > Nodes.Count()) then
                     Error('Index out of bounds: %1 (Count: %2)', Index, Nodes.Count());
                 
                 Nodes.Get(Index, Node);
@@ -87,7 +87,7 @@ public class GeneratorArray(Generator generator) : IGenerator
             begin
                 Nodes := _E.GetChildElements('{name}');
                 
-                if (Index < 0) or (Index >= Nodes.Count()) then
+                if (Index < 1) or (Index > Nodes.Count()) then
                     Error('Index out of bounds: %1 (Count: %2)', Index, Nodes.Count());
                 
                 Nodes.Get(Index, Node);
@@ -102,7 +102,7 @@ public class GeneratorArray(Generator generator) : IGenerator
             begin
                 Nodes := _E.GetChildElements('{name}');
                 
-                if (Index < 0) or (Index >= Nodes.Count()) then
+                if (Index < 1) or (Index > Nodes.Count()) then
                     Error('Index out of bounds: %1 (Count: %2)', Index, Nodes.Count());
                 
                 NewElement := Item.AsXmlElementWithName('{name}', {(context.ElementFormQualified ? "TargetNamespace()" : "''")});
