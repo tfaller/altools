@@ -134,6 +134,7 @@ public class Generator
                 var
                     Attributes: XmlAttributeCollection;
                     Attribute: XmlAttribute;
+                    Parent: XmlElement;
                     Nodes: XmlNodeList;
                     Node: XmlNode;
                 begin
@@ -142,10 +143,9 @@ public class Generator
                         _E := XmlElement.Create(LocalName, NamespaceUri);
                     end;
 
-                    if (_E.LocalName() <> LocalName) then
-                        if _A then
-                            Error('Element already accessed with different name')
-                        else begin
+                    if (_E.LocalName() <> LocalName) then begin
+                        if _E.GetParent(Parent) then
+                            Error('Element already assigned with different name');
                             Nodes := _E.GetChildNodes();
                             Attributes := _E.Attributes();
                             _E := XmlElement.Create(LocalName, NamespaceUri);
