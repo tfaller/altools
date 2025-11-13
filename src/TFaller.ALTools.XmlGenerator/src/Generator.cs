@@ -146,18 +146,18 @@ public class Generator
                     if (_E.LocalName() <> LocalName) then begin
                         if _E.GetParent(Parent) then
                             Error('Element already assigned with different name');
-                            Nodes := _E.GetChildNodes();
-                            Attributes := _E.Attributes();
-                            _E := XmlElement.Create(LocalName, NamespaceUri);
-                            foreach Node in Nodes do begin
-                                Node.Remove();
-                                _E.Add(Node);
-                            end;
-                            foreach Attribute in Attributes do begin
-                                Attribute.Remove();
-                                _E.Add(Attribute);
-                            end;
+                        Nodes := _E.GetChildNodes();
+                        Attributes := _E.Attributes();
+                        _E := XmlElement.Create(LocalName, NamespaceUri);
+                        foreach Node in Nodes do begin
+                            Node.Remove();
+                            _E.Add(Node);
                         end;
+                        foreach Attribute in Attributes do begin
+                            Attribute.Remove();
+                            _E.Add(Attribute);
+                        end;
+                    end;
 
                     _A := true;
                     exit(_E);
@@ -248,7 +248,14 @@ public class Generator
             return;
         }
 
-        var baseTypeAlName = TypeName(_manager.LookupNamespace(baseTypePrefix) ?? "", baseTypeLocalName);
+        var baseTypeNamespace = _manager.LookupNamespace(baseTypePrefix);
+        if (baseTypeNamespace == null)
+        {
+            Console.WriteLine("Invalid base type namespace: " + baseTypePrefix);
+            return;
+        }
+
+        var baseTypeAlName = TypeName(baseTypeNamespace, baseTypeLocalName);
 
         // Cast method
         _code.AppendLine(@$"
@@ -264,7 +271,7 @@ public class Generator
 
         // The inherited elements
 
-        var baseElement = element.ParentElement()?.ParentElement()?.SelectSingleNode($"xs:complexType[@name='{baseTypeLocalName}']", _manager);
+        var baseElement = GetSchemaByTargetNamespace(element.OwnerDocument, baseTypeNamespace)?.SelectSingleNode($"xs:complexType[@name='{baseTypeLocalName}']", _manager);
         if (baseElement is XmlElement baseComplexType)
         {
             GenerateComplexTypeChildren(baseComplexType, siblingsPath, elementFormDefault);
@@ -315,6 +322,18 @@ public class Generator
                 siblingsPath.Append("''])");
             }
         }
+    }
+
+    private XmlElement GetSchemaByTargetNamespace(XmlDocument xmlDocument, string targetNamespace)
+    {
+        var schemas = xmlDocument.SelectNodes("//xs:schema[@targetNamespace='" + targetNamespace + "']", _manager);
+        if (schemas is null || schemas.Count != 1)
+        {
+            throw new InvalidOperationException(
+                string.Format("Invalid amount of xs:schema elements for target namespace {0}, expected 1, found: {1}",
+                    targetNamespace, schemas?.Count ?? 0));
+        }
+        return (XmlElement)schemas[0]!;
     }
 
     public int GetFreeCodeunitId()
