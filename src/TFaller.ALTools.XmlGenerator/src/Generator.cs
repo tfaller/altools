@@ -248,7 +248,7 @@ public class Generator
             return;
         }
 
-        var baseTypeNamespace = _manager.LookupNamespace(baseTypePrefix);
+        var baseTypeNamespace = extension?.GetNamespaceOfPrefix(baseTypePrefix);
         if (baseTypeNamespace == null)
         {
             Console.WriteLine("Invalid base type namespace: " + baseTypePrefix);
