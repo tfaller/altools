@@ -16,8 +16,8 @@ public class GeneratorComplex(Generator generator) : IGenerator
             return GenerationStatus.Nothing;
         }
 
-        var typeNamespace = _generator.Manager.LookupNamespace(typePrefix);
-        if (typeNamespace is null || typeNamespace == Generator.XSNamespace)
+        var typeNamespace = element.GetNamespaceOfPrefix(typePrefix);
+        if (string.IsNullOrEmpty(typeNamespace) || typeNamespace == Generator.XSNamespace)
         {
             return GenerationStatus.Nothing;
         }
@@ -27,7 +27,7 @@ public class GeneratorComplex(Generator generator) : IGenerator
         var alType = Formatter.QuoteIdentifier(_generator.TypeName(typeNamespace, typeName));
 
         code.AppendLine(@$"
-            procedure Get{alName}(var Value: Codeunit {alType})
+            procedure {Formatter.CombineIdentifiers("Get", alName)}(var Value: Codeunit {alType})
             var 
                 NewObj: Codeunit {alType};
             begin
@@ -35,7 +35,7 @@ public class GeneratorComplex(Generator generator) : IGenerator
                 Value := NewObj;
             end;
 
-            procedure Set{alName}(Value: Codeunit {alType})
+            procedure {Formatter.CombineIdentifiers("Set", alName)}(Value: Codeunit {alType})
             begin
                 SetElement('{context.SiblingsPath}', Value.AsXmlElementWithName('{name}', {(context.ElementFormQualified ? "TargetNamespace()" : "''")}));
             end;

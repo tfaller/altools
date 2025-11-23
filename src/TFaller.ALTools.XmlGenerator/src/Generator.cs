@@ -255,11 +255,11 @@ public class Generator
             return;
         }
 
-        var baseTypeAlName = TypeName(baseTypeNamespace, baseTypeLocalName);
+        var baseTypeAlName = ALName(TypeName(baseTypeNamespace, baseTypeLocalName));
 
         // Cast method
         _code.AppendLine(@$"
-            procedure CastAs{baseTypeAlName}(var Casted: Codeunit {baseTypeAlName})
+            procedure {Formatter.CombineIdentifiers("CastAs", baseTypeAlName)}(var Casted: Codeunit {baseTypeAlName})
             begin
                 Clear(Casted);
                 _E.Add(XmlAttribute.CreateNamespaceDeclaration('ns', TargetNamespace()));
