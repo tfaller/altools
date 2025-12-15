@@ -164,7 +164,7 @@ public class Generator
                 end;
         ");
 
-        GenerateComplexTypeChildren(complexType, new StringBuilder(), elementFormDefault);
+        GenerateComplexTypeChildren(complexType, new StringBuilder(), elementFormDefault, name);
 
         _code.AppendLine(@$"
             local procedure GetElement(name: Text): XmlElement
@@ -221,7 +221,7 @@ public class Generator
         _code.AppendLine("}");
     }
 
-    private void GenerateComplexTypeChildren(XmlElement complexType, StringBuilder siblingsPath, bool elementFormDefault)
+    private void GenerateComplexTypeChildren(XmlElement complexType, StringBuilder siblingsPath, bool elementFormDefault, string complexName)
     {
         foreach (var element in complexType.ChildElements())
         {
@@ -232,12 +232,12 @@ public class Generator
 
             if (element.Name == "xs:complexContent")
             {
-                GenerateComplexContent(element, siblingsPath, elementFormDefault);
+                GenerateComplexContent(element, siblingsPath, elementFormDefault, complexName);
             }
         }
     }
 
-    private void GenerateComplexContent(XmlElement element, StringBuilder siblingsPath, bool elementFormDefault)
+    private void GenerateComplexContent(XmlElement element, StringBuilder siblingsPath, bool elementFormDefault, string complexName)
     {
         var extension = element.SelectSingleNode("xs:extension", _manager);
 
@@ -267,6 +267,20 @@ public class Generator
                 Casted.FromXmlInternal(_E, _A);
                 _A := true; // delegate access to base object
             end;
+
+            procedure {Formatter.CombineIdentifiers("CastFrom", baseTypeAlName)}(Base: Codeunit {baseTypeAlName})
+            var
+                Element: Xmlelement;
+                Attribute: XmlAttribute;
+                Prefix: Text;
+            begin
+                Element := Base.AsXmlElement();
+                Element.Attributes().Get('type', 'http://www.w3.org/2001/XMLSchema-instance', Attribute);
+                Element.GetPrefixOfNamespace(TargetNamespace(), Prefix);
+                if Prefix + ':{complexName}' <> Attribute.Value() then
+                    Error('Cannot cast %1 to %2:{complexName}', Attribute.Value(), Prefix);
+                FromXml(Element);
+            end;
         ");
 
         // The inherited elements
@@ -274,7 +288,7 @@ public class Generator
         var baseElement = GetSchemaByTargetNamespace(element.OwnerDocument, baseTypeNamespace)?.SelectSingleNode($"xs:complexType[@name='{baseTypeLocalName}']", _manager);
         if (baseElement is XmlElement baseComplexType)
         {
-            GenerateComplexTypeChildren(baseComplexType, siblingsPath, elementFormDefault);
+            GenerateComplexTypeChildren(baseComplexType, siblingsPath, elementFormDefault, complexName);
         }
 
         // The own, non inherited elements
