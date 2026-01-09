@@ -24,6 +24,15 @@ public static class AssemblyLoader
         "Newtonsoft.Json",
     ];
 
+    /// <summary>
+    /// Analyzer assemblies that are provided from the AL extension in a separate folder
+    /// </summary>
+    private static readonly HashSet<string> _alAnalyzerAssemblies =
+    [
+        "Microsoft.Dynamics.Nav.Analyzers.Common",
+        "Microsoft.Dynamics.Nav.CodeCop",
+    ];
+
     private static readonly Dictionary<string, Assembly> _loadedAlAssemblies = [];
 
     public static void RegisterLoader()
@@ -42,17 +51,30 @@ public static class AssemblyLoader
         {
             var name = eventArgs.Name.Split(",", 2)[0];
 
-            if (!_alAssemblies.Contains(name))
+            var basePath =
+                _alAssemblies.Contains(name) ? binPath :
+                _alAnalyzerAssemblies.Contains(name) ? Path.Combine(alExtensionPath, "bin", "Analyzers") :
+                null;
+
+            if (basePath == null)
                 return null;
 
             lock (_loadedAlAssemblies)
             {
                 if (!_loadedAlAssemblies.TryGetValue(name, out var assembly))
-                    _loadedAlAssemblies.Add(name, assembly = Assembly.LoadFile(Path.Combine(binPath, name + ".dll")));
+                    _loadedAlAssemblies.Add(name, assembly = Assembly.LoadFile(Path.Combine(basePath, name + ".dll")));
 
                 return assembly;
             }
         };
+    }
+
+    public static string AnalyzerFullPathByName(string name)
+    {
+        var alExtensionPath = FindAlExtension()
+            ?? throw new DirectoryNotFoundException("Could not find AL extension");
+
+        return Path.Combine(alExtensionPath, "bin", "Analyzers", name + ".dll");
     }
 
     private static string? FindAlExtension()
