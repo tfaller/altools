@@ -335,6 +335,12 @@ public class Generator
                 siblingsPath.Append(element.GetAttribute("name"));
                 siblingsPath.Append("''])");
             }
+
+            if (element.Name == "xs:choice")
+            {
+                // We currently do not support choice, just generate all options
+                GenerateSequence(element, siblingsPath, elementFormDefault);
+            }
         }
     }
 
