@@ -18,6 +18,7 @@ public sealed partial class Formatter : IDisposable
         "end",
         "exit",
         "for",
+        "key",
         "if",
         "then",
         "to",
