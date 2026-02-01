@@ -1,5 +1,6 @@
 using System.Text;
 using System.Xml;
+using TFaller.ALTools.Transformation;
 
 namespace TFaller.ALTools.XmlGenerator;
 
@@ -35,6 +36,31 @@ public class GeneratorString(Generator generator) : IGenerator
                 SetElement('{context.SiblingsPath}', XmlElement.Create('{name}', {(context.ElementFormQualified ? "TargetNamespace()" : "''")}, Value));
             end;
         ");
+
+        if (element.GetAttribute("maxOccurs") == "unbounded")
+        {
+            code.AppendLine(@$"
+                procedure {Formatter.CombineIdentifiers("Add", alName)}(Item: Text)
+                var
+                    Nodes: XmlNodeList;
+                    Node: XmlNode;
+                begin
+                    if not _I then begin
+                        {alName}(Item);
+                        exit;
+                    end;
+
+                    Nodes := _E.GetChildElements('{name}');
+                    if Nodes.Count() = 0 then begin
+                        {alName}(Item);
+                        exit;
+                    end;
+
+                    Nodes.Get(Nodes.Count(), Node);
+                    Node.AddAfterSelf(XmlElement.Create('{name}', {(context.ElementFormQualified ? "TargetNamespace()" : "''")}, Item));
+                end;
+            ");
+        }
 
         return GenerationStatus.Getter;
     }
