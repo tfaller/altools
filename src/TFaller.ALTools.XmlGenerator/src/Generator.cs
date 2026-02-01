@@ -281,6 +281,18 @@ public class Generator
                     Error('Cannot cast %1 to %2:{complexName}', Attribute.Value(), Prefix);
                 FromXml(Element);
             end;
+
+            procedure {Formatter.CombineIdentifiers("CastableFrom", baseTypeAlName)}(Base: Codeunit {baseTypeAlName}): Boolean
+            var
+                Element: Xmlelement;
+                Attribute: XmlAttribute;
+                Prefix: Text;
+            begin
+                Element := Base.AsXmlElement();
+                Element.Attributes().Get('type', 'http://www.w3.org/2001/XMLSchema-instance', Attribute);
+                Element.GetPrefixOfNamespace(TargetNamespace(), Prefix);
+                exit(Prefix + ':{complexName}' = Attribute.Value());
+            end;
         ");
 
         // The inherited elements
