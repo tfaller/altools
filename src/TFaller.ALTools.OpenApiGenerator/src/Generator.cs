@@ -65,7 +65,7 @@ public class Generator
         // basic object header
 
         code.AppendLine($@"
-            Codeunit {GetFreeCodeunitId()} {name} {{
+            Codeunit {GetFreeCodeunitId()} {ALObjectName(name)} {{
             Var J: JsonObject;
 
             procedure FromJson(Json: JsonToken) begin
@@ -410,7 +410,7 @@ public class Generator
     }
 
     /// <summary>
-    /// Generates a valid AL name. E.g. for procedures, variables, parameters, object names
+    /// Generates a valid AL name. E.g. for procedures, variables, parameters.
     /// </summary>
     /// <param name="name">The name which should be converted</param>
     /// <returns>Valid AL Name</returns>
@@ -438,5 +438,15 @@ public class Generator
         }
 
         return Formatter.QuoteIdentifier(name);
+    }
+
+    /// <summary>
+    /// Generates a valid AL object name. E.g. for codeunits.
+    /// </summary>
+    /// <param name="name">The name which should be converted</param>
+    /// <returns>Valid AL Object Name</returns>
+    public string ALObjectName(string name)
+    {
+        return name.ToPascalCase(true);
     }
 }

@@ -16,7 +16,7 @@ public class GeneratorComplex(Generator generator) : IGenerator
 
         var alName = _generator.ALName(name);
 
-        var type = _generator.ALName(
+        var type = _generator.ALObjectName(
             schema.Type == JsonSchemaType.Object
             ? ((OpenApiSchemaReference)schema).Reference.Id!
             : _generator.ArrayTypeMapper(schema) + "Array"
