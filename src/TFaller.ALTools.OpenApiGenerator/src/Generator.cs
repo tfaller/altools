@@ -302,7 +302,7 @@ public class Generator
         return items.Type switch
         {
             JsonSchemaType.String => "Text",
-            JsonSchemaType.Object => ALName(((OpenApiSchemaReference)items).Reference.Id!),
+            JsonSchemaType.Object => ALObjectName(((OpenApiSchemaReference)items).Reference.Id!),
             _ => throw new ArgumentException(string.Format("schame has unsupporetd typ {0}", schema.Items.Type)),
         };
     }
