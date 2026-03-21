@@ -131,6 +131,7 @@ internal static class WorkspaceTransformation
         Console.WriteLine($"Starting transformation '{transformationName}'...");
 
         var rewriter = new WorkspaceRewriter(rewriters, null!);
+        rewriter.FileRewritten += (sender, file) => Console.WriteLine($"Transformed: {file}");
         await rewriter.Rewrite(workspacePath);
 
         Console.WriteLine($"Completed transformation '{transformationName}' in {DateTime.Now - start}");

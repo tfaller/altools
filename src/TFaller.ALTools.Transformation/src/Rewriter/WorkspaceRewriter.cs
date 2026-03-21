@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -19,6 +20,7 @@ public class WorkspaceRewriter(List<IConcurrentRewriter> rewriters, ParseOptions
 {
     public static readonly UTF8Encoding Encoding = new(false, true);
     private readonly Formatter _formatter = new();
+    public event EventHandler<string>? FileRewritten;
 
     public async Task Rewrite(string workspace)
     {
@@ -131,8 +133,17 @@ public class WorkspaceRewriter(List<IConcurrentRewriter> rewriters, ParseOptions
             formattedFiles[file] = formatted.SyntaxTree.ToString();
         }
 
-        await Task.WhenAll(formattedFiles.Select(kvp =>
-            File.WriteAllTextAsync(kvp.Key, kvp.Value, Encoding)
-        ));
+        var formatTasks = formattedFiles.Select(async (kvp) =>
+        {
+            await File.WriteAllTextAsync(kvp.Key, kvp.Value, Encoding);
+            return kvp.Key;
+        }).ToHashSet();
+
+        while (formatTasks.Count > 0)
+        {
+            var completedTask = await Task.WhenAny(formatTasks);
+            formatTasks.Remove(completedTask);
+            FileRewritten?.Invoke(this, await completedTask);
+        }
     }
 }
