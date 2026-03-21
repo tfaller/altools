@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading.Tasks;
 using TFaller.ALTools.Transformation;
 using TFaller.ALTools.Transformation.Rewriter;
+using TFaller.ALTools.Transformation.Transformer.CommentRule;
 
 internal static class WorkspaceTransformation
 {
@@ -21,6 +22,7 @@ internal static class WorkspaceTransformation
         {
             Console.Error.WriteLine("Usage: workspace-transform <workspace-path> <rewriter>[,<rewriter>]*");
             Console.Error.WriteLine("       workspace-transform <workspace-path> file-name-normalizer");
+            Console.Error.WriteLine("       workspace-transform <workspace-path> config <transformation-name>");
             Environment.Exit(1);
         }
 
@@ -30,6 +32,18 @@ internal static class WorkspaceTransformation
         if (string.Equals(transformName, "file-name-normalizer", StringComparison.OrdinalIgnoreCase))
         {
             await RunFileNameNormalizer(workspacePath);
+            return;
+        }
+
+        if (string.Equals(transformName, "config", StringComparison.OrdinalIgnoreCase))
+        {
+            if (args.Length < 3)
+            {
+                Console.Error.WriteLine("When using 'config' as rewriter, you also need to specify the transformation name defined in the config file");
+                Environment.Exit(1);
+            }
+
+            await RunConfigBasedTransformation(workspacePath, args[2]);
             return;
         }
 
@@ -75,6 +89,51 @@ internal static class WorkspaceTransformation
         }
 
         Console.WriteLine($"Completed in {DateTime.Now - start}");
+    }
+
+    private static async Task RunConfigBasedTransformation(string workspacePath, string transformationName)
+    {
+        var config = WorkspaceConfig.LoadConfig(Path.Combine(workspacePath, "altools.json"));
+        if (!config.Transformations.TryGetValue(transformationName, out var rewriterConfigs) || rewriterConfigs is null)
+        {
+            Console.Error.WriteLine($"No transformation named '{transformationName}' found in config.");
+            Environment.Exit(1);
+        }
+
+        var rewriters = new List<IConcurrentRewriter>();
+        foreach (var rewriterConfig in rewriterConfigs)
+        {
+            if (rewriterConfig is RewriterCommentTransformVar commentTransformVar)
+            {
+                var tags = commentTransformVar.Tags?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? Array.Empty<string>();
+                rewriters.Add(Pool(new TransformVar(new HashSet<string>(tags, StringComparer.OrdinalIgnoreCase))));
+                continue;
+            }
+
+            if (rewriterConfig is RewriterComplexReturnTranspiler)
+            {
+                rewriters.Add(Rewriters["complex-return-transpiler"].Value);
+                continue;
+            }
+
+            if (rewriterConfig is RewriterComplexReturnUplifter)
+            {
+                rewriters.Add(Rewriters["complex-return-uplifter"].Value);
+                continue;
+            }
+
+            Console.Error.WriteLine($"Unknown rewriter type in config: {rewriterConfig.GetType().Name}");
+            Environment.Exit(1);
+        }
+
+        var start = DateTime.Now;
+
+        Console.WriteLine($"Starting transformation '{transformationName}'...");
+
+        var rewriter = new WorkspaceRewriter(rewriters, null!);
+        await rewriter.Rewrite(workspacePath);
+
+        Console.WriteLine($"Completed transformation '{transformationName}' in {DateTime.Now - start}");
     }
 
     private static ReuseableRewriterPool Pool(IReuseableRewriter rewriter) => new(rewriter);

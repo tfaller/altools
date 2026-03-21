@@ -32,6 +32,11 @@
         "command": "altools.workspaceOpen",
         "title": "Open Workspace",
         "category": "ALTools"
+      },
+      {
+        "command": "altools.transformationRun",
+        "title": "Transformation: Run",
+        "category": "ALTools"
       }
     ]
   },
