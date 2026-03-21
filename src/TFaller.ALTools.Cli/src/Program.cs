@@ -25,10 +25,11 @@ public class Program
         return args[0] switch
         {
             "analyzer" => Analyzer.Analyze(args[1..]),
+            "infer" => InferReferencesCommand.Execute(args[1..]),
             "openapi" => OpenApiGenerator.Program.Main(args[1..]),
             "xml" => XmlGenerator.Program.Main(args[1..]),
             "workspace-transformation" => WorkspaceTransformation.Transform(args[1..]),
-            _ => throw new ArgumentException($"Unknown command: {args[0]}, please use 'analyzer|openapi|xml|workspace-transformation'"),
+            _ => throw new ArgumentException($"Unknown command: {args[0]}, please use 'analyzer|openapi|xml|workspace-transformation|infer'"),
         };
     }
 }
