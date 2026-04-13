@@ -29,6 +29,7 @@ public class Generator
     {
         _generators = [
             new GeneratorPrimitive(this),
+            new GeneratorPrimitiveArray(this),
             new GeneratorComplex(this),
             new GeneratorHas(this),
         ];

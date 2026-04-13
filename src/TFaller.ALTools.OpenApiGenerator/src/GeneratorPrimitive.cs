@@ -155,7 +155,7 @@ public class GeneratorPrimitive(Generator generator) : IGenerator
         code.AppendLine($@"end;");
     }
 
-    private static string GetALTypeDefintionBySchema(IOpenApiSchema schema)
+    internal static string GetALTypeDefintionBySchema(IOpenApiSchema schema)
     {
         return schema.Type switch
         {

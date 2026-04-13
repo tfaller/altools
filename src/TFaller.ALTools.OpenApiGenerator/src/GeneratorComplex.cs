@@ -13,6 +13,9 @@ public class GeneratorComplex(Generator generator) : IGenerator
     {
         if (schema.Type != JsonSchemaType.Object && schema.Type != JsonSchemaType.Array)
             return GenerationStatus.Nothing;
+        
+        if (schema.Type == JsonSchemaType.Array && GeneratorPrimitive.SupportedTypes.Contains(schema.Items?.Type))
+            return GenerationStatus.Nothing;
 
         var alName = _generator.ALName(name);
 
