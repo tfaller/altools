@@ -64,7 +64,9 @@ src/
  ComplexReturnTranspilerTests.cs
  ComplexReturnUplifterTests.cs
  FormatterTests.cs
- Transformer/CommentRule/TransformVarTests.cs
+ Transformer/CommentRule/
+  QuerySyncTests.cs
+  TransformVarTests.cs
 
 [metadataReferences]
 ../../dll/

@@ -79,7 +79,9 @@ src/
   WorkspaceRewriter.cs
  SerializableSymbolModelConverter.cs
  StaticReferenceLoader.cs
- Transformer/CommentRule/TransformVar.cs
+ Transformer/CommentRule/
+  QuerySync.cs
+  TransformVar.cs
  VarUsageAnalyzer.cs
  WorkspaceHelper.cs
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -53,17 +54,28 @@ internal class WorkspaceConfig
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(RewriterCommentTransformVar), "comment-transform-var")]
+[JsonDerivedType(typeof(RewriterCommentQuerySync), "comment-query-sync")]
 [JsonDerivedType(typeof(RewriterComplexReturnTranspiler), "complex-return-transpiler")]
 [JsonDerivedType(typeof(RewriterComplexReturnUplifter), "complex-return-uplifter")]
 internal class Rewriter
 {
 }
 
-internal class RewriterCommentTransformVar : Rewriter
+internal class RewriterWithTags : Rewriter
 {
     [JsonPropertyName("tags")]
     public string? Tags { get; set; }
+
+    public HashSet<string> GetTags()
+    {
+        return Tags?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            ?.ToHashSet(StringComparer.InvariantCultureIgnoreCase) ?? new(StringComparer.InvariantCultureIgnoreCase);
+    }
 }
+
+internal class RewriterCommentTransformVar : RewriterWithTags { }
+
+internal class RewriterCommentQuerySync : RewriterWithTags { }
 
 internal class RewriterComplexReturnTranspiler : Rewriter { }
 

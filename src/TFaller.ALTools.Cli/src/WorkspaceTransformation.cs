@@ -105,8 +105,13 @@ internal static class WorkspaceTransformation
         {
             if (rewriterConfig is RewriterCommentTransformVar commentTransformVar)
             {
-                var tags = commentTransformVar.Tags?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? Array.Empty<string>();
-                rewriters.Add(Pool(new TransformVar(new HashSet<string>(tags, StringComparer.OrdinalIgnoreCase))));
+                rewriters.Add(Pool(new TransformVar(commentTransformVar.GetTags())));
+                continue;
+            }
+
+            if (rewriterConfig is RewriterCommentQuerySync commentQuerySync)
+            {
+                rewriters.Add(Pool(new QuerySync(commentQuerySync.GetTags())));
                 continue;
             }
 
