@@ -1,5 +1,6 @@
 using Microsoft.OpenApi.Models.Interfaces;
 using System.Text;
+using TFaller.ALTools.Transformation;
 
 namespace TFaller.ALTools.OpenApiGenerator;
 
@@ -17,7 +18,7 @@ public class GeneratorHas(Generator generator) : IGenerator
         var alName = _generator.ALName(name);
 
         code.AppendLine($@"
-            procedure Has{alName}(): Boolean
+            procedure {Formatter.CombineIdentifiers("Has", alName)}(): Boolean
             var 
                 Token: JsonToken;
             begin
@@ -28,7 +29,7 @@ public class GeneratorHas(Generator generator) : IGenerator
                 exit(true);
             end;
 
-            procedure Remove{alName}() begin
+            procedure {Formatter.CombineIdentifiers("Remove", alName)}() begin
                 if J.Contains('{name}') then
                     J.Remove('{name}');
             end;

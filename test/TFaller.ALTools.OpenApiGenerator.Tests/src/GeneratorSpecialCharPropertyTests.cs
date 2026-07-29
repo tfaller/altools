@@ -36,5 +36,11 @@ public class GeneratorSpecialCharPropertyTests
 
         Assert.DoesNotContain("Validate\"", code);
         Assert.Contains("\"Validate", code);
+
+        Assert.DoesNotContain("Had\"", code);
+        Assert.Contains("\"Has", code);
+
+        Assert.DoesNotContain("Remove\"", code);
+        Assert.Contains("\"Remove", code);
     }
 }
