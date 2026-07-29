@@ -161,7 +161,7 @@ public class Generator
 
             foreach (var p in validateProps)
             {
-                code.AppendLine($@"Error := Validate{ALName(p.Key)}(Path);");
+                code.AppendLine($@"Error := {Formatter.CombineIdentifiers("Validate", ALName(p.Key))}(Path);");
                 code.AppendLine("if Error <> '' then exit(Error);");
             }
 

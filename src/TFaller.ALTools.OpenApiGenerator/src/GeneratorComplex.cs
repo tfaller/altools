@@ -2,6 +2,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Models.Interfaces;
 using Microsoft.OpenApi.Models.References;
 using System.Text;
+using TFaller.ALTools.Transformation;
 
 namespace TFaller.ALTools.OpenApiGenerator;
 
@@ -70,7 +71,7 @@ public class GeneratorComplex(Generator generator) : IGenerator
     public static void CreateValidateCode(StringBuilder code, string name, string alName, string type, IOpenApiSchema schema, bool required)
     {
         code.AppendLine($@"
-            procedure Validate{alName}(Path: Text) Error: Text
+            procedure {Formatter.CombineIdentifiers("Validate", alName)}(Path: Text) Error: Text
             var Token: JsonToken;
                 Obj{alName}: Codeunit {type};
             begin

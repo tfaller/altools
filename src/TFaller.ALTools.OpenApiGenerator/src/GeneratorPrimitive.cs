@@ -91,7 +91,7 @@ public class GeneratorPrimitive(Generator generator) : IGenerator
         var type = GetALTypeDefintionBySchema(schema);
 
         code.AppendLine($@"
-            procedure Validate{alName}(Path: Text): Text
+            procedure {Formatter.CombineIdentifiers("Validate", alName)}(Path: Text): Text
             var Token: JsonToken;
             begin
         ");
