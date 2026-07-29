@@ -93,6 +93,19 @@ public class ActionGenerate
         var compUnit = SyntaxFactory.ParseCompilationUnit(symbolGen.GetCode(), 0, _parseOptions)
             ?? throw new InvalidOperationException("no codeunit found");
 
+        var hasDiagnostics = false;
+        foreach (var diag in compUnit.GetDiagnostics())
+        {
+            Log(schemaFile, string.Format("Generated file error {0}: {1}", diag.Location.GetLineSpan().StartLinePosition.Line, diag.GetMessage()));
+            hasDiagnostics = true;
+        }
+        if (hasDiagnostics)
+        {
+            Log(schemaFile, "Generated objects have errors, can't be merged");
+            await File.WriteAllTextAsync(RelativePath(definition.MergedCodeunitFile), symbolGen.GetCode());
+            return;
+        }
+
         var generatedCodeunits = compUnit.Objects.OfType<CodeunitSyntax>().ToArray();
 
         var merged = CodeunitMergeRewriter.Merge(definition.MergedCodeunitName, definition.MergedCodeunitId.Value, generatedCodeunits);
