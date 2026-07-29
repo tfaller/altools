@@ -73,7 +73,7 @@ public class GeneratorComplex(Generator generator) : IGenerator
         code.AppendLine($@"
             procedure {Formatter.CombineIdentifiers("Validate", alName)}(Path: Text) Error: Text
             var Token: JsonToken;
-                Obj{alName}: Codeunit {type};
+                Obj: Codeunit {type};
             begin
         ");
 
@@ -110,8 +110,8 @@ public class GeneratorComplex(Generator generator) : IGenerator
         }
 
         // validate the prop type itself
-        code.AppendLine($@"Get{alName}(Obj{alName});");
-        code.AppendLine($@"Error := Obj{alName}.Validate(Path + '.{name}');");
+        code.AppendLine($@"Get{alName}(Obj);");
+        code.AppendLine($@"Error := Obj.Validate(Path + '.{name}');");
         code.AppendLine("if Error <> '' then exit(Error);");
 
         code.AppendLine("end;");
