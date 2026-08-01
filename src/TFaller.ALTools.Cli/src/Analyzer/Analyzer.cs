@@ -1,4 +1,4 @@
-namespace TFaller.ALTools.Cli;
+namespace TFaller.ALTools.Cli.Analyzer;
 
 using System;
 using System.Collections.Generic;
