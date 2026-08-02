@@ -17,7 +17,7 @@
     <ProjectReference
       Include="..\TFaller.ALTools.XmlGenerator\TFaller.ALTools.XmlGenerator.csproj" />
 
-    <PackageReference Include="System.CommandLine" Version="2.0.10" />
+    <PackageReference Include="System.CommandLine" />
 
     <Reference Include="Microsoft.Dynamics.Nav.CodeAnalysis">
       <HintPath>../../dll/Microsoft.Dynamics.Nav.CodeAnalysis.dll</HintPath>
