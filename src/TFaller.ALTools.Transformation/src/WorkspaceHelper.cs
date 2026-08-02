@@ -1,4 +1,6 @@
 using Microsoft.Dynamics.Nav.CodeAnalysis;
+using Microsoft.Dynamics.Nav.CodeAnalysis.CommandLine;
+using Microsoft.Dynamics.Nav.CodeAnalysis.Diagnostics;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Packaging;
 using Microsoft.Dynamics.Nav.CodeAnalysis.SymbolReference;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Syntax;
@@ -81,5 +83,22 @@ public class WorkspaceHelper
         });
 
         return comp.AddSyntaxTrees(files.Values);
+    }
+
+    public static async Task<NavAppManifest> LoadAppManifestAsync(string projectPath)
+    {
+        var diagnosticList = new List<Diagnostic>();
+
+        var projectManifestProps = ProjectManifestProps.LoadFromFile(projectPath, diagnosticList);
+        if (diagnosticList.Count > 0)
+        {
+            throw new InvalidOperationException($"Could not load project props from {projectPath}", diagnosticList.ToException());
+        }
+
+        var manifestFile = Path.Combine(projectPath, "app.json");
+        var projectManifest = ProjectManifest.ReadFromString(manifestFile, await File.ReadAllTextAsync(manifestFile), projectManifestProps, diagnosticList) ??
+            throw new InvalidOperationException($"Could not load project manifest from {manifestFile}", diagnosticList.ToException());
+
+        return projectManifest.AppManifest;
     }
 }

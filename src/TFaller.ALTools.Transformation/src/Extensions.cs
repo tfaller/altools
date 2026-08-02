@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Microsoft.Dynamics.Nav.CodeAnalysis.Diagnostics;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Syntax;
 
 namespace TFaller.ALTools.Transformation;
@@ -37,5 +38,17 @@ public static class Extensions
         return parameterList.WithParameters(
             (SeparatedSyntaxList<ParameterSyntax>)_separatedSyntaxListConstructor.Invoke([list])
         );
+    }
+
+    public static AggregateException ToException(this IEnumerable<Diagnostic> diagnostics)
+    {
+        var exceptions = new List<Exception>();
+
+        foreach (var diagnostic in diagnostics)
+        {
+            exceptions.Add(new Exception(diagnostic.ToString()));
+        }
+
+        return new AggregateException(exceptions);
     }
 }
