@@ -12,19 +12,19 @@
   <ItemGroup>
     <PackageReference Include="System.IO.Packaging" />
 
-    <Reference Include="Microsoft.Dynamics.Nav.AL.Common">
+    <Reference Include="Microsoft.Dynamics.Nav.AL.Common" Condition="$(UseLocalDLLs)">
       <HintPath>../../dll/Microsoft.Dynamics.Nav.AL.Common.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="Microsoft.Dynamics.Nav.CodeAnalysis">
+    <Reference Include="Microsoft.Dynamics.Nav.CodeAnalysis" Condition="$(UseLocalDLLs)">
       <HintPath>../../dll/Microsoft.Dynamics.Nav.CodeAnalysis.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="Microsoft.Dynamics.Nav.CodeAnalysis.Workspaces">
+    <Reference Include="Microsoft.Dynamics.Nav.CodeAnalysis.Workspaces" Condition="$(UseLocalDLLs)">
       <HintPath>../../dll/Microsoft.Dynamics.Nav.CodeAnalysis.Workspaces.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="Microsoft.Dynamics.Nav.EditorServices.Protocol">
+    <Reference Include="Microsoft.Dynamics.Nav.EditorServices.Protocol" Condition="$(UseLocalDLLs)">
       <HintPath>../../dll/Microsoft.Dynamics.Nav.EditorServices.Protocol.dll</HintPath>
       <Private>false</Private>
     </Reference>

@@ -19,7 +19,7 @@
 
     <PackageReference Include="System.CommandLine" />
 
-    <Reference Include="Microsoft.Dynamics.Nav.CodeAnalysis">
+    <Reference Include="Microsoft.Dynamics.Nav.CodeAnalysis" Condition="$(UseLocalDLLs)">
       <HintPath>../../dll/Microsoft.Dynamics.Nav.CodeAnalysis.dll</HintPath>
       <Private>false</Private>
     </Reference>

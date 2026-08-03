@@ -1,0 +1,5 @@
+<Project>
+    <PropertyGroup>
+        <UseLocalDLLs>true</UseLocalDLLs>
+    </PropertyGroup>
+</Project>
