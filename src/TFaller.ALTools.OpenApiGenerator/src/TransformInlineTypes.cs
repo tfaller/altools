@@ -1,7 +1,5 @@
-﻿using Microsoft.OpenApi.Models;
-using Microsoft.OpenApi.Models.Interfaces;
-using Microsoft.OpenApi.Models.References;
-using Microsoft.Dynamics.Nav.CodeAnalysis.Utilities;
+﻿using Microsoft.Dynamics.Nav.CodeAnalysis.Utilities;
+using Microsoft.OpenApi;
 using System.Linq;
 
 namespace TFaller.ALTools.OpenApiGenerator;

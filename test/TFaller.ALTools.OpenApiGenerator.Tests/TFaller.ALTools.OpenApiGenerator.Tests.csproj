@@ -18,7 +18,7 @@
 
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="Microsoft.OpenApi.Readers" />
+    <PackageReference Include="Microsoft.OpenApi.YamlReader" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
 

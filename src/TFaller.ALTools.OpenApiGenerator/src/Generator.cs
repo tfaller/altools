@@ -1,9 +1,8 @@
 using Microsoft.Dynamics.Nav.CodeAnalysis.Utilities;
-using Microsoft.OpenApi.Models;
-using Microsoft.OpenApi.Models.Interfaces;
-using Microsoft.OpenApi.Models.References;
+using Microsoft.OpenApi;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using TFaller.ALTools.Transformation;
 
@@ -87,7 +86,7 @@ public class Generator
         var arrays = new HashSet<IOpenApiSchema>();
         var validateProps = new IdentifierDictionary<bool>();
 
-        foreach (var prop in schema.Properties!)
+        foreach (var prop in schema.Properties ?? Enumerable.Empty<KeyValuePair<string, IOpenApiSchema>>())
         {
             var propSchema = prop.Value;
             var propRequired = schema.Required?.Contains(prop.Key) ?? false;
@@ -169,7 +168,7 @@ public class Generator
             {
                 code.AppendLine("foreach PropKey in J.Keys() do begin");
 
-                if (schema.Properties.Count > 0)
+                if (schema.Properties?.Count > 0)
                 {
                     code.AppendLine("if not(PropKey in [");
 

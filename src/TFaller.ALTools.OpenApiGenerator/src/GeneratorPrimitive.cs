@@ -1,5 +1,4 @@
-using Microsoft.OpenApi.Models;
-using Microsoft.OpenApi.Models.Interfaces;
+using Microsoft.OpenApi;
 using System;
 using System.Collections.Generic;
 using System.Text;

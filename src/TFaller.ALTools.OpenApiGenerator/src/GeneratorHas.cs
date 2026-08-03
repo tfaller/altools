@@ -1,4 +1,4 @@
-using Microsoft.OpenApi.Models.Interfaces;
+using Microsoft.OpenApi;
 using System.Text;
 using TFaller.ALTools.Transformation;
 
