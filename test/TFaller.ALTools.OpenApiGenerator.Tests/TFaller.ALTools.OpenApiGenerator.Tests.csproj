@@ -23,7 +23,7 @@
     <PackageReference Include="xunit.runner.visualstudio" />
 
     <Reference Include="Microsoft.Dynamics.Nav.CodeAnalysis" Condition="$(UseLocalDLLs)">
-      <HintPath>../../dll/Microsoft.Dynamics.Nav.CodeAnalysis.dll</HintPath>
+      <HintPath>$(NavDLLsDir)/Microsoft.Dynamics.Nav.CodeAnalysis.dll</HintPath>
     </Reference>
   </ItemGroup>
 
