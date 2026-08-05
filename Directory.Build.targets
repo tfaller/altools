@@ -1,0 +1,27 @@
+<Project>
+    <ItemGroup Condition="$(UseNugetDLLs)">
+        <PackageReference
+            Include="Microsoft.Dynamics.BusinessCentral.Development.Tools.Osx"
+            ExcludeAssets="all"
+            GeneratePathProperty="true"
+            Condition="$([MSBuild]::IsOsPlatform('OSX'))" />
+
+        <PackageReference
+            Include="Microsoft.Dynamics.BusinessCentral.Development.Tools.Linux"
+            ExcludeAssets="all"
+            GeneratePathProperty="true"
+            Condition="$([MSBuild]::IsOsPlatform('Linux'))" />
+
+        <PackageReference
+            Include="Microsoft.Dynamics.BusinessCentral.Development.Tools.Win"
+            ExcludeAssets="all"
+            GeneratePathProperty="true"
+            Condition="$([MSBuild]::IsOsPlatform('Windows'))" />
+    </ItemGroup>
+
+    <PropertyGroup Condition="$(UseNugetDLLs)">
+        <NavDLLsDir Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(PkgMicrosoft_Dynamics_BusinessCentral_Development_Tools_Osx)/lib/net10.0/</NavDLLsDir>
+        <NavDLLsDir Condition="$([MSBuild]::IsOsPlatform('Linux'))">$(PkgMicrosoft_Dynamics_BusinessCentral_Development_Tools_Linux)/lib/net10.0/</NavDLLsDir>
+        <NavDLLsDir Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(PkgMicrosoft_Dynamics_BusinessCentral_Development_Tools_Win)/lib/net10.0/</NavDLLsDir>
+    </PropertyGroup>
+</Project>

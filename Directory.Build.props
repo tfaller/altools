@@ -1,6 +1,7 @@
 <Project>
     <PropertyGroup>
         <UseLocalDLLs>true</UseLocalDLLs>
+        <UseNugetDLLs>false</UseNugetDLLs>
         <NavDLLsDir>$(MSBuildThisFileDirectory)/dll</NavDLLsDir>
     </PropertyGroup>
 </Project>
