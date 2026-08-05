@@ -2,6 +2,8 @@
     <PropertyGroup>
         <UseLocalDLLs>true</UseLocalDLLs>
         <UseNugetDLLs>false</UseNugetDLLs>
+        <!-- Use nuget files if local DLLs are not available -->
+        <UseNugetDLLs Condition="!Exists('$(MSBuildThisFileDirectory)/dll/Microsoft.Dynamics.Nav.CodeAnalysis.dll')">true</UseNugetDLLs>
         <NavDLLsDir>$(MSBuildThisFileDirectory)/dll</NavDLLsDir>
     </PropertyGroup>
 </Project>
