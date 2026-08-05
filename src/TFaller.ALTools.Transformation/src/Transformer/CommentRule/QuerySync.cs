@@ -199,7 +199,7 @@ public partial class QuerySync : IReuseableRewriter
             SyntaxFactory.QueryColumn(MakeColumnIdentifier(f))
             .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
             .WithRelatedField(SyntaxFactory.IdentifierName(Formatter.QuoteIdentifier(f)))
-            .WithTrailingTrivia(SyntaxFactory.Linefeed)
+            .WithTrailingTrivia(SyntaxFactory.EndOfLine(Environment.NewLine))
         ).ToArray<QueryDataItemElementSyntax>();
         return dataItem.AddElements(colmnsSyntax);
     }
