@@ -20,6 +20,7 @@ public static class AssemblyLoader
         "Microsoft.Dynamics.Nav.AL.Common",
         "Microsoft.Dynamics.Nav.CodeAnalysis",
         "Microsoft.Dynamics.Nav.CodeAnalysis.Workspaces",
+        "Microsoft.Dynamics.Nav.Deployment",
         "Microsoft.Dynamics.Nav.EditorServices.Protocol",
         "Newtonsoft.Json",
     ];

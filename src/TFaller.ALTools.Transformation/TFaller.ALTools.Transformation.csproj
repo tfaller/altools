@@ -24,6 +24,10 @@
       <HintPath>$(NavDLLsDir)/Microsoft.Dynamics.Nav.CodeAnalysis.Workspaces.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="Microsoft.Dynamics.Nav.Deployment" Condition="$(UseLocalDLLs)">
+      <HintPath>$(NavDLLsDir)/Microsoft.Dynamics.Nav.Deployment.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="Microsoft.Dynamics.Nav.EditorServices.Protocol" Condition="$(UseLocalDLLs)">
       <HintPath>$(NavDLLsDir)/Microsoft.Dynamics.Nav.EditorServices.Protocol.dll</HintPath>
       <Private>false</Private>
