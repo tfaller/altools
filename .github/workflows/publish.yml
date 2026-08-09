@@ -32,4 +32,4 @@ jobs:
         working-directory: src/TFaller.ALTools.Cli
 
       - name: Publish
-        run: dotnet nuget push "src/TFaller.ALTools.Cli/bin/Release/*.nupkg" --source "github"
+        run: dotnet nuget push "src/TFaller.ALTools.Cli/bin/Release/*.nupkg" --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
