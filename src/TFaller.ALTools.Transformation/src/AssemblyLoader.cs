@@ -41,19 +41,25 @@ public static class AssemblyLoader
         var alExtensionPath = FindAlExtension()
             ?? throw new DirectoryNotFoundException("Could not find AL extension");
 
-        var binPath = Path.Combine(alExtensionPath, "bin", OsPath());
-        if (!Directory.Exists(binPath))
-            throw new DirectoryNotFoundException($"Could not find bin directory at {binPath}");
+        var extensionBinPath = Path.Combine(alExtensionPath, "bin", OsPath());
+        if (!Directory.Exists(extensionBinPath))
+            extensionBinPath = null;
+        else
+            // must be an absolute path
+            extensionBinPath = Path.GetFullPath(extensionBinPath);
 
-        // must be an absolute path
-        binPath = Path.GetFullPath(binPath);
+        var bcToolsDllsPath = BcToolsDllsPath();
+
+        if (extensionBinPath is null && bcToolsDllsPath is null)
+            throw new DirectoryNotFoundException("Could not find needed AL Dlls. Either install the AL vscode extension or install the Microsoft.Dynamics.BusinessCentral.Development.Tools as a local tool");
 
         AppDomain.CurrentDomain.AssemblyResolve += (sender, eventArgs) =>
         {
             var name = eventArgs.Name.Split(",", 2)[0];
 
             var basePath =
-                _alAssemblies.Contains(name) ? binPath :
+                extensionBinPath is null ? bcToolsDllsPath :
+                _alAssemblies.Contains(name) ? extensionBinPath :
                 _alAnalyzerAssemblies.Contains(name) ? Path.Combine(alExtensionPath, "bin", "Analyzers") :
                 null;
 
@@ -108,5 +114,54 @@ public static class AssemblyLoader
             return "darwin";
 
         throw new PlatformNotSupportedException();
+    }
+
+    private static string? DotNetCliHomePath()
+    {
+        var cliHome = Environment.GetEnvironmentVariable("DOTNET_CLI_HOME");
+        if (!string.IsNullOrEmpty(cliHome))
+            return cliHome;
+
+        var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        if (!string.IsNullOrEmpty(userProfile))
+            return userProfile;
+
+        return null;
+    }
+
+    private static string? NugetPackagesPath()
+    {
+        var nugetPackages = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
+        if (!string.IsNullOrEmpty(nugetPackages))
+            return nugetPackages;
+
+        var dotNetCliHome = DotNetCliHomePath();
+        if (!string.IsNullOrEmpty(dotNetCliHome))
+            return Path.Combine(dotNetCliHome, ".nuget", "packages");
+
+        return null;
+    }
+
+    private static string? BcToolsDllsPath()
+    {
+        var nugetPackages = NugetPackagesPath();
+        if (string.IsNullOrEmpty(nugetPackages))
+            return null;
+
+        var bcToolsPath = Path.Combine(nugetPackages, "microsoft.dynamics.businesscentral.development.tools");
+        if (!Directory.Exists(bcToolsPath))
+            return null;
+
+        var bcToolsVersions = Directory.GetDirectories(bcToolsPath);
+        if (bcToolsVersions.Length == 0)
+            return null;
+
+        var latestBcToolsVersion = bcToolsVersions.Max()!;
+        var bcToolsDllsPath = Path.Combine(latestBcToolsVersion, "tools", "net10.0", "any");
+
+        if (!Directory.Exists(bcToolsDllsPath))
+            return null;
+
+        return bcToolsDllsPath;
     }
 }
