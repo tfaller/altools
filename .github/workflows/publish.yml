@@ -1,0 +1,35 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG#v}   # strip leading "v" if present
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Github Packages as NuGet Source
+        run: dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+
+      - name: Pack
+        run: dotnet pack -c Release -p:Version=${{ steps.version.outputs.version }}
+        working-directory: src/TFaller.ALTools.Cli
+
+      - name: Publish
+        run: dotnet nuget push "src/TFaller.ALTools.Cli/bin/Release/*.nupkg" --source "github"
