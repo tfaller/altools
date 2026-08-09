@@ -22,6 +22,8 @@ public static class AssemblyLoader
         "Microsoft.Dynamics.Nav.CodeAnalysis.Workspaces",
         "Microsoft.Dynamics.Nav.Deployment",
         "Microsoft.Dynamics.Nav.EditorServices.Protocol",
+        // "external" dependencies also provided by the AL extension
+        "Microsoft.ApplicationInsights",
         "Newtonsoft.Json",
     ];
 

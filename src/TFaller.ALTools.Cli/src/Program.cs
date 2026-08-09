@@ -25,6 +25,7 @@ public class Program
         return args[0] switch
         {
             "analyzer" => Analyzer.Analyzer.Analyze(args[1..]),
+            "download-symbols" => DownloadSymbols.Download(args[1..]),
             "formatter" => Formatter.WorkspaceFormatter.Format(args[1..]),
             "infer" => InferReferencesCommand.Execute(args[1..]),
             "openapi" => OpenApiGenerator.Program.Main(args[1..]),
