@@ -38,20 +38,21 @@ public static class AssemblyLoader
 
     public static void RegisterLoader()
     {
-        var alExtensionPath = FindAlExtension()
-            ?? throw new DirectoryNotFoundException("Could not find AL extension");
+        var alExtensionPath = FindAlExtension();
+        string? extensionBinPath = null;
 
-        var extensionBinPath = Path.Combine(alExtensionPath, "bin", OsPath());
-        if (!Directory.Exists(extensionBinPath))
-            extensionBinPath = null;
-        else
-            // must be an absolute path
-            extensionBinPath = Path.GetFullPath(extensionBinPath);
+        if (alExtensionPath is not null)
+        {
+            extensionBinPath = Path.Combine(alExtensionPath, "bin", OsPath());
+            if (Directory.Exists(extensionBinPath))
+                // must be an absolute path
+                extensionBinPath = Path.GetFullPath(extensionBinPath);
+        }
 
         var bcToolsDllsPath = BcToolsDllsPath();
 
         if (extensionBinPath is null && bcToolsDllsPath is null)
-            throw new DirectoryNotFoundException("Could not find needed AL Dlls. Either install the AL vscode extension or install the Microsoft.Dynamics.BusinessCentral.Development.Tools as a local tool");
+            throw DllsNotFoundException();
 
         AppDomain.CurrentDomain.AssemblyResolve += (sender, eventArgs) =>
         {
@@ -60,7 +61,7 @@ public static class AssemblyLoader
             var basePath =
                 extensionBinPath is null ? bcToolsDllsPath :
                 _alAssemblies.Contains(name) ? extensionBinPath :
-                _alAnalyzerAssemblies.Contains(name) ? Path.Combine(alExtensionPath, "bin", "Analyzers") :
+                _alAnalyzerAssemblies.Contains(name) ? Path.Combine(alExtensionPath!, "bin", "Analyzers") :
                 null;
 
             if (basePath == null)
@@ -78,26 +79,39 @@ public static class AssemblyLoader
 
     public static string AnalyzerFullPathByName(string name)
     {
-        var alExtensionPath = FindAlExtension()
-            ?? throw new DirectoryNotFoundException("Could not find AL extension");
+        var alExtensionPath = FindAlExtension();
 
-        return Path.Combine(alExtensionPath, "bin", "Analyzers", name + ".dll");
+        if (alExtensionPath is not null)
+        {
+            return Path.Combine(alExtensionPath, "bin", "Analyzers", name + ".dll");
+        }
+
+        var bcToolsDllsPath = BcToolsDllsPath();
+        if (bcToolsDllsPath is not null)
+        {
+            return Path.Combine(bcToolsDllsPath, name + ".dll");
+        }
+
+        throw DllsNotFoundException();
     }
 
     private static string? FindAlExtension()
     {
         var vscodeExtensionsPath = FindVscodeExtensionDir();
+        if (string.IsNullOrEmpty(vscodeExtensionsPath))
+            return null;
+
         var alExtensions = Directory.GetDirectories(vscodeExtensionsPath, "ms-dynamics-smb.al-*");
         return alExtensions.Max();
     }
 
-    private static string FindVscodeExtensionDir()
+    private static string? FindVscodeExtensionDir()
     {
         var vscodePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".vscode");
         var vscodeExtensionsPath = Path.Combine(vscodePath, "extensions");
 
         if (!Directory.Exists(vscodeExtensionsPath))
-            throw new DirectoryNotFoundException($"Could not find vscode extensions directory at {vscodeExtensionsPath}");
+            return null;
 
         return vscodeExtensionsPath;
     }
@@ -163,5 +177,10 @@ public static class AssemblyLoader
             return null;
 
         return bcToolsDllsPath;
+    }
+
+    private static DirectoryNotFoundException DllsNotFoundException()
+    {
+        return new DirectoryNotFoundException("Could not find needed AL Dlls. Either install the AL vscode extension or install the Microsoft.Dynamics.BusinessCentral.Development.Tools as a local tool");
     }
 }
