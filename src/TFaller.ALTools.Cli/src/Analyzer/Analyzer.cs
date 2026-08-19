@@ -62,15 +62,6 @@ internal static class Analyzer
             supresssIds.ToImmutableDictionary(item => item, _ => ReportDiagnostic.Suppress)
         ));
 
-        var analyzerFile = new AnalyzerFileReference(
-            AssemblyLoader.AnalyzerFullPathByName("Microsoft.Dynamics.Nav.CodeCop"),
-            new AnalyzerAssemblyLoader());
-
-        analyzerFile.AnalyzerLoadFailed += (sender, e) =>
-        {
-            Console.WriteLine($"Failed to load analyzer: {e.Message}");
-        };
-
         var compAnalyzerOptions = new CompilationWithAnalyzersOptions(
             new AnalyzerOptions([]),
             onAnalyzerException: null!,
@@ -79,7 +70,9 @@ internal static class Analyzer
             reportSuppressedDiagnostics: false
         );
 
-        var compWithAnalyzers = new CompilationWithAnalyzers(comp, analyzerFile.GetAnalyzers(), compAnalyzerOptions);
+        var analyzers = AnalyzerAssemblyLoader.GetAnalyzersByAssemblyName("Microsoft.Dynamics.Nav.CodeCop");
+
+        var compWithAnalyzers = new CompilationWithAnalyzers(comp, analyzers, compAnalyzerOptions);
 
         var diagnostics = await compWithAnalyzers.GetAllDiagnosticsAsync();
 
@@ -165,6 +158,20 @@ internal static class Analyzer
         {
             // Load by name, so the regular AL extension assembly loader is used
             return Assembly.Load(Path.GetFileNameWithoutExtension(fullPath));
+        }
+
+        public static ImmutableArray<DiagnosticAnalyzer> GetAnalyzersByAssemblyName(string assemblyName)
+        {
+            var analyzerFile = new AnalyzerFileReference(
+                AssemblyLoader.AnalyzerFullPathByName(assemblyName),
+                new AnalyzerAssemblyLoader());
+
+            analyzerFile.AnalyzerLoadFailed += (sender, e) =>
+            {
+                throw new Exception($"Failed to load analyzer: {e.Message}", e.Exception);
+            };
+
+            return analyzerFile.GetAnalyzers();
         }
     }
 }
