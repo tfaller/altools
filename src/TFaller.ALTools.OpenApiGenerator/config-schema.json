@@ -39,6 +39,10 @@
         "projectPath": {
             "type": "string",
             "description": "Location of the project folder. Can be ommited if the config file is in the project folder."
+        },
+        "outputVersion": {
+            "type": "string",
+            "description": "Expected generator output format version."
         }
     },
     "required": [

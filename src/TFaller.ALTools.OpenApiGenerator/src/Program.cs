@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using TFaller.ALTools.Transformation;
 
 namespace TFaller.ALTools.OpenApiGenerator;
@@ -28,6 +29,28 @@ public class Program
         }
 
         var config = Config.LoadConfig(args[1]);
+
+        // Compare the configured output-format version to a fixed expected output version.
+        // This is a manual bump target that indicates a change in the generator's output format.
+        const string ExpectedOutputVersion = "1.0.0";
+
+        // Default missing output version to 0.0.0 to simplify checks downstream.
+        var cfgVerStr = string.IsNullOrWhiteSpace(config.OutputVersion) ? "0.0.0" : config.OutputVersion!.Trim();
+
+        if (string.Equals(cfgVerStr, "0.0.0", StringComparison.OrdinalIgnoreCase))
+        {
+            Console.WriteLine($"WARNING: config does not contain 'outputVersion'. Expected output version: '{ExpectedOutputVersion}'.");
+        }
+        else if (!string.Equals(cfgVerStr, ExpectedOutputVersion, StringComparison.OrdinalIgnoreCase))
+        {
+            Console.WriteLine($"WARNING: outputVersion '{cfgVerStr}' does not match expected output version '{ExpectedOutputVersion}'.");
+        }
+
+        if ((string.Equals(cfgVerStr, "0.0.0", StringComparison.OrdinalIgnoreCase) || !string.Equals(cfgVerStr, ExpectedOutputVersion, StringComparison.OrdinalIgnoreCase)) && Debugger.IsAttached)
+        {
+            Console.WriteLine("Debugger attached — breaking into debugger to notify about output-version issue.");
+            Debugger.Break();
+        }
 
         switch (args[0])
         {

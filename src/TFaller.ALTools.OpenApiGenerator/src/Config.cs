@@ -19,6 +19,9 @@ public class Config
     [JsonPropertyName("projectPath")]
     public string ProjectPath { get; private set; } = string.Empty;
 
+    [JsonPropertyName("outputVersion")]
+    public string? OutputVersion { get; set; }
+
     public string ConfigPath { get; private set; } = string.Empty;
 
     public static Config LoadConfig(string file)
