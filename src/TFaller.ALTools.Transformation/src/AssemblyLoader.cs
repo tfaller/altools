@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 
 namespace TFaller.ALTools.Transformation;
 
@@ -45,7 +44,7 @@ public static class AssemblyLoader
 
         if (alExtensionPath is not null)
         {
-            extensionBinPath = Path.Combine(alExtensionPath, "bin", OsPath());
+            extensionBinPath = Path.Combine(alExtensionPath, "bin");
             if (Directory.Exists(extensionBinPath))
                 // must be an absolute path
                 extensionBinPath = Path.GetFullPath(extensionBinPath);
@@ -63,7 +62,7 @@ public static class AssemblyLoader
             var basePath =
                 extensionBinPath is null ? bcToolsDllsPath :
                 _alAssemblies.Contains(name) ? extensionBinPath :
-                _alAnalyzerAssemblies.Contains(name) ? Path.Combine(alExtensionPath!, "bin", "Analyzers") :
+                _alAnalyzerAssemblies.Contains(name) ? extensionBinPath :
                 null;
 
             if (basePath == null)
@@ -85,7 +84,7 @@ public static class AssemblyLoader
 
         if (alExtensionPath is not null)
         {
-            return Path.Combine(alExtensionPath, "bin", "Analyzers", name + ".dll");
+            return Path.Combine(alExtensionPath, "bin", name + ".dll");
         }
 
         var bcToolsDllsPath = BcToolsDllsPath();
@@ -116,20 +115,6 @@ public static class AssemblyLoader
             return null;
 
         return vscodeExtensionsPath;
-    }
-
-    private static string OsPath()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            return "win32";
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            return "linux";
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            return "darwin";
-
-        throw new PlatformNotSupportedException();
     }
 
     private static string? DotNetCliHomePath()
