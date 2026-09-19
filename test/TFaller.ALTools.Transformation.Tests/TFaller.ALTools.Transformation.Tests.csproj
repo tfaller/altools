@@ -32,9 +32,4 @@
       <HintPath>$(NavDLLsDir)/Microsoft.Dynamics.Nav.EditorServices.Protocol.dll</HintPath>
     </Reference>
   </ItemGroup>
-
-  <ItemGroup>
-    <Using Include="Xunit" />
-  </ItemGroup>
-
 </Project>
