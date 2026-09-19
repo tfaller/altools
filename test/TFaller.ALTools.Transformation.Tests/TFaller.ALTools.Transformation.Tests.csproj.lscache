@@ -60,6 +60,7 @@ TemporaryDependencyNodeTargetIdentifier=net10.0
 obj/Debug/net10.0/
  .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
  TFaller.ALTools.Transformation.Tests.AssemblyInfo.cs
+ TFaller.ALTools.Transformation.Tests.GlobalUsings.g.cs
 src/
  Deployment/
   DeploymentAssemblyTest.cs
