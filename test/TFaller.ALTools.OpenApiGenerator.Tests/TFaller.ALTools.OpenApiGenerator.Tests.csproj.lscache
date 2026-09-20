@@ -75,7 +75,7 @@ Microsoft.NETCore.App.Ref
  TFaller.ALTools.Transformation/obj/Debug/net10.0/ref/TFaller.ALTools.Transformation.dll
 <NUGET>/
  microsoft.codecoverage/18.10.1/lib/net8.0/Microsoft.VisualStudio.CodeCoverage.Shim.dll
- microsoft.dynamics.businesscentral.development.tools/18.0.39.10160-beta/tools/net10.0/any/Microsoft.Dynamics.Nav.CodeAnalysis.dll
+ microsoft.dynamics.businesscentral.development.tools/18.0.41.39415/tools/net10.0/any/Microsoft.Dynamics.Nav.CodeAnalysis.dll
  microsoft.openapi.yamlreader/3.10.2/lib/net8.0/Microsoft.OpenApi.YamlReader.dll
  microsoft.openapi/3.10.2/lib/net8.0/Microsoft.OpenApi.dll
  microsoft.testplatform.testhost/18.10.1/lib/net8.0/

@@ -96,7 +96,7 @@ Microsoft.NETCore.App.Ref
 
 [metadataReferences]
 <NUGET>/
- microsoft.dynamics.businesscentral.development.tools/18.0.39.10160-beta/tools/net10.0/any/
+ microsoft.dynamics.businesscentral.development.tools/18.0.41.39415/tools/net10.0/any/
   Microsoft.Dynamics.Nav.AL.Common.dll
   Microsoft.Dynamics.Nav.CodeAnalysis.dll
   Microsoft.Dynamics.Nav.CodeAnalysis.Workspaces.dll

@@ -8,7 +8,7 @@
         <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
         <PackageVersion
             Include="Microsoft.Dynamics.BusinessCentral.Development.Tools"
-            Version="18.0.39.10160-beta" />
+            Version="18.0.41.39415" />
         <PackageVersion Include="Microsoft.OpenApi.YamlReader" Version="3.10.2" />
         <PackageVersion Include="System.IO.Packaging" Version="10.0.12" />
         <PackageVersion Include="System.CommandLine" Version="2.0.12" />

@@ -81,7 +81,7 @@ Microsoft.NETCore.App.Ref
 [metadataReferences]
 ../TFaller.ALTools.Transformation/obj/Debug/net10.0/ref/TFaller.ALTools.Transformation.dll
 <NUGET>/
- microsoft.dynamics.businesscentral.development.tools/18.0.39.10160-beta/tools/net10.0/any/Microsoft.Dynamics.Nav.CodeAnalysis.dll
+ microsoft.dynamics.businesscentral.development.tools/18.0.41.39415/tools/net10.0/any/Microsoft.Dynamics.Nav.CodeAnalysis.dll
  system.io.packaging/10.0.12/lib/net10.0/System.IO.Packaging.dll
 
 [analyzerReferences]
