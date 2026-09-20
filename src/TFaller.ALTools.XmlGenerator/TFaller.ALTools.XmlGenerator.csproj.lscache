@@ -81,16 +81,13 @@ Microsoft.NETCore.App.Ref
 [metadataReferences]
 ../TFaller.ALTools.Transformation/obj/Debug/net10.0/ref/TFaller.ALTools.Transformation.dll
 <NUGET>/
- microsoft.dynamics.businesscentral.development.tools.osx/18.0.39.10160-beta/lib/net10.0/Microsoft.Dynamics.Nav.CodeAnalysis.dll
+ microsoft.dynamics.businesscentral.development.tools/18.0.39.10160-beta/tools/net10.0/any/Microsoft.Dynamics.Nav.CodeAnalysis.dll
  system.io.packaging/10.0.12/lib/net10.0/System.IO.Packaging.dll
 
 [analyzerReferences]
 <NETSDK>/Sdks/Microsoft.NET.Sdk/analyzers/
  Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll
  Microsoft.CodeAnalysis.NetAnalyzers.dll
-<NUGET>/microsoft.codeanalysis.analyzers/3.3.4/analyzers/dotnet/cs/
- Microsoft.CodeAnalysis.Analyzers.dll
- Microsoft.CodeAnalysis.CSharp.Analyzers.dll
 
 [sdkAnalyzerConfigPolicy]
 Microsoft.NET.Sdk/analyzers

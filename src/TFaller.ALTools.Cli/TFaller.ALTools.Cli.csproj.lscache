@@ -78,7 +78,7 @@ Microsoft.NETCore.App.Ref
  TFaller.ALTools.Transformation/obj/Debug/net10.0/ref/TFaller.ALTools.Transformation.dll
  TFaller.ALTools.XmlGenerator/obj/Debug/net10.0/ref/TFaller.ALTools.XmlGenerator.dll
 <NUGET>/
- microsoft.dynamics.businesscentral.development.tools.osx/18.0.39.10160-beta/lib/net10.0/Microsoft.Dynamics.Nav.CodeAnalysis.dll
+ microsoft.dynamics.businesscentral.development.tools/18.0.39.10160-beta/tools/net10.0/any/Microsoft.Dynamics.Nav.CodeAnalysis.dll
  microsoft.openapi.yamlreader/3.10.2/lib/net8.0/Microsoft.OpenApi.YamlReader.dll
  microsoft.openapi/3.10.2/lib/net8.0/Microsoft.OpenApi.dll
  sharpyaml/2.1.5/lib/netstandard2.0/SharpYaml.dll
@@ -89,9 +89,6 @@ Microsoft.NETCore.App.Ref
 <NETSDK>/Sdks/Microsoft.NET.Sdk/analyzers/
  Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll
  Microsoft.CodeAnalysis.NetAnalyzers.dll
-<NUGET>/microsoft.codeanalysis.analyzers/3.3.4/analyzers/dotnet/cs/
- Microsoft.CodeAnalysis.Analyzers.dll
- Microsoft.CodeAnalysis.CSharp.Analyzers.dll
 
 [sdkAnalyzerConfigPolicy]
 Microsoft.NET.Sdk/analyzers
