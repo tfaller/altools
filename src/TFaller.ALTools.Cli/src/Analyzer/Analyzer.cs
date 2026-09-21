@@ -71,9 +71,11 @@ internal static class Analyzer
 
         var supresssIds = suppressIdsList.ToArray();
 
-        var comp = Compilation.Create("tmp");
+        var manifest = await WorkspaceHelper.LoadAppManifestAsync(workspace);
+        var comp = Compilation.Create(manifest.AppName);
         var files = new Dictionary<string, SyntaxTree>();
 
+        comp = comp.WithOptions(comp.Options.WithManifestOptions(manifest));
         comp = WorkspaceHelper.LoadReferences(comp, workspace + "/.alpackages");
         comp = await WorkspaceHelper.LoadFilesAsync(comp, workspace, null!, files);
 
