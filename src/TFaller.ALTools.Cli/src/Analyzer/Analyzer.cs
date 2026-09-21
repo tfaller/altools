@@ -49,7 +49,7 @@ internal static class Analyzer
         root.TreatUnmatchedTokensAsErrors = true;
         root.SetAction(async parseResult =>
         {
-            await AnalyzeAction(
+            return await AnalyzeAction(
                 parseResult.GetValue(workspaceArg) ?? throw new ArgumentException("workspace path is required"),
                 parseResult.GetValue(suppressOption) ?? [],
                 parseResult.GetValue(gitlabOption),
@@ -61,7 +61,7 @@ internal static class Analyzer
         Environment.Exit(await parseResult.InvokeAsync());
     }
 
-    private async static Task AnalyzeAction(string workspace, string[] suppressValues, string? gitlabReportPath, string[] analyzerNames)
+    private async static Task<int> AnalyzeAction(string workspace, string[] suppressValues, string? gitlabReportPath, string[] analyzerNames)
     {
         var suppressIdsList = new List<string>();
         foreach (var supress in suppressValues)
@@ -122,6 +122,8 @@ internal static class Analyzer
             var json = JsonSerializer.Serialize(issues, jsonOptions);
             await File.WriteAllTextAsync(gitlabReportPath, json, Encoding.UTF8);
         }
+
+        return issues.Count == 0 ? 0 : 1;
     }
 
     private static GitlabCodeQualityIssue? ConvertDiagnosticToIssue(Diagnostic diag, string basePath)
