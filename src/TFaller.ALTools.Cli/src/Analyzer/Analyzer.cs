@@ -85,7 +85,7 @@ internal static class Analyzer
         comp = comp.WithOptions(comp.Options.WithManifestOptions(manifest));
         comp = WorkspaceHelper.LoadReferences(comp, Path.Combine(workspace, ".alpackages"));
         comp = comp.WithDotNetResolverFactory(new DotNetResolverFactory(new AssemblyLocator([Path.Combine(workspace, ".netpackages")])));
-        comp = await WorkspaceHelper.LoadFilesAsync(comp, workspace, null!, files);
+        comp = await WorkspaceHelper.LoadFilesAsync(comp, workspace, new ParseOptions(manifest.Runtime), files);
 
         comp = comp.WithOptions(comp.Options.WithSpecificDiagnosticOptions(
             supresssIds.ToImmutableDictionary(item => item, _ => ReportDiagnostic.Suppress)
