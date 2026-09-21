@@ -32,7 +32,10 @@ public static class AssemblyLoader
     private static readonly HashSet<string> _alAnalyzerAssemblies =
     [
         "Microsoft.Dynamics.Nav.Analyzers.Common",
+        "Microsoft.Dynamics.Nav.AppSourceCop",
         "Microsoft.Dynamics.Nav.CodeCop",
+        "Microsoft.Dynamics.Nav.PerTenantExtensionCop",
+        "Microsoft.Dynamics.Nav.UICop",
     ];
 
     private static readonly Dictionary<string, Assembly> _loadedAlAssemblies = [];

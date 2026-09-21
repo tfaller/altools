@@ -14,6 +14,7 @@ using Microsoft.Dynamics.Nav.CodeAnalysis;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Diagnostics;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Syntax;
 using TFaller.ALTools.Transformation;
+using System.Linq;
 
 internal static class Analyzer
 {
@@ -22,28 +23,46 @@ internal static class Analyzer
         WriteIndented = true
     };
 
+    private static readonly Dictionary<string, string> copAssemblies = new()
+    {
+        ["AppSourceCop"] = "Microsoft.Dynamics.Nav.AppSourceCop",
+        ["CodeCop"] = "Microsoft.Dynamics.Nav.CodeCop",
+        ["PerTenantExtensionCop"] = "Microsoft.Dynamics.Nav.PerTenantExtensionCop",
+        ["UICop"] = "Microsoft.Dynamics.Nav.UICop"
+    };
+
     public async static Task Analyze(string[] args)
     {
-        if (args.Length == 0)
-            throw new ArgumentException("analyzer requires workspace path as first argument");
-
-        // Use System.CommandLine to parse arguments: workspace (positional), --gitlabReport, --suppress
         var workspaceArg = new Argument<string>("workspace") { Arity = ArgumentArity.ExactlyOne };
         var gitlabOption = new Option<string?>("--gitlabReport") { Description = "Path to write GitLab code-quality JSON" };
         var suppressOption = new Option<string[]>("--suppress") { Description = "Suppress diagnostic IDs (can be passed multiple times or comma-separated)", Arity = ArgumentArity.ZeroOrMore };
+        var analyzers = new Option<string[]>("--analyzer", "-a") { Description = "Specify which analyzers to run", Arity = ArgumentArity.ZeroOrMore, DefaultValueFactory = (_) => [.. copAssemblies.Keys] };
+        analyzers.AcceptOnlyFromAmong([.. copAssemblies.Keys]);
 
         var root = new RootCommand
         {
             workspaceArg,
             gitlabOption,
-            suppressOption
+            suppressOption,
+            analyzers,
         };
+        root.TreatUnmatchedTokensAsErrors = true;
+        root.SetAction(async parseResult =>
+        {
+            await AnalyzeAction(
+                parseResult.GetValue(workspaceArg) ?? throw new ArgumentException("workspace path is required"),
+                parseResult.GetValue(suppressOption) ?? [],
+                parseResult.GetValue(gitlabOption),
+                parseResult.GetValue(analyzers) ?? [.. copAssemblies.Keys]
+            );
+        });
 
         var parseResult = root.Parse(args);
-        var workspace = parseResult.GetValue(workspaceArg) ?? throw new ArgumentException("workspace path is required");
-        var gitlabReportPath = parseResult.GetValue(gitlabOption);
-        var suppressValues = parseResult.GetValue(suppressOption) ?? [];
+        Environment.Exit(await parseResult.InvokeAsync());
+    }
 
+    private async static Task AnalyzeAction(string workspace, string[] suppressValues, string? gitlabReportPath, string[] analyzerNames)
+    {
         var suppressIdsList = new List<string>();
         foreach (var supress in suppressValues)
         {
@@ -70,10 +89,11 @@ internal static class Analyzer
             reportSuppressedDiagnostics: false
         );
 
-        var analyzers = AnalyzerAssemblyLoader.GetAnalyzersByAssemblyName("Microsoft.Dynamics.Nav.CodeCop");
+        var copAnalyzers = analyzerNames.Select(name => AnalyzerAssemblyLoader.GetAnalyzersByAssemblyName(copAssemblies[name]))
+            .SelectMany(cop => cop)
+            .ToImmutableArray();
 
-        var compWithAnalyzers = new CompilationWithAnalyzers(comp, analyzers, compAnalyzerOptions);
-
+        var compWithAnalyzers = new CompilationWithAnalyzers(comp, copAnalyzers, compAnalyzerOptions);
         var diagnostics = await compWithAnalyzers.GetAllDiagnosticsAsync();
 
         var issues = new List<GitlabCodeQualityIssue>();
