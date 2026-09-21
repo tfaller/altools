@@ -15,6 +15,8 @@ using Microsoft.Dynamics.Nav.CodeAnalysis.Diagnostics;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Syntax;
 using TFaller.ALTools.Transformation;
 using System.Linq;
+using Microsoft.Dynamics.Nav.CodeAnalysis.DiagnosticRules;
+using Microsoft.Dynamics.Nav.CodeAnalysis.DotNet;
 
 internal static class Analyzer
 {
@@ -36,6 +38,8 @@ internal static class Analyzer
         var workspaceArg = new Argument<string>("workspace") { Arity = ArgumentArity.ExactlyOne };
         var gitlabOption = new Option<string?>("--gitlabReport") { Description = "Path to write GitLab code-quality JSON" };
         var suppressOption = new Option<string[]>("--suppress") { Description = "Suppress diagnostic IDs (can be passed multiple times or comma-separated)", Arity = ArgumentArity.ZeroOrMore };
+        var ruleSet = new Option<string>("--ruleSet") { Description = "Path to the rule set file", Arity = ArgumentArity.ZeroOrOne };
+        var ruleSetAllowExternal = new Option<bool>("--ruleSetAllowExternal") { Description = "Allow external rules in the rule set", Arity = ArgumentArity.ZeroOrOne };
         var analyzers = new Option<string[]>("--analyzer", "-a") { Description = "Specify which analyzers to run", Arity = ArgumentArity.ZeroOrMore, DefaultValueFactory = (_) => [.. copAssemblies.Keys] };
         analyzers.AcceptOnlyFromAmong([.. copAssemblies.Keys]);
 
@@ -45,6 +49,7 @@ internal static class Analyzer
             gitlabOption,
             suppressOption,
             analyzers,
+            ruleSet,
         };
         root.TreatUnmatchedTokensAsErrors = true;
         root.SetAction(async parseResult =>
@@ -53,7 +58,9 @@ internal static class Analyzer
                 parseResult.GetValue(workspaceArg) ?? throw new ArgumentException("workspace path is required"),
                 parseResult.GetValue(suppressOption) ?? [],
                 parseResult.GetValue(gitlabOption),
-                parseResult.GetValue(analyzers) ?? [.. copAssemblies.Keys]
+                parseResult.GetValue(analyzers) ?? [.. copAssemblies.Keys],
+                parseResult.GetValue(ruleSet),
+                parseResult.GetValue(ruleSetAllowExternal)
             );
         });
 
@@ -61,7 +68,7 @@ internal static class Analyzer
         Environment.Exit(await parseResult.InvokeAsync());
     }
 
-    private async static Task<int> AnalyzeAction(string workspace, string[] suppressValues, string? gitlabReportPath, string[] analyzerNames)
+    private async static Task<int> AnalyzeAction(string workspace, string[] suppressValues, string? gitlabReportPath, string[] analyzerNames, string? ruleSetPath, bool ruleSetAllowExternal)
     {
         var suppressIdsList = new List<string>();
         foreach (var supress in suppressValues)
@@ -83,6 +90,26 @@ internal static class Analyzer
         comp = comp.WithOptions(comp.Options.WithSpecificDiagnosticOptions(
             supresssIds.ToImmutableDictionary(item => item, _ => ReportDiagnostic.Suppress)
         ));
+
+        if (!string.IsNullOrWhiteSpace(ruleSetPath))
+        {
+            var ruleSetDiagnostic = new List<Diagnostic>();
+            var ruleSet = RuleSetResolver.Load(ruleSetPath, ruleSetDiagnostic, ruleSetAllowExternal);
+
+            if (ruleSetDiagnostic.Count > 0)
+            {
+                Console.Error.WriteLine("Errors occurred while loading the rule set:");
+                foreach (var diag in ruleSetDiagnostic)
+                {
+                    Console.Error.WriteLine(diag.ToString());
+                }
+                return 1;
+            }
+
+            comp = comp.WithOptions(comp.Options.WithSpecificDiagnosticOptions(
+                comp.Options.SpecificDiagnosticOptions.Union(ruleSet.SpecificDiagnosticOptions).ToImmutableDictionary()
+            ));
+        }
 
         var compAnalyzerOptions = new CompilationWithAnalyzersOptions(
             new AnalyzerOptions([]),
