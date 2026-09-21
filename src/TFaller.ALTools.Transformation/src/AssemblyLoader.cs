@@ -23,6 +23,7 @@ public static class AssemblyLoader
         "Microsoft.Dynamics.Nav.EditorServices.Protocol",
         // "external" dependencies also provided by the AL extension
         "Microsoft.ApplicationInsights",
+        "Mono.Cecil",
         "Newtonsoft.Json",
     ];
 

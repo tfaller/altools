@@ -76,7 +76,8 @@ internal static class Analyzer
         var files = new Dictionary<string, SyntaxTree>();
 
         comp = comp.WithOptions(comp.Options.WithManifestOptions(manifest));
-        comp = WorkspaceHelper.LoadReferences(comp, workspace + "/.alpackages");
+        comp = WorkspaceHelper.LoadReferences(comp, Path.Combine(workspace, ".alpackages"));
+        comp = comp.WithDotNetResolverFactory(new DotNetResolverFactory(new AssemblyLocator([Path.Combine(workspace, ".netpackages")])));
         comp = await WorkspaceHelper.LoadFilesAsync(comp, workspace, null!, files);
 
         comp = comp.WithOptions(comp.Options.WithSpecificDiagnosticOptions(
