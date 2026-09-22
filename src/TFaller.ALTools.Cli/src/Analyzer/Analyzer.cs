@@ -7,7 +7,6 @@ using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 using System.CommandLine;
 using System.Threading.Tasks;
 using Microsoft.Dynamics.Nav.CodeAnalysis;
@@ -20,11 +19,6 @@ using Microsoft.Dynamics.Nav.CodeAnalysis.DotNet;
 
 internal static class Analyzer
 {
-    private static readonly JsonSerializerOptions jsonOptions = new()
-    {
-        WriteIndented = true
-    };
-
     private static readonly Dictionary<string, string> copAssemblies = new()
     {
         ["AppSourceCop"] = "Microsoft.Dynamics.Nav.AppSourceCop",
@@ -149,8 +143,7 @@ internal static class Analyzer
 
         if (gitlabReportPath != null)
         {
-            var json = JsonSerializer.Serialize(issues, jsonOptions);
-            await File.WriteAllTextAsync(gitlabReportPath, json, Encoding.UTF8);
+            await GitlabReportWriter.WriteReportAsync(gitlabReportPath, issues);
         }
 
         return issues.Count == 0 ? 0 : 1;

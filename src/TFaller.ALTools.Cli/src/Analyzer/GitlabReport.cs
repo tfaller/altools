@@ -1,6 +1,27 @@
 namespace TFaller.ALTools.Cli.Analyzer;
 
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+
+public static class GitlabReportWriter
+{
+    private static readonly JsonSerializerOptions jsonOptions = new()
+    {
+        WriteIndented = true
+    };
+
+    private static readonly UTF8Encoding utf8NoBom = new(false);
+
+    public static async Task WriteReportAsync(string path, IEnumerable<GitlabCodeQualityIssue> issues)
+    {
+        var json = JsonSerializer.Serialize(issues, jsonOptions);
+        await File.WriteAllTextAsync(path, json, utf8NoBom);
+    }
+}
 
 public sealed class GitlabCodeQualityIssue
 {
