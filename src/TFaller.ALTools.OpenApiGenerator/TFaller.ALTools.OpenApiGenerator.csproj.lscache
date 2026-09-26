@@ -81,6 +81,7 @@ Microsoft.NETCore.App.Ref
  microsoft.openapi.yamlreader/3.10.2/lib/net8.0/Microsoft.OpenApi.YamlReader.dll
  microsoft.openapi/3.10.2/lib/net8.0/Microsoft.OpenApi.dll
  sharpyaml/2.1.5/lib/netstandard2.0/SharpYaml.dll
+ system.commandline/2.0.12/lib/net8.0/System.CommandLine.dll
  system.io.packaging/10.0.12/lib/net10.0/System.IO.Packaging.dll
 
 [analyzerReferences]

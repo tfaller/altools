@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CommandLine;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using TFaller.ALTools.Transformation;
@@ -7,28 +8,36 @@ namespace TFaller.ALTools.OpenApiGenerator;
 
 public class Program
 {
-    enum ExitCodes : int
-    {
-        Sucesss = 0,
-        NoConfig = 1,
-        InvalidOperation = 2,
-    }
-
-    public static async Task Main(string[] args)
+    public static Task<int> Main(string[] args)
     {
         AssemblyLoader.RegisterLoader();
 
-        if (args.Length < 2)
+        var configArgument = new Argument<string>("config")
         {
-            if (args.Length < 1)
-            {
-                Console.WriteLine("no operation given: generate");
-            }
-            Console.WriteLine("no config file given");
-            Environment.Exit((int)ExitCodes.NoConfig);
-        }
+            Description = "Path to the OpenAPI generator configuration file",
+        };
+        var generateCommand = new Command("generate", "Generate the OpenAPI output")
+        {
+            configArgument
+        };
+        generateCommand.SetAction(async parseResult =>
+        {
+            var config = Config.LoadConfig(parseResult.GetValue(configArgument)!);
+            await Generate(config);
+            return 0;
+        });
 
-        var config = Config.LoadConfig(args[1]);
+        var rootCommand = new RootCommand("Generate OpenAPI output from an AL workspace")
+        {
+            generateCommand
+        };
+        rootCommand.TreatUnmatchedTokensAsErrors = true;
+
+        return rootCommand.Parse(args).InvokeAsync();
+    }
+
+    private static async Task Generate(Config config)
+    {
 
         // Compare the configured output-format version to a fixed expected output version.
         // This is a manual bump target that indicates a change in the generator's output format.
@@ -52,19 +61,7 @@ public class Program
             Debugger.Break();
         }
 
-        switch (args[0])
-        {
-            case "generate":
-                var generator = new ActionGenerate(config);
-                await generator.Generate();
-                break;
-
-            default:
-                Console.WriteLine("invalid operation given: generate");
-                Environment.Exit((int)ExitCodes.InvalidOperation);
-                break;
-        }
-
-        Environment.Exit((int)ExitCodes.Sucesss);
+        var generator = new ActionGenerate(config);
+        await generator.Generate();
     }
 }

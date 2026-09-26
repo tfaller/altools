@@ -88,6 +88,7 @@ Microsoft.NETCore.App.Ref
   Microsoft.VisualStudio.TestPlatform.ObjectModel.dll
   testhost.dll
  sharpyaml/2.1.5/lib/netstandard2.0/SharpYaml.dll
+ system.commandline/2.0.12/lib/net8.0/System.CommandLine.dll
  system.io.packaging/10.0.12/lib/net10.0/System.IO.Packaging.dll
  xunit.abstractions/2.0.3/lib/netstandard2.0/xunit.abstractions.dll
  xunit.assert/2.9.3/lib/net6.0/xunit.assert.dll
