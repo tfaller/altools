@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CommandLine;
 using System.Threading.Tasks;
 using TFaller.ALTools.Transformation;
 
@@ -6,42 +7,32 @@ namespace TFaller.ALTools.XmlGenerator;
 
 public class Program
 {
-    enum ExitCodes : int
-    {
-        Sucesss = 0,
-        NoConfig = 1,
-        InvalidOperation = 2,
-    }
-
-    public static async Task Main(string[] args)
+    public static Task<int> Main(string[] args)
     {
         AssemblyLoader.RegisterLoader();
 
-        if (args.Length < 2)
+        var configArgument = new Argument<string>("config")
         {
-            if (args.Length < 1)
-            {
-                Console.WriteLine("no operation given: generate");
-            }
-            Console.WriteLine("no config file given");
-            Environment.Exit((int)ExitCodes.NoConfig);
-        }
-
-        var config = Config.LoadConfig(args[1]);
-
-        switch (args[0])
+            Description = "Path to the XML generator configuration file",
+        };
+        var generateCommand = new Command("generate", "Generate the XML output")
         {
-            case "generate":
-                var generator = new ActionGenerate(config);
-                await generator.Generate();
-                break;
+            configArgument
+        };
+        generateCommand.SetAction(async parseResult =>
+        {
+            var config = Config.LoadConfig(parseResult.GetValue(configArgument)!);
+            var generator = new ActionGenerate(config);
+            await generator.Generate();
+            return 0;
+        });
 
-            default:
-                Console.WriteLine("invalid operation given: generate");
-                Environment.Exit((int)ExitCodes.InvalidOperation);
-                break;
-        }
+        var rootCommand = new RootCommand("Generate XML output from an AL workspace")
+        {
+            generateCommand
+        };
+        rootCommand.TreatUnmatchedTokensAsErrors = true;
 
-        Environment.Exit((int)ExitCodes.Sucesss);
+        return rootCommand.Parse(args).InvokeAsync();
     }
 }

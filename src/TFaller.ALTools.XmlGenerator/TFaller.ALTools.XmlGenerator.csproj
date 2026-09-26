@@ -11,6 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.CommandLine" />
+
     <ProjectReference
       Include="..\TFaller.ALTools.Transformation\TFaller.ALTools.Transformation.csproj" />
 
