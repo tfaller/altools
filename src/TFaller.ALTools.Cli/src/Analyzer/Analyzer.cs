@@ -185,7 +185,7 @@ internal static class Analyzer
             Location = new()
             {
                 Path = path,
-                Lines = new() { Begin = line }
+                Lines = new() { Begin = line + 1 }
             }
         };
 
