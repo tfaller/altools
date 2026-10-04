@@ -84,6 +84,7 @@ src/
  Extensions.cs
  FileNameNormalizer.cs
  Formatter.cs
+ GeneratedFileWriter.cs
  IdentifierDictionary.cs
  InferReferences.cs
  SerializableSymbolModelConverter.cs

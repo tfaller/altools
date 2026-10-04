@@ -16,15 +16,20 @@ public class Program
         {
             Description = "Path to the OpenAPI generator configuration file",
         };
+        var checkOption = new Option<bool?>("--check")
+        {
+            Description = "Verify that the generated files are up to date without writing them. Fails with a non-zero exit code if not, useful for CI pipelines.",
+        };
         var generateCommand = new Command("generate", "Generate the OpenAPI output")
         {
-            configArgument
+            configArgument,
+            checkOption
         };
         generateCommand.SetAction(async parseResult =>
         {
             var config = Config.LoadConfig(parseResult.GetValue(configArgument)!);
-            await Generate(config);
-            return 0;
+            var check = parseResult.GetValue(checkOption) ?? false;
+            return await Generate(config, check);
         });
 
         var rootCommand = new RootCommand("Generate OpenAPI output from an AL workspace")
@@ -36,7 +41,7 @@ public class Program
         return rootCommand.Parse(args).InvokeAsync();
     }
 
-    private static async Task Generate(Config config)
+    private static async Task<int> Generate(Config config, bool check)
     {
 
         // Compare the configured output-format version to a fixed expected output version.
@@ -62,6 +67,14 @@ public class Program
         }
 
         var generator = new ActionGenerate(config);
-        await generator.Generate();
+        var upToDate = await generator.Generate(check);
+
+        if (check && !upToDate)
+        {
+            Console.Error.WriteLine("Generated files are not up to date. Run 'generate' without --check to update them.");
+            return 1;
+        }
+
+        return 0;
     }
 }

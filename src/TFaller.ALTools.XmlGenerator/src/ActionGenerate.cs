@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using TFaller.ALTools.Transformation;
@@ -27,7 +28,7 @@ public class ActionGenerate
         _parseOptions = new ParseOptions(_projectManifest.AppManifest.Runtime);
     }
 
-    public async Task Generate()
+    public async Task<bool> Generate(bool check = false)
     {
         var start = DateTime.Now;
 
@@ -36,15 +37,35 @@ public class ActionGenerate
             throw new InvalidOperationException("no definitions found");
         }
 
+        var upToDateCount = 0;
+        var outdatedCount = 0;
+
         await Parallel.ForEachAsync(_config.Definitions, async (definition, token) =>
         {
-            await GenerateCodeunit(definition);
+            var isUpToDate = await GenerateCodeunit(definition, check);
+            if (isUpToDate)
+            {
+                Interlocked.Increment(ref upToDateCount);
+            }
+            else
+            {
+                Interlocked.Increment(ref outdatedCount);
+            }
         });
 
-        Console.WriteLine(string.Format("Finished all code generation in {0}!", DateTime.Now - start));
+        if (check)
+        {
+            Console.WriteLine(string.Format("Checked {0} definitions in {1}: {2} up to date, {3} outdated", upToDateCount + outdatedCount, DateTime.Now - start, upToDateCount, outdatedCount));
+        }
+        else
+        {
+            Console.WriteLine(string.Format("Finished all code generation in {0}!", DateTime.Now - start));
+        }
+
+        return outdatedCount == 0;
     }
 
-    private async Task GenerateCodeunit(Definition definition)
+    private async Task<bool> GenerateCodeunit(Definition definition, bool check)
     {
         if (definition.SchemaFile == null)
         {
@@ -85,8 +106,14 @@ public class ActionGenerate
         var merged = CodeunitMergeRewriter.Merge(definition.MergedCodeunitName, definition.MergedCodeunitId.Value, generatedCodeunits);
 
         // final generated result
-        await File.WriteAllTextAsync(RelativePath(definition.MergedCodeunitFile), _formatter.Format(merged).ToFullString());
+        var path = RelativePath(definition.MergedCodeunitFile);
+        var isUpToDate = await GeneratedFileWriter.WriteOrCheck(path, _formatter.Format(merged).ToFullString(), check);
+        if (!isUpToDate)
+        {
+            Log(schemaFile, string.Format("File is out of date: {0}", path));
+        }
         Log(schemaFile, "Finished generation");
+        return isUpToDate;
     }
 
     private string RelativePath(string file)

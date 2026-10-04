@@ -71,6 +71,7 @@ src/
  ComplexReturnTranspilerTests.cs
  ComplexReturnUplifterTests.cs
  FormatterTests.cs
+ GeneratedFileWriterTests.cs
 
 [frameworkPacks]
 Microsoft.NETCore.App.Ref

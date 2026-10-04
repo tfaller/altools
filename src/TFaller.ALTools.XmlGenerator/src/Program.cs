@@ -15,15 +15,28 @@ public class Program
         {
             Description = "Path to the XML generator configuration file",
         };
+        var checkOption = new Option<bool?>("--check")
+        {
+            Description = "Verify that the generated files are up to date without writing them. Fails with a non-zero exit code if not, useful for CI pipelines.",
+        };
         var generateCommand = new Command("generate", "Generate the XML output")
         {
-            configArgument
+            configArgument,
+            checkOption
         };
         generateCommand.SetAction(async parseResult =>
         {
             var config = Config.LoadConfig(parseResult.GetValue(configArgument)!);
+            var check = parseResult.GetValue(checkOption) ?? false;
             var generator = new ActionGenerate(config);
-            await generator.Generate();
+            var upToDate = await generator.Generate(check);
+
+            if (check && !upToDate)
+            {
+                Console.Error.WriteLine("Generated files are not up to date. Run 'generate' without --check to update them.");
+                return 1;
+            }
+
             return 0;
         });
 
