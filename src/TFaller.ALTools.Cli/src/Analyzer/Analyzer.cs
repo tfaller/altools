@@ -166,8 +166,11 @@ internal static class Analyzer
         // fingerprint: md5 of checkName + description + path + line
         var fingerprintSource = $"{checkName}\u0000{description}\u0000{path}\u0000{line}";
         var hash = MD5.HashData(Encoding.UTF8.GetBytes(fingerprintSource));
+#if NET9_0_OR_GREATER 
         var fingerprint = Convert.ToHexStringLower(hash);
-
+#else
+        var fingerprint = Convert.ToHexString(hash).ToLowerInvariant();
+#endif
         var severity = diag.Severity switch
         {
             DiagnosticSeverity.Error => GitlabSeverity.Major,
