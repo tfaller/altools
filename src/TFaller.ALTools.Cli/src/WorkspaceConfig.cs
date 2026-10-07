@@ -15,14 +15,7 @@ internal class WorkspaceConfig
     };
 
     [JsonPropertyName("transformations")]
-    public Dictionary<string, List<Rewriter>> Transformations
-    {
-        get
-        {
-            return field ?? [];
-        }
-        set;
-    }
+    public Dictionary<string, List<Rewriter>> Transformations = [];
 
     [JsonPropertyName("projectPath")]
     public string ProjectPath { get; private set; } = string.Empty;
