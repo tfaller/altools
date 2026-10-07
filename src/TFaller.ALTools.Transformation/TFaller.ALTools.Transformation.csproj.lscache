@@ -123,7 +123,7 @@ obj/Debug/net8.0/
 
 [metadataReferences]
 <NUGET>/
- microsoft.dynamics.businesscentral.development.tools/18.0.41.39415/tools/net8.0/any/
+ microsoft.dynamics.businesscentral.development.tools/18.0.43.1464/tools/net8.0/any/
   Microsoft.Dynamics.Nav.AL.Common.dll
   Microsoft.Dynamics.Nav.CodeAnalysis.dll
   Microsoft.Dynamics.Nav.CodeAnalysis.Workspaces.dll
@@ -173,7 +173,7 @@ obj/Debug/net10.0/
 
 [metadataReferences]
 <NUGET>/
- microsoft.dynamics.businesscentral.development.tools/18.0.41.39415/tools/net10.0/any/
+ microsoft.dynamics.businesscentral.development.tools/18.0.43.1464/tools/net10.0/any/
   Microsoft.Dynamics.Nav.AL.Common.dll
   Microsoft.Dynamics.Nav.CodeAnalysis.dll
   Microsoft.Dynamics.Nav.CodeAnalysis.Workspaces.dll

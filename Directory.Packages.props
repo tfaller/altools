@@ -3,12 +3,12 @@
         <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     </PropertyGroup>
     <ItemGroup>
-        <PackageVersion Include="coverlet.collector" Version="10.0.1" />
+        <PackageVersion Include="coverlet.collector" Version="10.1.0" />
         <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
         <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
         <PackageVersion
             Include="Microsoft.Dynamics.BusinessCentral.Development.Tools"
-            Version="18.0.41.39415" />
+            Version="18.0.43.1464" />
         <PackageVersion Include="Microsoft.OpenApi.YamlReader" Version="3.10.2" />
         <PackageVersion Include="System.IO.Packaging" Version="10.0.12" />
         <PackageVersion Include="System.Collections.Immutable" Version="10.0.12" />
