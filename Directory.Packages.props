@@ -11,7 +11,10 @@
             Version="18.0.41.39415" />
         <PackageVersion Include="Microsoft.OpenApi.YamlReader" Version="3.10.2" />
         <PackageVersion Include="System.IO.Packaging" Version="10.0.12" />
+        <PackageVersion Include="System.Collections.Immutable" Version="10.0.12" />
         <PackageVersion Include="System.CommandLine" Version="2.0.12" />
+        <PackageVersion Include="System.Reflection.Metadata" Version="10.0.12" />
+        <PackageVersion Include="System.Text.Json" Version="10.0.12" />
         <PackageVersion Include="xunit" Version="2.9.3" />
         <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
     </ItemGroup>

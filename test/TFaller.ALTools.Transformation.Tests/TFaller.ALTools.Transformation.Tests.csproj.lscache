@@ -10,7 +10,6 @@ version=2.2
 [project]
 project=TFaller.ALTools.Transformation.Tests.csproj
 language=C#
-primary
 lastDtbSucceeded
 
 [properties]
@@ -18,16 +17,10 @@ AssemblyName=TFaller.ALTools.Transformation.Tests
 BaseIntermediateOutputPath=obj/
 BaseOutputPath=bin/
 IsTestProject=true
-MaxSupportedLangVersion=14.0
 OutputType=Exe
 ProjectAssetsFile=<PATH>obj/project.assets.json
 RootNamespace=TFaller.ALTools.Transformation.Tests
-TargetFramework=net10.0
 TargetFrameworkIdentifier=.NETCoreApp
-TargetFrameworkVersion=v10.0
-TargetPath=<PATH>bin/Debug/net10.0/TFaller.ALTools.Transformation.Tests.dll
-TargetRefPath=<PATH>obj/Debug/net10.0/ref/TFaller.ALTools.Transformation.Tests.dll
-TemporaryDependencyNodeTargetIdentifier=net10.0
 
 [commandLineArguments]
 /noconfig
@@ -37,30 +30,20 @@ TemporaryDependencyNodeTargetIdentifier=net10.0
 /fullpaths
 /nostdlib+
 /errorreport:prompt
-/warn:10
-/define:TRACE;DEBUG;NET;NET10_0;NETCOREAPP;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NET10_0_OR_GREATER;NETCOREAPP1_0_OR_GREATER;NETCOREAPP1_1_OR_GREATER;NETCOREAPP2_0_OR_GREATER;NETCOREAPP2_1_OR_GREATER;NETCOREAPP2_2_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER
 /highentropyva+
 /nullable:enable
-/features:"InterceptorsNamespaces=;Microsoft.Extensions.Validation.Generated"
 /debug+
 /debug:portable
 /filealign:512
 /optimize-
-/out:obj/Debug/net10.0/TFaller.ALTools.Transformation.Tests.dll
-/refout:obj/Debug/net10.0/refint/TFaller.ALTools.Transformation.Tests.dll
 /target:exe
 /warnaserror-
 /utf8output
 /deterministic+
-/langversion:14.0
 /warnaserror+:NU1605,SYSLIB0011
 
 [sourceFiles]
 <NUGET>/microsoft.net.test.sdk/18.10.1/build/net8.0/Microsoft.NET.Test.Sdk.Program.cs
-obj/Debug/net10.0/
- .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
- TFaller.ALTools.Transformation.Tests.AssemblyInfo.cs
- TFaller.ALTools.Transformation.Tests.GlobalUsings.g.cs
 src/
  Deployment/
   DeploymentAssemblyTest.cs
@@ -75,6 +58,127 @@ src/
 
 [frameworkPacks]
 Microsoft.NETCore.App.Ref
+
+[analyzerReferences]
+<NETSDK>/Sdks/Microsoft.NET.Sdk/analyzers/
+ Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll
+ Microsoft.CodeAnalysis.NetAnalyzers.dll
+
+[sdkAnalyzerConfigPolicy]
+Microsoft.NET.Sdk/analyzers
+
+[projectReferences]
+../../src/TFaller.ALTools.Transformation/TFaller.ALTools.Transformation.csproj
+
+[capabilities]
+CrossPlatformExecutable
+NativeAOT
+Pack
+SupportsHotReload
+TestContainer
+
+---
+
+[project]
+language=C#
+primary
+
+[sliceDimensions]
+TargetFramework=net8.0
+
+[properties]
+MaxSupportedLangVersion=12.0
+TargetFramework=net8.0
+TargetFrameworkVersion=v8.0
+TargetPath=<PATH>bin/Debug/net8.0/TFaller.ALTools.Transformation.Tests.dll
+TargetRefPath=<PATH>obj/Debug/net8.0/ref/TFaller.ALTools.Transformation.Tests.dll
+TemporaryDependencyNodeTargetIdentifier=net8.0
+
+[commandLineArguments]
+/warn:8
+/define:TRACE;DEBUG;NET;NET8_0;NETCOREAPP;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NETCOREAPP1_0_OR_GREATER;NETCOREAPP1_1_OR_GREATER;NETCOREAPP2_0_OR_GREATER;NETCOREAPP2_1_OR_GREATER;NETCOREAPP2_2_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER
+/out:obj/Debug/net8.0/TFaller.ALTools.Transformation.Tests.dll
+/refout:obj/Debug/net8.0/refint/TFaller.ALTools.Transformation.Tests.dll
+/langversion:12.0
+
+[sourceFiles]
+obj/Debug/net8.0/
+ .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+ TFaller.ALTools.Transformation.Tests.AssemblyInfo.cs
+ TFaller.ALTools.Transformation.Tests.GlobalUsings.g.cs
+
+[metadataReferences]
+../../src/TFaller.ALTools.Transformation/obj/Debug/net8.0/ref/TFaller.ALTools.Transformation.dll
+<NUGET>/
+ microsoft.codeanalysis.common/5.9.0/lib/netstandard2.0/Microsoft.CodeAnalysis.dll
+ microsoft.codeanalysis.csharp/5.9.0/lib/netstandard2.0/Microsoft.CodeAnalysis.CSharp.dll
+ microsoft.codecoverage/18.10.1/lib/net8.0/Microsoft.VisualStudio.CodeCoverage.Shim.dll
+ microsoft.dynamics.businesscentral.development.tools/18.0.41.39415/tools/net8.0/any/
+  Microsoft.Dynamics.Nav.CodeAnalysis.dll
+  Microsoft.Dynamics.Nav.Deployment.dll
+  Microsoft.Dynamics.Nav.EditorServices.Protocol.dll
+ microsoft.testplatform.testhost/18.10.1/lib/net8.0/
+  Microsoft.TestPlatform.CommunicationUtilities.dll
+  Microsoft.TestPlatform.CoreUtilities.dll
+  Microsoft.TestPlatform.CrossPlatEngine.dll
+  Microsoft.TestPlatform.PlatformAbstractions.dll
+  Microsoft.TestPlatform.Utilities.dll
+  Microsoft.VisualStudio.TestPlatform.Common.dll
+  Microsoft.VisualStudio.TestPlatform.ObjectModel.dll
+  testhost.dll
+ system.collections.immutable/10.0.12/lib/net8.0/System.Collections.Immutable.dll
+ system.io.packaging/10.0.12/lib/net8.0/System.IO.Packaging.dll
+ system.io.pipelines/10.0.12/lib/net8.0/System.IO.Pipelines.dll
+ system.reflection.metadata/10.0.12/lib/net8.0/System.Reflection.Metadata.dll
+ system.text.encodings.web/10.0.12/lib/net8.0/System.Text.Encodings.Web.dll
+ system.text.json/10.0.12/lib/net8.0/System.Text.Json.dll
+ xunit.abstractions/2.0.3/lib/netstandard2.0/xunit.abstractions.dll
+ xunit.assert/2.9.3/lib/net6.0/xunit.assert.dll
+ xunit.extensibility.core/2.9.3/lib/netstandard1.1/xunit.core.dll
+ xunit.extensibility.execution/2.9.3/lib/netstandard1.1/xunit.execution.dotnet.dll
+
+[analyzerReferences]
+<NUGET>/
+ microsoft.codeanalysis.analyzers/5.9.0-1.26328.17/analyzers/dotnet/cs/
+  Microsoft.CodeAnalysis.Analyzers.dll
+  Microsoft.CodeAnalysis.CSharp.Analyzers.dll
+ system.text.json/10.0.12/analyzers/dotnet/roslyn4.4/cs/System.Text.Json.SourceGeneration.dll
+ xunit.analyzers/1.18.0/analyzers/dotnet/cs/
+  xunit.analyzers.dll
+  xunit.analyzers.fixes.dll
+
+[analyzerConfigFiles]
+obj/Debug/net8.0/TFaller.ALTools.Transformation.Tests.GeneratedMSBuildEditorConfig.editorconfig
+
+---
+
+[project]
+language=C#
+
+[sliceDimensions]
+TargetFramework=net10.0
+
+[properties]
+MaxSupportedLangVersion=14.0
+TargetFramework=net10.0
+TargetFrameworkVersion=v10.0
+TargetPath=<PATH>bin/Debug/net10.0/TFaller.ALTools.Transformation.Tests.dll
+TargetRefPath=<PATH>obj/Debug/net10.0/ref/TFaller.ALTools.Transformation.Tests.dll
+TemporaryDependencyNodeTargetIdentifier=net10.0
+
+[commandLineArguments]
+/warn:10
+/define:TRACE;DEBUG;NET;NET10_0;NETCOREAPP;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NET10_0_OR_GREATER;NETCOREAPP1_0_OR_GREATER;NETCOREAPP1_1_OR_GREATER;NETCOREAPP2_0_OR_GREATER;NETCOREAPP2_1_OR_GREATER;NETCOREAPP2_2_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER
+/features:"InterceptorsNamespaces=;Microsoft.Extensions.Validation.Generated"
+/out:obj/Debug/net10.0/TFaller.ALTools.Transformation.Tests.dll
+/refout:obj/Debug/net10.0/refint/TFaller.ALTools.Transformation.Tests.dll
+/langversion:14.0
+
+[sourceFiles]
+obj/Debug/net10.0/
+ .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+ TFaller.ALTools.Transformation.Tests.AssemblyInfo.cs
+ TFaller.ALTools.Transformation.Tests.GlobalUsings.g.cs
 
 [metadataReferences]
 ../../src/TFaller.ALTools.Transformation/obj/Debug/net10.0/ref/TFaller.ALTools.Transformation.dll
@@ -102,9 +206,6 @@ Microsoft.NETCore.App.Ref
  xunit.extensibility.execution/2.9.3/lib/netstandard1.1/xunit.execution.dotnet.dll
 
 [analyzerReferences]
-<NETSDK>/Sdks/Microsoft.NET.Sdk/analyzers/
- Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll
- Microsoft.CodeAnalysis.NetAnalyzers.dll
 <NUGET>/
  microsoft.codeanalysis.analyzers/5.9.0-1.26328.17/analyzers/dotnet/cs/
   Microsoft.CodeAnalysis.Analyzers.dll
@@ -113,18 +214,5 @@ Microsoft.NETCore.App.Ref
   xunit.analyzers.dll
   xunit.analyzers.fixes.dll
 
-[sdkAnalyzerConfigPolicy]
-Microsoft.NET.Sdk/analyzers
-
 [analyzerConfigFiles]
 obj/Debug/net10.0/TFaller.ALTools.Transformation.Tests.GeneratedMSBuildEditorConfig.editorconfig
-
-[projectReferences]
-../../src/TFaller.ALTools.Transformation/TFaller.ALTools.Transformation.csproj
-
-[capabilities]
-CrossPlatformExecutable
-NativeAOT
-Pack
-SupportsHotReload
-TestContainer
