@@ -10,7 +10,7 @@ public class Program
 {
     // Compare the configured output-format version to a fixed expected output version.
     // This is a manual bump target that indicates a change in the generator's output format.
-    const string ExpectedOutputVersion = "1.0.1";
+    const string ExpectedOutputVersion = "1.0.2";
 
     public static Task<int> Main(string[] args)
     {

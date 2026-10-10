@@ -65,7 +65,7 @@ public class Generator
 
         code.AppendLine($@"
             Codeunit {GetFreeCodeunitId()} {ALObjectName(name)} {{
-            Var J: JsonObject;
+            var J: JsonObject;
 
             procedure FromJson(Json: JsonToken) begin
                 J := Json.AsObject()
@@ -151,14 +151,12 @@ public class Generator
                     exit(Validate('$'));
                 end;
 
-                procedure Validate(Path: Text): Text
-                var
-                    Error: Text;
+                procedure Validate(Path: Text) Error: Text
             ");
 
             if (!schema.AdditionalPropertiesAllowed)
             {
-                code.AppendLine("PropKey: Text;");
+                code.AppendLine("var PropKey: Text;");
             }
 
             code.AppendLine("begin");
@@ -166,12 +164,12 @@ public class Generator
             foreach (var p in validateProps)
             {
                 code.AppendLine($@"Error := {Formatter.CombineIdentifiers("Validate", ALName(p.Key))}(Path);");
-                code.AppendLine("if Error <> '' then exit(Error);");
+                code.AppendLine("if Error <> '' then exit;");
             }
 
             if (!schema.AdditionalPropertiesAllowed)
             {
-                code.AppendLine("foreach PropKey in J.Keys() do begin");
+                code.AppendLine("foreach PropKey in J.Keys() do //");
 
                 if (schema.Properties?.Count > 0)
                 {
@@ -187,10 +185,8 @@ public class Generator
                 }
 
                 code.AppendLine("exit(Path + ': Unknown additional property: ' + PropKey);");
-                code.AppendLine("end;");
             }
 
-            code.AppendLine("exit('');");
             code.AppendLine("end;");
         }
 
@@ -230,7 +226,7 @@ public class Generator
         var code = _code;
         code.AppendLine($@"
             Codeunit {GetFreeCodeunitId()} {type}Array {{
-            Var J: JsonArray;
+            var J: JsonArray;
 
             procedure FromJson(Json: JsonToken) begin
                 J := Json.AsArray()
@@ -254,8 +250,8 @@ public class Generator
 
             procedure Get(Index: Integer; var Item: Codeunit {type}) 
             var
-                ItemToken: JsonToken;
                 I: Codeunit {type};
+                ItemToken: JsonToken;
             begin
                 J.Get(Index, ItemToken);
                 I.FromJson(ItemToken);
@@ -281,8 +277,8 @@ public class Generator
             code.AppendLine($@"
                 procedure Validate(Path: Text) Err: Text
                 var
-                    I: Integer;
                     Item: Codeunit {type};
+                    I: Integer;
                 begin
                     for I := 0 to J.Count() - 1 do begin
                         Get(I, Item);
@@ -333,7 +329,7 @@ public class Generator
         var code = _code;
         code.AppendLine($@"
             Codeunit {GetFreeCodeunitId()} {type}Array {{
-            Var J: JsonArray;
+            var J: JsonArray;
 
             procedure FromJson(Json: JsonToken) begin
                 J := Json.AsArray()
@@ -384,7 +380,7 @@ public class Generator
                 var
                     I: Integer;
                 begin
-                    for I := 0 to J.Count() - 1 do
+                    for I := 0 to J.Count() - 1 do //
                         if not ValidateItem(I) then
                             exit(Path + '[' + Format(I) + ']: is not type {type}: ' + GetLastErrorText());
                 end;

@@ -70,8 +70,9 @@ public class GeneratorComplex(Generator generator) : IGenerator
     {
         code.AppendLine($@"
             procedure {Formatter.CombineIdentifiers("Validate", alName)}(Path: Text) Error: Text
-            var Token: JsonToken;
+            var 
                 Obj: Codeunit {type};
+                Token: JsonToken;
             begin
         ");
 
