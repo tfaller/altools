@@ -31,7 +31,7 @@ public class CodeunitMergeRewriter : SyntaxRewriter
 
         _mergedCodeunitType = SyntaxFactory.SimpleTypeReference(
             SyntaxFactory.SubtypedDataType(
-                SyntaxFactory.Token(SyntaxKind.CodeunitKeyword),
+                SyntaxFactory.ParseToken("Codeunit"),
                 SyntaxFactory.ObjectNameOrId(SyntaxFactory.IdentifierName(mergedCodeunitName))
             )
         );
