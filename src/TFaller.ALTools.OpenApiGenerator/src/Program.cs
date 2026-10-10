@@ -8,6 +8,10 @@ namespace TFaller.ALTools.OpenApiGenerator;
 
 public class Program
 {
+    // Compare the configured output-format version to a fixed expected output version.
+    // This is a manual bump target that indicates a change in the generator's output format.
+    const string ExpectedOutputVersion = "1.0.1";
+
     public static Task<int> Main(string[] args)
     {
         AssemblyLoader.RegisterLoader();
@@ -43,11 +47,6 @@ public class Program
 
     private static async Task<int> Generate(Config config, bool check)
     {
-
-        // Compare the configured output-format version to a fixed expected output version.
-        // This is a manual bump target that indicates a change in the generator's output format.
-        const string ExpectedOutputVersion = "1.0.0";
-
         // Default missing output version to 0.0.0 to simplify checks downstream.
         var cfgVerStr = string.IsNullOrWhiteSpace(config.OutputVersion) ? "0.0.0" : config.OutputVersion!.Trim();
 

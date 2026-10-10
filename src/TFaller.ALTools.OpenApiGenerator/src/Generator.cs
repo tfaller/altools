@@ -153,10 +153,15 @@ public class Generator
 
                 procedure Validate(Path: Text): Text
                 var
-                    PropKey: Text;
                     Error: Text;
-                begin
             ");
+
+            if (!schema.AdditionalPropertiesAllowed)
+            {
+                code.AppendLine("PropKey: Text;");
+            }
+
+            code.AppendLine("begin");
 
             foreach (var p in validateProps)
             {
