@@ -58,9 +58,9 @@ public class GeneratorArray(Generator generator) : IGenerator
 
             procedure {Formatter.CombineIdentifiers("Get", alName)}(Index: Integer; var Item: Codeunit {alType})
             var
+                NewItem: Codeunit {alType};
                 Nodes: XmlNodeList;
                 Node: XmlNode;
-                NewItem: Codeunit {alType};
             begin
                 Nodes := _E.GetChildElements('{name}');
                 

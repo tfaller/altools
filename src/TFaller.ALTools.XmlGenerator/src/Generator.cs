@@ -164,59 +164,63 @@ public class Generator
                 end;
         ");
 
-        GenerateComplexTypeChildren(complexType, new StringBuilder(), elementFormDefault, name);
+        var siblingsPath = new StringBuilder();
+        GenerateComplexTypeChildren(complexType, siblingsPath, elementFormDefault, name);
 
-        _code.AppendLine(@$"
-            local procedure GetElement(name: Text): XmlElement
-            var
-                Elements: XmlNodeList;
-                Node: XmlNode;
-            begin
-                Elements := _E.GetChildElements(name);
-                if (Elements.Count <> 1) then
-                    Error('Invalid XML: %1, expected 1, got %2 elements', name, Elements.Count);
+        if (siblingsPath.Length > 0)
+        {
+            _code.AppendLine(@$"
+                local procedure GetElement(name: Text): XmlElement
+                var
+                    Elements: XmlNodeList;
+                    Node: XmlNode;
+                begin
+                    Elements := _E.GetChildElements(name);
+                    if (Elements.Count <> 1) then
+                        Error('Invalid XML: %1, expected 1, got %2 elements', name, Elements.Count);
 
-                Elements.Get(1, Node);
-                exit(Node.AsXmlElement());
-            end;
-            
-            local procedure SetElement(SiblingsPath: Text; Element: XmlElement)
-            var
-                Nodes: XmlNodeList;
-                Node: XmlNode;
-            begin
-                if not _I then begin
-                    _E := XmlElement.Create('{name}', TargetNamespace(), Element);
-                    _I := true;
-                    exit;
+                    Elements.Get(1, Node);
+                    exit(Node.AsXmlElement());
                 end;
-
-                Nodes := _E.GetChildElements(Element.LocalName(), Element.NamespaceURI());
-
-                case Nodes.Count() of
-                    0:;
-                    1: begin
-                        Nodes.Get(1, Node);
-                        Node.ReplaceWith(Element);
+                
+                local procedure SetElement(SiblingsPath: Text; Element: XmlElement)
+                var
+                    Nodes: XmlNodeList;
+                    Node: XmlNode;
+                begin
+                    if not _I then begin
+                        _E := XmlElement.Create('{name}', TargetNamespace(), Element);
+                        _I := true;
                         exit;
                     end;
-                    else
-                        Error('Invalid XML: %1, expected 0 or 1, got %2 elements', Element.LocalName(), Nodes.Count());
-                end;
 
-                if SiblingsPath <> '' then begin
-                    _E.SelectNodes(SiblingsPath, Nodes);
+                    Nodes := _E.GetChildElements(Element.LocalName(), Element.NamespaceURI());
 
-                    if Nodes.Count() > 0 then begin
-                        Nodes.Get(Nodes.Count(), Node);
-                        Node.AddAfterSelf(Element);
-                        exit;
+                    case Nodes.Count() of
+                        0:;
+                        1: begin
+                            Nodes.Get(1, Node);
+                            Node.ReplaceWith(Element);
+                            exit;
+                        end;
+                        else
+                            Error('Invalid XML: %1, expected 0 or 1, got %2 elements', Element.LocalName(), Nodes.Count());
                     end;
-                end;
 
-                _E.AddFirst(Element);
-            end;"
-        );
+                    if SiblingsPath <> '' then begin
+                        _E.SelectNodes(SiblingsPath, Nodes);
+
+                        if Nodes.Count() > 0 then begin
+                            Nodes.Get(Nodes.Count(), Node);
+                            Node.AddAfterSelf(Element);
+                            exit;
+                        end;
+                    end;
+
+                    _E.AddFirst(Element);
+                end;"
+            );
+        }
 
         _code.AppendLine("}");
     }
