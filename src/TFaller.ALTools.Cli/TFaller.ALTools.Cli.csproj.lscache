@@ -66,6 +66,7 @@ Microsoft.NET.Sdk/analyzers
 
 [projectReferences]
 ../
+ TFaller.ALTools.Cop/TFaller.ALTools.Cop.csproj
  TFaller.ALTools.OpenApiGenerator/TFaller.ALTools.OpenApiGenerator.csproj
  TFaller.ALTools.Transformation/TFaller.ALTools.Transformation.csproj
  TFaller.ALTools.XmlGenerator/TFaller.ALTools.XmlGenerator.csproj
@@ -108,6 +109,7 @@ obj/Debug/net10.0/
 
 [metadataReferences]
 ../
+ TFaller.ALTools.Cop/obj/Debug/net10.0/ref/TFaller.ALTools.Cop.dll
  TFaller.ALTools.OpenApiGenerator/obj/Debug/net10.0/ref/TFaller.ALTools.OpenApiGenerator.dll
  TFaller.ALTools.Transformation/obj/Debug/net10.0/ref/TFaller.ALTools.Transformation.dll
  TFaller.ALTools.XmlGenerator/obj/Debug/net10.0/ref/TFaller.ALTools.XmlGenerator.dll
@@ -152,6 +154,7 @@ obj/Debug/net8.0/
 
 [metadataReferences]
 ../
+ TFaller.ALTools.Cop/obj/Debug/net8.0/ref/TFaller.ALTools.Cop.dll
  TFaller.ALTools.OpenApiGenerator/obj/Debug/net8.0/ref/TFaller.ALTools.OpenApiGenerator.dll
  TFaller.ALTools.Transformation/obj/Debug/net8.0/ref/TFaller.ALTools.Transformation.dll
  TFaller.ALTools.XmlGenerator/obj/Debug/net8.0/ref/TFaller.ALTools.XmlGenerator.dll

@@ -14,6 +14,8 @@
     <ProjectReference
       Include="..\TFaller.ALTools.OpenApiGenerator\TFaller.ALTools.OpenApiGenerator.csproj" />
 
+    <ProjectReference Include="..\TFaller.ALTools.Cop\TFaller.ALTools.Cop.csproj" />
+
     <ProjectReference
       Include="..\TFaller.ALTools.XmlGenerator\TFaller.ALTools.XmlGenerator.csproj" />
 
@@ -25,4 +27,4 @@
     </Reference>
   </ItemGroup>
 
-</Project>
+</Project>
