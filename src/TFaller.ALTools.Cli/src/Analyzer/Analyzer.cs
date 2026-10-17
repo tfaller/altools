@@ -27,6 +27,10 @@ internal static class Analyzer
         ["UICop"] = "Microsoft.Dynamics.Nav.UICop"
     };
 
+    private const string TFallerALToolsCop = "TFallerALToolsCop";
+
+    private static readonly string[] analyzerNamesAll = [.. copAssemblies.Keys, TFallerALToolsCop];
+
     public async static Task Analyze(string[] args)
     {
         var workspaceArg = new Argument<string>("workspace") { Arity = ArgumentArity.ExactlyOne };
@@ -34,8 +38,8 @@ internal static class Analyzer
         var suppressOption = new Option<string[]>("--suppress") { Description = "Suppress diagnostic IDs (can be passed multiple times or comma-separated)", Arity = ArgumentArity.ZeroOrMore };
         var ruleSet = new Option<string>("--ruleSet") { Description = "Path to the rule set file", Arity = ArgumentArity.ZeroOrOne };
         var ruleSetAllowExternal = new Option<bool>("--ruleSetAllowExternal") { Description = "Allow external rules in the rule set", Arity = ArgumentArity.ZeroOrOne };
-        var analyzers = new Option<string[]>("--analyzer", "-a") { Description = "Specify which analyzers to run", Arity = ArgumentArity.ZeroOrMore, DefaultValueFactory = (_) => [.. copAssemblies.Keys] };
-        analyzers.AcceptOnlyFromAmong([.. copAssemblies.Keys]);
+        var analyzers = new Option<string[]>("--analyzer", "-a") { Description = "Specify which analyzers to run", Arity = ArgumentArity.ZeroOrMore, DefaultValueFactory = (_) => analyzerNamesAll };
+        analyzers.AcceptOnlyFromAmong(analyzerNamesAll);
 
         var root = new RootCommand
         {
@@ -52,7 +56,7 @@ internal static class Analyzer
                 parseResult.GetValue(workspaceArg) ?? throw new ArgumentException("workspace path is required"),
                 parseResult.GetValue(suppressOption) ?? [],
                 parseResult.GetValue(gitlabOption),
-                parseResult.GetValue(analyzers) ?? [.. copAssemblies.Keys],
+                parseResult.GetValue(analyzers) ?? analyzerNamesAll,
                 parseResult.GetValue(ruleSet),
                 parseResult.GetValue(ruleSetAllowExternal)
             );
@@ -113,8 +117,9 @@ internal static class Analyzer
             reportSuppressedDiagnostics: false
         );
 
-        var copAnalyzers = analyzerNames.Select(name => AnalyzerAssemblyLoader.GetAnalyzersByAssemblyName(copAssemblies[name]))
-            .SelectMany(cop => cop)
+        var copAnalyzers = analyzerNames.SelectMany(name => name == TFallerALToolsCop
+                ? LoadTFallerCopAnalyzers()
+                : AnalyzerAssemblyLoader.GetAnalyzersByAssemblyName(copAssemblies[name]))
             .ToImmutableArray();
 
         var compWithAnalyzers = new CompilationWithAnalyzers(comp, copAnalyzers, compAnalyzerOptions);
@@ -148,6 +153,9 @@ internal static class Analyzer
 
         return issues.Count == 0 ? 0 : 1;
     }
+
+    private static ImmutableArray<DiagnosticAnalyzer> LoadTFallerCopAnalyzers() =>
+        AnalyzerAssemblyLoader.GetAnalyzersByAssemblyPath(typeof(Cop.NotRequiresParenthesesAnalyzer).Assembly.Location);
 
     private static GitlabCodeQualityIssue? ConvertDiagnosticToIssue(Diagnostic diag, string basePath)
     {
@@ -208,11 +216,9 @@ internal static class Analyzer
             return Assembly.Load(Path.GetFileNameWithoutExtension(fullPath));
         }
 
-        public static ImmutableArray<DiagnosticAnalyzer> GetAnalyzersByAssemblyName(string assemblyName)
+        public static ImmutableArray<DiagnosticAnalyzer> GetAnalyzersByAssemblyPath(string fullPath)
         {
-            var analyzerFile = new AnalyzerFileReference(
-                AssemblyLoader.AnalyzerFullPathByName(assemblyName),
-                new AnalyzerAssemblyLoader());
+            var analyzerFile = new AnalyzerFileReference(fullPath, new AnalyzerAssemblyLoader());
 
             analyzerFile.AnalyzerLoadFailed += (sender, e) =>
             {
@@ -220,6 +226,11 @@ internal static class Analyzer
             };
 
             return analyzerFile.GetAnalyzers();
+        }
+
+        public static ImmutableArray<DiagnosticAnalyzer> GetAnalyzersByAssemblyName(string assemblyName)
+        {
+            return GetAnalyzersByAssemblyPath(AssemblyLoader.AnalyzerFullPathByName(assemblyName));
         }
     }
 }
