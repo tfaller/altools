@@ -7,16 +7,20 @@ using System.Text.Json.Serialization;
 
 namespace TFaller.ALTools.Cli;
 
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 internal class WorkspaceConfig
 {
     private static readonly JsonSerializerOptions _jsonOptions = new()
     {
         ReadCommentHandling = JsonCommentHandling.Skip,
+        AllowDuplicateProperties = false,
     };
 
+    [JsonInclude]
     [JsonPropertyName("transformations")]
-    public Dictionary<string, List<Rewriter>> Transformations = [];
+    public Dictionary<string, List<Rewriter>> Transformations { get; private set; } = [];
 
+    [JsonInclude]
     [JsonPropertyName("projectPath")]
     public string ProjectPath { get; private set; } = string.Empty;
 
