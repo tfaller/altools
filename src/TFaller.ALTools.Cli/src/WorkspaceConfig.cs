@@ -51,6 +51,7 @@ internal class WorkspaceConfig
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(RewriterCommentTransformVar), "comment-transform-var")]
+[JsonDerivedType(typeof(RewriterCommentTransformParam), "comment-transform-param")]
 [JsonDerivedType(typeof(RewriterCommentQuerySync), "comment-query-sync")]
 [JsonDerivedType(typeof(RewriterComplexReturnTranspiler), "complex-return-transpiler")]
 [JsonDerivedType(typeof(RewriterComplexReturnUplifter), "complex-return-uplifter")]
@@ -71,6 +72,8 @@ internal class RewriterWithTags : Rewriter
 }
 
 internal class RewriterCommentTransformVar : RewriterWithTags { }
+
+internal class RewriterCommentTransformParam : RewriterWithTags { }
 
 internal class RewriterCommentQuerySync : RewriterWithTags { }
 

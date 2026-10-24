@@ -155,7 +155,7 @@ public partial class TransformVar : SyntaxRewriter, IReuseableRewriter
     /// <summary>
     /// Removes the @altools:transform comment from the trivia list while preserving other trivia
     /// </summary>
-    private static SyntaxTriviaList RemoveTransformComment(SyntaxTriviaList trivia)
+    internal static SyntaxTriviaList RemoveTransformComment(SyntaxTriviaList trivia, Func<string, bool>? shouldRemove = null)
     {
         var newTrivia = new List<SyntaxTrivia>();
 
@@ -165,7 +165,8 @@ public partial class TransformVar : SyntaxRewriter, IReuseableRewriter
             var triviaText = t.ToString();
 
             // Only skip trivia that contains the @altools:transform directive
-            if (triviaText.TrimStart().StartsWith("//") && triviaText.Contains("@altools:transform:"))
+            if (triviaText.TrimStart().StartsWith("//") && triviaText.Contains("@altools:transform:") &&
+                (shouldRemove is null || shouldRemove(triviaText)))
             {
                 // Remove previous whitespace trivia if it only contains whitespace to avoid leaving extra blank lines.
                 if (newTrivia.Count > 0 &&
@@ -195,7 +196,7 @@ public partial class TransformVar : SyntaxRewriter, IReuseableRewriter
     /// <summary>
     /// Parses a type reference string into a TypeReferenceSyntax
     /// </summary>
-    private static TypeReferenceBaseSyntax ParseTypeReference(string typeText)
+    internal static TypeReferenceBaseSyntax ParseTypeReference(string typeText)
     {
         // Parse the type text as AL code
         // Try to parse it as a complete codeunit with variable declaration and extract the type

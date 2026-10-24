@@ -109,6 +109,12 @@ internal static class WorkspaceTransformation
                 continue;
             }
 
+            if (rewriterConfig is RewriterCommentTransformParam commentTransformParam)
+            {
+                rewriters.Add(Pool(new TransformParam(commentTransformParam.GetTags())));
+                continue;
+            }
+
             if (rewriterConfig is RewriterCommentQuerySync commentQuerySync)
             {
                 rewriters.Add(Pool(new QuerySync(commentQuerySync.GetTags())));

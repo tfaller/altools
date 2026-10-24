@@ -50,6 +50,7 @@ src/
   DownloadSymbolsTest.cs
  Transformer/CommentRule/
   QuerySyncTests.cs
+  TransformParamTests.cs
   TransformVarTests.cs
  ComplexReturnTranspilerTests.cs
  ComplexReturnUplifterTests.cs

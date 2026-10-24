@@ -16,7 +16,8 @@
                         "type:": {
                             "type": "string",
                             "enum": [
-                                "comment-transform-var"
+                                "comment-transform-var",
+                                "comment-transform-param"
                             ]
                         },
                         "tags": {

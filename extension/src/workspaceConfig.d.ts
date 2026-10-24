@@ -8,4 +8,9 @@ export interface RewriterCommentTransformVar {
     tags?: string;
 }
 
-export type RewriterConfig = RewriterCommentTransformVar;
+export interface RewriterCommentTransformParam {
+    type: "comment-transform-param";
+    tags?: string;
+}
+
+export type RewriterConfig = RewriterCommentTransformVar | RewriterCommentTransformParam;

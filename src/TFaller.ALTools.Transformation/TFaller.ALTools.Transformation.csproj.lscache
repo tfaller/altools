@@ -59,6 +59,7 @@ src/
   WorkspaceRewriter.cs
  Transformer/CommentRule/
   QuerySync.cs
+  TransformParam.cs
   TransformVar.cs
  AppPackageHelper.cs
  AssemblyLoader.cs
