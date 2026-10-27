@@ -6,12 +6,12 @@ using TFaller.ALTools.Transformation;
 
 public class Program
 {
-    public static Task Main(string[] args)
+    public static async Task<int> Main(string[] args)
     {
         if (args.Length == 0)
         {
             Console.Error.WriteLine("No command passed");
-            Environment.Exit(1);
+            return 1;
         }
 
         AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
@@ -22,7 +22,7 @@ public class Program
 
         AssemblyLoader.RegisterLoader();
 
-        return args[0] switch
+        return await (args[0] switch
         {
             "analyzer" => Analyzer.Analyzer.Analyze(args[1..]),
             "download-symbols" => DownloadSymbols.Download(args[1..]),
@@ -32,6 +32,6 @@ public class Program
             "xml" => XmlGenerator.Program.Main(args[1..]),
             "workspace-transformation" => WorkspaceTransformation.Transform(args[1..]),
             _ => throw new ArgumentException($"Unknown command: {args[0]}, please use 'analyzer|openapi|xml|workspace-transformation|infer'"),
-        };
+        });
     }
 }

@@ -6,12 +6,12 @@ namespace TFaller.ALTools.Cli;
 
 public static class DownloadSymbols
 {
-    public static async Task Download(string[] args)
+    public static async Task<int> Download(string[] args)
     {
         if (args.Length < 1)
         {
             Console.Error.WriteLine("Usage: download-symbols <workspace-path> --url <connection-url>");
-            Environment.Exit(1);
+            return 1;
         }
 
         var workspaceArg = new Argument<string>("workspace") { Arity = ArgumentArity.ExactlyOne };
@@ -28,5 +28,6 @@ public static class DownloadSymbols
         var url = parseResult.GetValue(urlOption) ?? throw new ArgumentException("connection URI is required");
 
         await Transformation.Deployment.DownloadSymbols.DownloadSymbolsAsync(workspace, url);
+        return 0;
     }
 }

@@ -31,7 +31,7 @@ internal static class Analyzer
 
     private static readonly string[] analyzerNamesAll = [.. copAssemblies.Keys, TFallerALToolsCop];
 
-    public async static Task Analyze(string[] args)
+    public async static Task<int> Analyze(string[] args)
     {
         var workspaceArg = new Argument<string>("workspace") { Arity = ArgumentArity.ExactlyOne };
         var gitlabOption = new Option<string?>("--gitlabReport") { Description = "Path to write GitLab code-quality JSON" };
@@ -63,7 +63,7 @@ internal static class Analyzer
         });
 
         var parseResult = root.Parse(args);
-        Environment.Exit(await parseResult.InvokeAsync());
+        return await parseResult.InvokeAsync();
     }
 
     private async static Task<int> AnalyzeAction(string workspace, string[] suppressValues, string? gitlabReportPath, string[] analyzerNames, string? ruleSetPath, bool ruleSetAllowExternal)

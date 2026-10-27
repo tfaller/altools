@@ -16,14 +16,14 @@ internal static class WorkspaceTransformation
         ["complex-return-uplifter"] = new(() => Pool(new ComplexReturnUplifter())),
     };
 
-    public static async Task Transform(string[] args)
+    public static async Task<int> Transform(string[] args)
     {
         if (args.Length < 2)
         {
             Console.Error.WriteLine("Usage: workspace-transform <workspace-path> <rewriter>[,<rewriter>]*");
             Console.Error.WriteLine("       workspace-transform <workspace-path> file-name-normalizer");
             Console.Error.WriteLine("       workspace-transform <workspace-path> config <transformation-name>");
-            Environment.Exit(1);
+            return 1;
         }
 
         var workspacePath = args[0];
@@ -32,7 +32,7 @@ internal static class WorkspaceTransformation
         if (string.Equals(transformName, "file-name-normalizer", StringComparison.OrdinalIgnoreCase))
         {
             await RunFileNameNormalizer(workspacePath);
-            return;
+            return 0;
         }
 
         if (string.Equals(transformName, "config", StringComparison.OrdinalIgnoreCase))
@@ -40,11 +40,10 @@ internal static class WorkspaceTransformation
             if (args.Length < 3)
             {
                 Console.Error.WriteLine("When using 'config' as rewriter, you also need to specify the transformation name defined in the config file");
-                Environment.Exit(1);
+                return 1;
             }
 
-            await RunConfigBasedTransformation(workspacePath, args[2]);
-            return;
+            return await RunConfigBasedTransformation(workspacePath, args[2]);
         }
 
         var rewritersNames = transformName.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -55,7 +54,7 @@ internal static class WorkspaceTransformation
             if (!Rewriters.TryGetValue(rewriterName, out var lazyRewriter))
             {
                 Console.Error.WriteLine($"Unknown rewriter: {rewriterName}. Available rewriters: \n{string.Join("\n", Rewriters.Keys)}");
-                Environment.Exit(1);
+                return 1;
             }
 
             rewriters.Add(lazyRewriter.Value);
@@ -67,6 +66,7 @@ internal static class WorkspaceTransformation
         await rewriter.Rewrite(workspacePath);
 
         Console.WriteLine($"Transformed workspace in {DateTime.Now - start}");
+        return 0;
     }
 
     private static async Task RunFileNameNormalizer(string workspacePath)
@@ -91,13 +91,13 @@ internal static class WorkspaceTransformation
         Console.WriteLine($"Completed in {DateTime.Now - start}");
     }
 
-    private static async Task RunConfigBasedTransformation(string workspacePath, string transformationName)
+    private static async Task<int> RunConfigBasedTransformation(string workspacePath, string transformationName)
     {
         var config = WorkspaceConfig.LoadConfig(Path.Combine(workspacePath, "altools.json"));
         if (!config.Transformations.TryGetValue(transformationName, out var rewriterConfigs) || rewriterConfigs is null)
         {
             Console.Error.WriteLine($"No transformation named '{transformationName}' found in config.");
-            Environment.Exit(1);
+            return 1;
         }
 
         var rewriters = new List<IConcurrentRewriter>();
@@ -134,7 +134,7 @@ internal static class WorkspaceTransformation
             }
 
             Console.Error.WriteLine($"Unknown rewriter type in config: {rewriterConfig.GetType().Name}");
-            Environment.Exit(1);
+            return 1;
         }
 
         var start = DateTime.Now;
@@ -146,6 +146,7 @@ internal static class WorkspaceTransformation
         await rewriter.Rewrite(workspacePath);
 
         Console.WriteLine($"Completed transformation '{transformationName}' in {DateTime.Now - start}");
+        return 0;
     }
 
     private static ReuseableRewriterPool Pool(IReuseableRewriter rewriter) => new(rewriter);

@@ -6,7 +6,7 @@ namespace TFaller.ALTools.Cli;
 
 internal static class InferReferencesCommand
 {
-    public static async Task Execute(string[] args)
+    public static async Task<int> Execute(string[] args)
     {
         if (args.Length < 5)
         {
@@ -29,7 +29,7 @@ internal static class InferReferencesCommand
             Console.Error.WriteLine();
             Console.Error.WriteLine("  # Export to JSON for inspection:");
             Console.Error.WriteLine("  infer-references ./MyApp ./output/refs.json \"MyApp References\" \"MyCompany\" 1.0.0.0 --json");
-            Environment.Exit(1);
+            return 1;
         }
 
         var workspacePath = args[0];
@@ -58,7 +58,7 @@ internal static class InferReferencesCommand
                     else
                     {
                         Console.Error.WriteLine($"Invalid module ID");
-                        Environment.Exit(1);
+                        return 1;
                     }
                     break;
                 default:
@@ -69,7 +69,7 @@ internal static class InferReferencesCommand
                     else
                     {
                         Console.Error.WriteLine($"Unknown option: {args[i]}");
-                        Environment.Exit(1);
+                        return 1;
                     }
                     break;
             }
@@ -104,12 +104,13 @@ internal static class InferReferencesCommand
             }
 
             Console.WriteLine($"\nCompleted in {DateTime.Now - start}");
+            return 0;
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
             Console.Error.WriteLine(ex.StackTrace);
-            Environment.Exit(1);
+            return 1;
         }
     }
 }

@@ -12,12 +12,12 @@ namespace TFaller.ALTools.Cli.Formatter;
 
 public static class WorkspaceFormatter
 {
-    public static async Task Format(string[] args)
+    public static async Task<int> Format(string[] args)
     {
         if (args.Length < 1)
         {
             Console.Error.WriteLine("Usage: format <workspace-path>");
-            Environment.Exit(1);
+            return 1;
         }
 
         var workspaceArg = new Argument<string>("workspace") { Arity = ArgumentArity.ExactlyOne };
@@ -67,9 +67,10 @@ public static class WorkspaceFormatter
         if (checkMode)
         {
             Console.WriteLine($"Checked {statsFormattedFiles + statsUnformattedFiles} files, {statsUnformattedFiles} not formatted, {statsFormattedFiles} already formatted");
-            Environment.Exit(statsUnformattedFiles > 0 ? 1 : 0);
+            return statsUnformattedFiles > 0 ? 1 : 0;
         }
 
         Console.WriteLine($"Checked {statsFormattedFiles + statsUnformattedFiles} files, {statsUnformattedFiles} formatted, {statsFormattedFiles} already formatted");
+        return 0;
     }
 }
