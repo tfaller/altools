@@ -28,6 +28,16 @@ public class Config
         // makes things easier later on for us.
         file = Path.GetFullPath(file);
 
+        if (Directory.Exists(file))
+        {
+            throw new FileNotFoundException($"expected a config file but got a directory: '{file}'", file);
+        }
+
+        if (!File.Exists(file))
+        {
+            throw new FileNotFoundException($"config file not found: '{file}'", file);
+        }
+
         var json = File.ReadAllText(file)
             ?? throw new FileNotFoundException("no file found", file);
 
