@@ -48,10 +48,12 @@ src/
  Deployment/
   DeploymentAssemblyTest.cs
   DownloadSymbolsTest.cs
- Transformer/CommentRule/
-  QuerySyncTests.cs
-  TransformParamTests.cs
-  TransformVarTests.cs
+ Transformer/
+  CommentRule/
+   QuerySyncTests.cs
+   TransformParamTests.cs
+   TransformVarTests.cs
+  TempBlobUplifterTests.cs
  ComplexReturnTranspilerTests.cs
  ComplexReturnUplifterTests.cs
  FormatterTests.cs

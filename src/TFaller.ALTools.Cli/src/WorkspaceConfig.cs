@@ -65,6 +65,7 @@ internal class WorkspaceConfig
 [JsonDerivedType(typeof(RewriterCommentQuerySync), "comment-query-sync")]
 [JsonDerivedType(typeof(RewriterComplexReturnTranspiler), "complex-return-transpiler")]
 [JsonDerivedType(typeof(RewriterComplexReturnUplifter), "complex-return-uplifter")]
+[JsonDerivedType(typeof(RewriterTempBlobUplifter), "temp-blob-uplifter")]
 internal class Rewriter
 {
 }
@@ -90,3 +91,5 @@ internal class RewriterCommentQuerySync : RewriterWithTags { }
 internal class RewriterComplexReturnTranspiler : Rewriter { }
 
 internal class RewriterComplexReturnUplifter : Rewriter { }
+
+internal class RewriterTempBlobUplifter : Rewriter { }

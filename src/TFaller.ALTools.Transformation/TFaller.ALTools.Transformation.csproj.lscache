@@ -57,10 +57,12 @@ src/
   RewriterContext.cs
   RewriterContextWithState.cs
   WorkspaceRewriter.cs
- Transformer/CommentRule/
-  QuerySync.cs
-  TransformParam.cs
-  TransformVar.cs
+ Transformer/
+  CommentRule/
+   QuerySync.cs
+   TransformParam.cs
+   TransformVar.cs
+  TempBlobUplifter.cs
  AppPackageHelper.cs
  AssemblyLoader.cs
  CodeunitMergeRewriter.cs

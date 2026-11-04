@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading.Tasks;
 using TFaller.ALTools.Transformation;
 using TFaller.ALTools.Transformation.Rewriter;
+using TFaller.ALTools.Transformation.Transformer;
 using TFaller.ALTools.Transformation.Transformer.CommentRule;
 
 internal static class WorkspaceTransformation
@@ -14,6 +15,7 @@ internal static class WorkspaceTransformation
     {
         ["complex-return-transpiler"] = new(() => Pool(new ComplexReturnTranspiler())),
         ["complex-return-uplifter"] = new(() => Pool(new ComplexReturnUplifter())),
+        ["temp-blob-uplifter"] = new(() => Pool(new TempBlobUplifter())),
     };
 
     public static async Task<int> Transform(string[] args)
@@ -130,6 +132,12 @@ internal static class WorkspaceTransformation
             if (rewriterConfig is RewriterComplexReturnUplifter)
             {
                 rewriters.Add(Rewriters["complex-return-uplifter"].Value);
+                continue;
+            }
+
+            if (rewriterConfig is RewriterTempBlobUplifter)
+            {
+                rewriters.Add(Rewriters["temp-blob-uplifter"].Value);
                 continue;
             }
 

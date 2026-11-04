@@ -13,4 +13,8 @@ export interface RewriterCommentTransformParam {
     tags?: string;
 }
 
-export type RewriterConfig = RewriterCommentTransformVar | RewriterCommentTransformParam;
+export interface RewriterTempBlobUplifter {
+    type: "temp-blob-uplifter";
+}
+
+export type RewriterConfig = RewriterCommentTransformVar | RewriterCommentTransformParam | RewriterTempBlobUplifter;
