@@ -86,7 +86,80 @@ public partial class TransformParam : SyntaxRewriter, IReuseableRewriter
         }
 
         var result = (MethodDeclarationSyntax)base.VisitMethodDeclaration(node)!;
-        return result.WithLeadingTrivia(TransformVar.RemoveTransformComment(result.GetLeadingTrivia(), predicate));
+        result = result.WithLeadingTrivia(TransformVar.RemoveTransformComment(result.GetLeadingTrivia(), predicate));
+
+        var tableChanges = GetTableChanges(node, result);
+        return tableChanges.Count == 0 ? result : UpdateEventSubscribers(result, tableChanges);
+    }
+
+    /// <summary>
+    /// Collects old table name -> new table name for all transformed Record parameters whose table changes.
+    /// </summary>
+    private static Dictionary<string, string> GetTableChanges(MethodDeclarationSyntax oldNode, MethodDeclarationSyntax newNode)
+    {
+        var changes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        for (var i = oldNode.ParameterList.Parameters.Count - 1; i >= 0; i--)
+        {
+            var oldTable = Formatter.UnquoteIdentifier(GetRecordParameterTableName(oldNode.ParameterList.Parameters[i]) ?? "+");
+            var newTable = Formatter.UnquoteIdentifier(GetRecordParameterTableName(newNode.ParameterList.Parameters[i]) ?? "-");
+
+            if (!oldTable.EqualsOrdinalIgnoreCase(newTable))
+            {
+                changes.TryAdd(oldTable, newTable);
+            }
+        }
+
+        return changes;
+    }
+
+    private static string? GetRecordParameterTableName(ParameterSyntax parameter)
+    {
+        if (parameter.Type is not RecordTypeReferenceSyntax recRef ||
+            recRef.DataType is not SubtypedDataTypeSyntax subtyped ||
+            subtyped.Subtype is not ObjectNameOrIdSyntax typeIdent ||
+            typeIdent.Identifier is not IdentifierNameSyntax id)
+        {
+            return null;
+        }
+
+        return id.Identifier.ValueText;
+    }
+
+    /// <summary>
+    /// Adjusts [EventSubscriber(ObjectType::Table, Database::OldTable, ...)] when the table of the Record parameter changed.
+    /// </summary>
+    private static MethodDeclarationSyntax UpdateEventSubscribers(MethodDeclarationSyntax method, Dictionary<string, string> tableChanges)
+    {
+        foreach (var attribute in method.Attributes.ToList())
+        {
+            if (!"EventSubscriber".EqualsOrdinalIgnoreCase(attribute.Name.Identifier.ValueText))
+            {
+                continue;
+            }
+
+            var arg = attribute.ArgumentList.Arguments[1];
+            if (arg is not OptionAccessAttributeArgumentSyntax optionAccessArg ||
+                optionAccessArg.OptionAccess.Expression is not IdentifierNameSyntax optionBaseIdent ||
+                !"Database".EqualsOrdinalIgnoreCase(optionBaseIdent.Identifier.ValueText))
+            {
+                continue;
+            }
+
+            if (!tableChanges.TryGetValue(Formatter.UnquoteIdentifier(optionAccessArg.OptionAccess.Name.ToString()), out var newTable))
+            {
+                continue;
+            }
+
+            var updated = SyntaxFactory.OptionAccessAttributeArgument(SyntaxFactory.OptionAccessExpression(
+                SyntaxFactory.IdentifierName("Database"),
+                SyntaxFactory.Token(SyntaxKind.ColonColonToken),
+                SyntaxFactory.IdentifierName(Formatter.QuoteIdentifier(newTable))
+            ));
+
+            method = method.ReplaceNode(method.Attributes.First(a => a.IsEquivalentTo(attribute)).ArgumentList.Arguments[1], updated);
+        }
+
+        return method;
     }
 
     public override SyntaxNode VisitTriggerDeclaration(TriggerDeclarationSyntax node)

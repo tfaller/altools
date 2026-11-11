@@ -192,6 +192,29 @@ public class TransformParamTests
         """,
         "cloud"
     )]
+    // Event subscriber: table change updates the subscriber attribute
+    [InlineData(
+        """
+        codeunit 1 Test
+        {
+            // @altools:transform:cloud:param:Rec:var NewRec: Record "New Sales Line"
+            [EventSubscriber(ObjectType::Table, Database::"Sales Line", 'OnAfterInsertEvent', '', false, false)]
+            local procedure OnAfterInsert(var Rec: Record "Sales Line")
+            begin
+            end;
+        }
+        """,
+        """
+        codeunit 1 Test
+        {
+            [EventSubscriber(ObjectType::Table, Database::"New Sales Line", 'OnAfterInsertEvent', '', false, false)]
+            local procedure OnAfterInsert(var NewRec: Record "New Sales Line")
+            begin
+            end;
+        }
+        """,
+        "cloud"
+    )]
     public void TransformParameterTest(string input, string expected, string? tags)
     {
         Assert.Equal(expected, Run(input, tags), ignoreAllWhiteSpace: true, ignoreLineEndingDifferences: true);
