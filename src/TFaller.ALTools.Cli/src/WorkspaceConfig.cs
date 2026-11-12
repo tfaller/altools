@@ -67,6 +67,7 @@ internal class WorkspaceConfig
 [JsonDerivedType(typeof(RewriterComplexReturnTranspiler), "complex-return-transpiler")]
 [JsonDerivedType(typeof(RewriterComplexReturnUplifter), "complex-return-uplifter")]
 [JsonDerivedType(typeof(RewriterTempBlobUplifter), "temp-blob-uplifter")]
+[JsonDerivedType(typeof(RewriterImplicitRecFixer), "implicit-rec-fixer")]
 internal class Rewriter
 {
 }
@@ -103,3 +104,5 @@ internal class RewriterComplexReturnTranspiler : Rewriter { }
 internal class RewriterComplexReturnUplifter : Rewriter { }
 
 internal class RewriterTempBlobUplifter : Rewriter { }
+
+internal class RewriterImplicitRecFixer : Rewriter { }

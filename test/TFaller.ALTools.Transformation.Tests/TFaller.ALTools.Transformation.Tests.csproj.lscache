@@ -54,6 +54,7 @@ src/
    TransformCondTests.cs
    TransformParamTests.cs
    TransformVarTests.cs
+  ImplicitRecFixerTests.cs
   TempBlobUplifterTests.cs
  ComplexReturnTranspilerTests.cs
  ComplexReturnUplifterTests.cs

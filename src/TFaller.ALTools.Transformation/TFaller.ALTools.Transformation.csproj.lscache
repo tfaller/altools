@@ -63,6 +63,7 @@ src/
    TransformCond.cs
    TransformParam.cs
    TransformVar.cs
+  ImplicitRecFixer.cs
   TempBlobUplifter.cs
  AppPackageHelper.cs
  AssemblyLoader.cs

@@ -36,4 +36,8 @@ export interface RewriterTempBlobUplifter {
     type: "temp-blob-uplifter";
 }
 
-export type RewriterConfig = RewriterCommentTransformVar | RewriterCommentTransformParam | RewriterCommentTransformCond | RewriterCommentQuerySync | RewriterComplexReturnTranspiler | RewriterComplexReturnUplifter | RewriterTempBlobUplifter;
+export interface RewriterImplicitRecFixer {
+    type: "implicit-rec-fixer";
+}
+
+export type RewriterConfig = RewriterCommentTransformVar | RewriterCommentTransformParam | RewriterCommentTransformCond | RewriterCommentQuerySync | RewriterComplexReturnTranspiler | RewriterComplexReturnUplifter | RewriterTempBlobUplifter | RewriterImplicitRecFixer;

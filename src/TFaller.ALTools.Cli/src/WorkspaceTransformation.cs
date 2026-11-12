@@ -16,6 +16,7 @@ internal static class WorkspaceTransformation
         ["complex-return-transpiler"] = new(() => Pool(new ComplexReturnTranspiler())),
         ["complex-return-uplifter"] = new(() => Pool(new ComplexReturnUplifter())),
         ["temp-blob-uplifter"] = new(() => Pool(new TempBlobUplifter())),
+        ["implicit-rec-fixer"] = new(() => Pool(new ImplicitRecFixer())),
     };
 
     public static async Task<int> Transform(string[] args)
@@ -144,6 +145,12 @@ internal static class WorkspaceTransformation
             if (rewriterConfig is RewriterTempBlobUplifter)
             {
                 rewriters.Add(Rewriters["temp-blob-uplifter"].Value);
+                continue;
+            }
+
+            if (rewriterConfig is RewriterImplicitRecFixer)
+            {
+                rewriters.Add(Rewriters["implicit-rec-fixer"].Value);
                 continue;
             }
 

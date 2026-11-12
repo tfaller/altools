@@ -22,7 +22,8 @@
                                 "comment-query-sync",
                                 "complex-return-transpiler",
                                 "complex-return-uplifter",
-                                "temp-blob-uplifter"
+                                "temp-blob-uplifter",
+                                "implicit-rec-fixer"
                             ]
                         },
                         "tags": {
