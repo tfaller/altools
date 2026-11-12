@@ -51,6 +51,7 @@ src/
  Transformer/
   CommentRule/
    QuerySyncTests.cs
+   TransformCondTests.cs
    TransformParamTests.cs
    TransformVarTests.cs
   TempBlobUplifterTests.cs

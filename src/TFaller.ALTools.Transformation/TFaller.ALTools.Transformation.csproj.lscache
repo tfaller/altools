@@ -60,6 +60,7 @@ src/
  Transformer/
   CommentRule/
    QuerySync.cs
+   TransformCond.cs
    TransformParam.cs
    TransformVar.cs
   TempBlobUplifter.cs
