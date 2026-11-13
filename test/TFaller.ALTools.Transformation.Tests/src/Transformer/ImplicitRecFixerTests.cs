@@ -166,6 +166,62 @@ public class ImplicitRecFixerTests
         }
         """
     )]
+    // API page: ODataKeyFields must stay a plain field name
+    [InlineData(
+        """
+        page 50000 MyApiPage
+        {
+            PageType = API;
+            SourceTable = MyTable;
+            ODataKeyFields = Name;
+
+            trigger OnAfterGetRecord()
+            begin
+                Name := 'x';
+            end;
+        }
+        """,
+        """
+        page 50000 MyApiPage
+        {
+            PageType = API;
+            SourceTable = MyTable;
+            ODataKeyFields = Name;
+
+            trigger OnAfterGetRecord()
+            begin
+                Rec.Name := 'x';
+            end;
+        }
+        """
+    )]
+    // SourceTableView: field names in where conditions must stay plain
+    [InlineData(
+        """
+        page 50000 MyPage
+        {
+            SourceTable = MyTable;
+            SourceTableView = sorting("No.") where(Name = const('x'), "No." = filter(<>''));
+
+            trigger OnAfterGetRecord()
+            begin
+                Name := 'x';
+            end;
+        }
+        """,
+        """
+        page 50000 MyPage
+        {
+            SourceTable = MyTable;
+            SourceTableView = sorting("No.") where(Name = const('x'), "No." = filter(<>''));
+
+            trigger OnAfterGetRecord()
+            begin
+                Rec.Name := 'x';
+            end;
+        }
+        """
+    )]
     public void FixImplicitRecTest(string input, string expected)
     {
         Assert.Equal(expected, Run(input), ignoreLineEndingDifferences: true);

@@ -17,7 +17,8 @@ namespace TFaller.ALTools.Transformation.Transformer;
 ///
 /// Identifiers are only prefixed if the semantic model resolves them to a field or procedure of the
 /// source table. Own members of the object, local variables, parameters and identifiers inside
-/// a "with" statement are left untouched.
+/// a "with" statement are left untouched. Field names in the properties ODataKeyFields and SourceTableView
+/// must stay plain names and are skipped.
 /// </summary>
 public class ImplicitRecFixer : SyntaxRewriter, IReuseableRewriter
 {
@@ -50,6 +51,12 @@ public class ImplicitRecFixer : SyntaxRewriter, IReuseableRewriter
     {
         // Rec.Name -> "Name" is a member access, not an implicit one
         if (node.Parent is MemberAccessExpressionSyntax access && access.Name == node)
+        {
+            return false;
+        }
+
+        // Properties like ODataKeyFields or SourceTableView reference fields by plain name
+        if (node.Ancestors().OfType<PropertySyntax>().Any(p => p.Name.Identifier.ValueText is "ODataKeyFields" or "SourceTableView"))
         {
             return false;
         }
