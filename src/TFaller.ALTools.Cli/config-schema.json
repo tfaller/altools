@@ -23,11 +23,45 @@
                                 "complex-return-transpiler",
                                 "complex-return-uplifter",
                                 "temp-blob-uplifter",
-                                "implicit-rec-fixer"
+                                "implicit-rec-fixer",
+                                "table-field-renamer"
                             ]
                         },
                         "tags": {
                             "type": "string"
+                        },
+                        "tables": {
+                            "type": "array",
+                            "description": "Only for table-field-renamer: tables and their fields to rename and/or renumber. Declarations (tables, table extensions) and references are updated. Fields not listed are ignored.",
+                            "items": {
+                                "type": "object",
+                                "required": ["name", "fields"],
+                                "additionalProperties": false,
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Name of the table"
+                                    },
+                                    "fields": {
+                                        "type": "object",
+                                        "description": "Current field name -> change",
+                                        "additionalProperties": {
+                                            "type": "object",
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "description": "New field name"
+                                                },
+                                                "no": {
+                                                    "type": "integer",
+                                                    "description": "New field number"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         },
                         "flags": {
                             "type": "object",

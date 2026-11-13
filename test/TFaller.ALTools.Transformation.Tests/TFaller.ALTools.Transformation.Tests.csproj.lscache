@@ -55,6 +55,7 @@ src/
    TransformParamTests.cs
    TransformVarTests.cs
   ImplicitRecFixerTests.cs
+  TableFieldRenamerTests.cs
   TempBlobUplifterTests.cs
  ComplexReturnTranspilerTests.cs
  ComplexReturnUplifterTests.cs

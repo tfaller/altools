@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using TFaller.ALTools.Transformation.Transformer;
 
 namespace TFaller.ALTools.Cli;
 
@@ -68,6 +69,7 @@ internal class WorkspaceConfig
 [JsonDerivedType(typeof(RewriterComplexReturnUplifter), "complex-return-uplifter")]
 [JsonDerivedType(typeof(RewriterTempBlobUplifter), "temp-blob-uplifter")]
 [JsonDerivedType(typeof(RewriterImplicitRecFixer), "implicit-rec-fixer")]
+[JsonDerivedType(typeof(RewriterTableFieldRenamer), "table-field-renamer")]
 internal class Rewriter
 {
 }
@@ -106,3 +108,42 @@ internal class RewriterComplexReturnUplifter : Rewriter { }
 internal class RewriterTempBlobUplifter : Rewriter { }
 
 internal class RewriterImplicitRecFixer : Rewriter { }
+
+internal class RewriterTableFieldRenamer : Rewriter
+{
+    [JsonPropertyName("tables")]
+    public List<TableFieldRenamerTable> Tables { get; set; } = [];
+
+    public List<TableFieldChanges> GetChanges()
+    {
+        return Tables
+            .Select(t => new TableFieldChanges(
+                t.Name,
+                t.Fields.ToDictionary(f => f.Key, f => new TableFieldChange(f.Value.Name, f.Value.No))))
+            .ToList();
+    }
+}
+
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
+internal class TableFieldRenamerTable
+{
+    /// <summary>Name of the table</summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>Current field name -> change</summary>
+    [JsonPropertyName("fields")]
+    public Dictionary<string, TableFieldRenamerField> Fields { get; set; } = [];
+}
+
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
+internal class TableFieldRenamerField
+{
+    /// <summary>New field name, if the field should be renamed</summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>New field number, if the field should be renumbered</summary>
+    [JsonPropertyName("no")]
+    public int? No { get; set; }
+}
