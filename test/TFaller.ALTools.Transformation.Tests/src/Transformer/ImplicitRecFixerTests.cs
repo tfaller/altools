@@ -222,6 +222,204 @@ public class ImplicitRecFixerTests
         }
         """
     )]
+    // SubPageLink: plain field names
+    [InlineData(
+        """
+        page 50000 MyPage
+        {
+            SourceTable = MyTable;
+
+            layout
+            {
+                area(Content)
+                {
+                    part(Lines; MyBasePage)
+                    {
+                        SubPageLink = "No." = field("No."), Name = const('x');
+                        SubPageView = where(Name = filter(<>''));
+                    }
+                }
+            }
+
+            trigger OnAfterGetRecord()
+            begin
+                Name := 'x';
+            end;
+        }
+        """,
+        """
+        page 50000 MyPage
+        {
+            SourceTable = MyTable;
+
+            layout
+            {
+                area(Content)
+                {
+                    part(Lines; MyBasePage)
+                    {
+                        SubPageLink = "No." = field("No."), Name = const('x');
+                        SubPageView = where(Name = filter(<>''));
+                    }
+                }
+            }
+
+            trigger OnAfterGetRecord()
+            begin
+                Rec.Name := 'x';
+            end;
+        }
+        """
+    )]
+    // TableRelation: plain field names
+    [InlineData(
+        """
+        page 50000 MyPage
+        {
+            SourceTable = MyTable;
+
+            layout
+            {
+                area(Content)
+                {
+                    field(Test; Dummy)
+                    {
+                        TableRelation = MyTable."No." where(Name = field(Name));
+                    }
+                }
+            }
+
+            trigger OnAfterGetRecord()
+            begin
+                Name := 'x';
+            end;
+        }
+        """,
+        """
+        page 50000 MyPage
+        {
+            SourceTable = MyTable;
+
+            layout
+            {
+                area(Content)
+                {
+                    field(Test; Dummy)
+                    {
+                        TableRelation = MyTable."No." where(Name = field(Name));
+                    }
+                }
+            }
+
+            trigger OnAfterGetRecord()
+            begin
+                Rec.Name := 'x';
+            end;
+        }
+        """
+    )]
+    // RunPageLink / RunPageView: plain field names
+    [InlineData(
+        """
+        page 50000 MyPage
+        {
+            SourceTable = MyTable;
+
+            actions
+            {
+                area(Processing)
+                {
+                    action(Open)
+                    {
+                        RunObject = page MyBasePage;
+                        RunPageLink = "No." = field("No."), Name = const('x');
+                        RunPageView = where(Name = filter(<>''));
+                    }
+                }
+            }
+
+            trigger OnAfterGetRecord()
+            begin
+                Name := 'x';
+            end;
+        }
+        """,
+        """
+        page 50000 MyPage
+        {
+            SourceTable = MyTable;
+
+            actions
+            {
+                area(Processing)
+                {
+                    action(Open)
+                    {
+                        RunObject = page MyBasePage;
+                        RunPageLink = "No." = field("No."), Name = const('x');
+                        RunPageView = where(Name = filter(<>''));
+                    }
+                }
+            }
+
+            trigger OnAfterGetRecord()
+            begin
+                Rec.Name := 'x';
+            end;
+        }
+        """
+    )]
+    // Field source expressions are rewritten
+    [InlineData(
+        """
+        page 50000 MyPage
+        {
+            SourceTable = MyTable;
+
+            layout
+            {
+                area(Content)
+                {
+                    field(Test; Name)
+                    {
+                    }
+                    field(Test2; "No.")
+                    {
+                    }
+                }
+            }
+
+            trigger OnAfterGetRecord()
+            begin
+                Name := 'x';
+            end;
+        }
+        """,
+        """
+        page 50000 MyPage
+        {
+            SourceTable = MyTable;
+
+            layout
+            {
+                area(Content)
+                {
+                    field(Test; Rec.Name)
+                    {
+                    }
+                    field(Test2; Rec."No.")
+                    {
+                    }
+                }
+            }
+
+            trigger OnAfterGetRecord()
+            begin
+                Rec.Name := 'x';
+            end;
+        }
+        """
+    )]
     public void FixImplicitRecTest(string input, string expected)
     {
         Assert.Equal(expected, Run(input), ignoreLineEndingDifferences: true);

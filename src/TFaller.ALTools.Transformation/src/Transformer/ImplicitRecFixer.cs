@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Dynamics.Nav.CodeAnalysis;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Syntax;
@@ -17,11 +19,21 @@ namespace TFaller.ALTools.Transformation.Transformer;
 ///
 /// Identifiers are only prefixed if the semantic model resolves them to a field or procedure of the
 /// source table. Own members of the object, local variables, parameters and identifiers inside
-/// a "with" statement are left untouched. Field names in the properties ODataKeyFields and SourceTableView
+/// a "with" statement are left untouched. Field names in the properties ODataKeyFields, SourceTableView, SubPageLink,
+/// SubPageView, RunPageLink, RunPageView and TableRelation
 /// must stay plain names and are skipped.
 /// </summary>
 public class ImplicitRecFixer : SyntaxRewriter, IReuseableRewriter
 {
+    // Properties whose values reference fields by plain name (filter/link syntax), never via Rec
+    private static readonly HashSet<string> PlainFieldNameProperties = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "ODataKeyFields", "SourceTableView",
+        "SubPageLink", "SubPageView",
+        "RunPageLink", "RunPageView",
+        "TableRelation"
+    };
+
     private SemanticModel _model = null!;
 
     public SyntaxNode Rewrite(SyntaxNode node, ref IRewriterContext context)
@@ -56,7 +68,7 @@ public class ImplicitRecFixer : SyntaxRewriter, IReuseableRewriter
         }
 
         // Properties like ODataKeyFields or SourceTableView reference fields by plain name
-        if (node.Ancestors().OfType<PropertySyntax>().Any(p => p.Name.Identifier.ValueText is "ODataKeyFields" or "SourceTableView"))
+        if (node.Ancestors().OfType<PropertySyntax>().Any(p => PlainFieldNameProperties.Contains(p.Name.Identifier.ValueText ?? "")))
         {
             return false;
         }
