@@ -36,6 +36,28 @@ public class ImplicitRecFixer : SyntaxRewriter, IReuseableRewriter
 
     public bool RerunUntilNoChanges => false;
 
+    /// <summary>
+    /// Only expression values (Visible, Editable, ...) may use Rec. All other value kinds
+    /// (TableRelation, SourceTableView, SubPageLink, CalcFormula, ...) reference fields by
+    /// plain name, so they are not visited at all.
+    /// </summary>
+    public override SyntaxNode? VisitProperty(PropertySyntax node)
+    {
+        return node.Value is ExpressionPropertyValueSyntax ? base.VisitProperty(node) : node;
+    }
+
+    /// <summary>
+    /// The name of a page control, e.g. field(Name; Rec.Name), is a declaration and must stay an
+    /// identifier even if it is named like a field of Rec, so only the rest is visited.
+    /// </summary>
+    public override SyntaxNode? VisitPageField(PageFieldSyntax node)
+    {
+        return node
+            .WithExpression((CodeExpressionSyntax)Visit(node.Expression)!)
+            .WithPropertyList((PropertyListSyntax)Visit(node.PropertyList)!)
+            .WithTriggers(VisitList(node.Triggers));
+    }
+
     public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
     {
         if (!IsImplicitRecMember(node))

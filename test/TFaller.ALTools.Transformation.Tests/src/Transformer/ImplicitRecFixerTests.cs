@@ -237,6 +237,147 @@ public class ImplicitRecFixerTests
         }
         """
     )]
+    // TableRelation on a page field: plain field names, no Rec prefix
+    [InlineData(
+        """
+        page 50000 MyPage
+        {
+            SourceTable = MyTable;
+
+            layout
+            {
+                area(Content)
+                {
+                    field(Other; Name)
+                    {
+                        TableRelation = OtherTable."No." where(Name = field(Name));
+                    }
+                }
+            }
+
+            trigger OnAfterGetRecord()
+            begin
+                Name := 'x';
+            end;
+        }
+        """,
+        """
+        page 50000 MyPage
+        {
+            SourceTable = MyTable;
+
+            layout
+            {
+                area(Content)
+                {
+                    field(Other; Rec.Name)
+                    {
+                        TableRelation = OtherTable."No." where(Name = field(Name));
+                    }
+                }
+            }
+
+            trigger OnAfterGetRecord()
+            begin
+                Rec.Name := 'x';
+            end;
+        }
+        """
+    )]
+    // Other properties (Visible, ...) may contain expressions: prefixed
+    [InlineData(
+        """
+        page 50000 MyPage
+        {
+            SourceTable = MyTable;
+
+            layout
+            {
+                area(Content)
+                {
+                    field(Other; Rec.Name)
+                    {
+                        Visible = Name <> '';
+                    }
+                }
+            }
+        }
+        """,
+        """
+        page 50000 MyPage
+        {
+            SourceTable = MyTable;
+
+            layout
+            {
+                area(Content)
+                {
+                    field(Other; Rec.Name)
+                    {
+                        Visible = Rec.Name <> '';
+                    }
+                }
+            }
+        }
+        """
+    )]
+    // Already explicit page without triggers: unchanged
+    [InlineData(
+        """
+        page 50153 MyListPart
+        {
+            PageType = ListPart;
+            SourceTable = OtherTable;
+            CardPageId = MyBasePage;
+            Editable = false;
+
+            layout
+            {
+                area(Content)
+                {
+                    repeater(Messages)
+                    {
+                        field(Name; Rec.Name)
+                        {
+                        }
+                        field("No."; Rec."No.")
+                        {
+                            Editable = false;
+                        }
+                        field(Extra; Rec.Extra) { }
+                    }
+                }
+            }
+        }
+        """,
+        """
+        page 50153 MyListPart
+        {
+            PageType = ListPart;
+            SourceTable = OtherTable;
+            CardPageId = MyBasePage;
+            Editable = false;
+
+            layout
+            {
+                area(Content)
+                {
+                    repeater(Messages)
+                    {
+                        field(Name; Rec.Name)
+                        {
+                        }
+                        field("No."; Rec."No.")
+                        {
+                            Editable = false;
+                        }
+                        field(Extra; Rec.Extra) { }
+                    }
+                }
+            }
+        }
+        """
+    )]
     // SubPageLink: plain field names
     [InlineData(
         """
