@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Dynamics.Nav.CodeAnalysis;
 using Microsoft.Dynamics.Nav.CodeAnalysis.Syntax;
@@ -17,23 +15,13 @@ namespace TFaller.ALTools.Transformation.Transformer;
 /// Other.Name := 'x';     -> unchanged
 /// </code>
 ///
-/// Identifiers are only prefixed if the semantic model resolves them to a field or procedure of the
-/// source table. Own members of the object, local variables, parameters and identifiers inside
-/// a "with" statement are left untouched. Field names in the properties ODataKeyFields, SourceTableView, SubPageLink,
-/// SubPageView, RunPageLink, RunPageView and TableRelation
-/// must stay plain names and are skipped.
+/// Identifiers are only prefixed if the compiler bound them to the implicitly declared "Rec" variable.
+/// Members of other record variables (also inside a "with" statement), own members of the object,
+/// local variables, parameters and plain field names in properties (e.g. SourceTableView,
+/// SubPageLink) or field arguments (e.g. TestField(Name)) are left untouched.
 /// </summary>
 public class ImplicitRecFixer : SyntaxRewriter, IReuseableRewriter
 {
-    // Properties whose values reference fields by plain name (filter/link syntax), never via Rec
-    private static readonly HashSet<string> PlainFieldNameProperties = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "ODataKeyFields", "SourceTableView",
-        "SubPageLink", "SubPageView",
-        "RunPageLink", "RunPageView",
-        "TableRelation"
-    };
-
     private SemanticModel _model = null!;
 
     public SyntaxNode Rewrite(SyntaxNode node, ref IRewriterContext context)
@@ -67,21 +55,27 @@ public class ImplicitRecFixer : SyntaxRewriter, IReuseableRewriter
             return false;
         }
 
-        // Properties like ODataKeyFields or SourceTableView reference fields by plain name
-        if (node.Ancestors().OfType<PropertySyntax>().Any(p => PlainFieldNameProperties.Contains(p.Name.Identifier.ValueText ?? "")))
-        {
-            return false;
-        }
-
         var obj = node.Ancestors().FirstOrDefault(a => a is ObjectSyntax);
-        if (obj is not (CodeunitSyntax or PageSyntax or PageExtensionSyntax) ||
-            node.Ancestors().Any(a => a is WithStatementSyntax))
+        if (obj is not (CodeunitSyntax or PageSyntax or PageExtensionSyntax))
         {
             return false;
         }
 
-        var symbol = _model.GetSymbolInfo(node).Symbol;
-        return symbol is IFieldSymbol or IMethodSymbol &&
-            symbol.ContainingSymbol is ITableTypeSymbol;
+        // The identifier is an implicit Rec member if the compiler bound it to the implicitly declared
+        // "Rec" variable (a local in codeunits, a global in pages). Members of other variables, also
+        // in "with" statements, are bound to that variable instead.
+        var instance = _model.GetOperation(node) switch
+        {
+            IFieldAccess field => field.Instance,
+            IInvocationExpression call => call.Instance,
+            _ => null,
+        };
+        var variable = instance switch
+        {
+            ILocalReferenceExpression local => local.LocalVariable,
+            IGlobalReferenceExpression global => global.GlobalVariable,
+            _ => null,
+        };
+        return variable is { IsImplicitlyDeclared: true };
     }
 }

@@ -24,6 +24,21 @@ public class ImplicitRecFixerTests
         }
         """,
         """
+        table 50001 OtherTable
+        {
+            fields
+            {
+                field(1; "No."; Code[20]) { }
+                field(2; Name; Text[50]) { }
+                field(3; Extra; Text[50]) { }
+            }
+
+            procedure Calc(): Integer
+            begin
+            end;
+        }
+        """,
+        """
         page 50001 MyBasePage
         {
             SourceTable = MyTable;
@@ -416,6 +431,127 @@ public class ImplicitRecFixerTests
             trigger OnAfterGetRecord()
             begin
                 Rec.Name := 'x';
+            end;
+        }
+        """
+    )]
+    // Field arguments of record methods stay plain, value arguments are rewritten
+    [InlineData(
+        """
+        codeunit 50000 MyCodeunit
+        {
+            TableNo = MyTable;
+
+            trigger OnRun()
+            var
+                Other: Record MyTable;
+            begin
+                Other.TestField(Name);
+                Other.SetRange(Name, Name);
+                Other.SetFilter("No.", '<>%1', Name);
+                Other.SetCurrentKey(Name, "No.", Name);
+                Other.CalcFields(Name, Name, Name);
+            end;
+        }
+        """,
+        """
+        codeunit 50000 MyCodeunit
+        {
+            TableNo = MyTable;
+
+            trigger OnRun()
+            var
+                Other: Record MyTable;
+            begin
+                Other.TestField(Name);
+                Other.SetRange(Name, Rec.Name);
+                Other.SetFilter("No.", '<>%1', Rec.Name);
+                Other.SetCurrentKey(Name, "No.", Name);
+                Other.CalcFields(Name, Name, Name);
+            end;
+        }
+        """
+    )]
+    // Fields of another table than the source table are never implicit Rec members
+    [InlineData(
+        """
+        codeunit 50000 MyCodeunit
+        {
+            TableNo = MyTable;
+
+            trigger OnRun()
+            var
+                Cust: Record OtherTable;
+            begin
+                Cust.TestField(Extra);
+                Cust.SetRange(Name, Extra);
+                Cust.Name := Name;
+                Message('%1', Cust.Calc());
+            end;
+        }
+        """,
+        """
+        codeunit 50000 MyCodeunit
+        {
+            TableNo = MyTable;
+
+            trigger OnRun()
+            var
+                Cust: Record OtherTable;
+            begin
+                Cust.TestField(Extra);
+                Cust.SetRange(Name, Extra);
+                Cust.Name := Rec.Name;
+                Message('%1', Cust.Calc());
+            end;
+        }
+        """
+    )]
+    // "with" on a record of the same table as Rec: members belong to the variable, not to Rec
+    [InlineData(
+        """
+        page 50000 MyPage
+        {
+            SourceTable = MyTable;
+
+            var
+                GlobalRec: Record MyTable;
+
+            trigger OnAfterGetRecord()
+            var
+                Other: Record MyTable;
+            begin
+                with Other do begin
+                    Name := Name;
+                    TestField(Name);
+                    Calc();
+                end;
+                with GlobalRec do
+                    Name := 'x';
+                Name := 'y';
+            end;
+        }
+        """,
+        """
+        page 50000 MyPage
+        {
+            SourceTable = MyTable;
+
+            var
+                GlobalRec: Record MyTable;
+
+            trigger OnAfterGetRecord()
+            var
+                Other: Record MyTable;
+            begin
+                with Other do begin
+                    Name := Name;
+                    TestField(Name);
+                    Calc();
+                end;
+                with GlobalRec do
+                    Name := 'x';
+                Rec.Name := 'y';
             end;
         }
         """
