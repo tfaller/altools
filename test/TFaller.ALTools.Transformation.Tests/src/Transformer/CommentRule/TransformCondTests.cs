@@ -71,4 +71,35 @@ public class TransformCondTests
         var input = Input.Replace("// @altools:transform:cloud:cond:end", "");
         Assert.Throws<InvalidOperationException>(() => Run(input, "cloud", new() { ["Feature"] = true, ["Other"] = true }));
     }
+
+    private const string CommentedInput = """
+        codeunit 1 Test
+        {
+            procedure Do()
+            begin
+                A();
+                // @altools:transform:cloud:cond:if:Feature
+                /*
+                B();
+                */
+                // @altools:transform:cloud:cond:end
+                E();
+            end;
+        }
+        """;
+
+    [Theory]
+    [InlineData(true, "A(); B(); E();")]
+    [InlineData(false, "A(); E();")]
+    public void CommentedBodyIsActivated(bool feature, string calls)
+    {
+        var result = Run(CommentedInput, "cloud", new() { ["Feature"] = feature });
+
+        Assert.DoesNotContain("@altools", result);
+        Assert.DoesNotContain("/*", result);
+        Assert.DoesNotContain("*/", result);
+        Assert.Equal(
+            $"codeunit1Test{{procedureDo()begin{calls}end;}}".Replace(" ", ""),
+            string.Concat(result.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)));
+    }
 }

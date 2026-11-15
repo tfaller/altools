@@ -19,6 +19,9 @@ namespace TFaller.ALTools.Transformation.Transformer.CommentRule;
 /// If the flag "HasFeature" is true, the block is kept, otherwise it is removed.
 /// The two comment lines are always removed. Blocks can be nested.
 ///
+/// If the body of a kept block is wrapped in a block comment (first line "/*", last line "*/"),
+/// these two lines are removed as well, which activates the code.
+///
 /// Syntax:
 ///   @altools:transform:TAG:cond:if:FLAG
 ///   @altools:transform:TAG:cond:end
@@ -70,13 +73,43 @@ public partial class TransformCond : IReuseableRewriter
     }
 
     /// <summary>
+    /// If the kept body (from <paramref name="start"/> to the end of the builder) is wrapped in a block comment
+    /// (first non-empty line "/*", last non-empty line "*/"), these two lines are removed to activate the code.
+    /// </summary>
+    private static bool UncommentBody(StringBuilder sb, int start)
+    {
+        var body = sb.ToString(start, sb.Length - start);
+        var lines = body.Split('\n');
+
+        var first = Array.FindIndex(lines, l => l.Trim().Length > 0);
+        var last = Array.FindLastIndex(lines, l => l.Trim().Length > 0);
+        if (first < 0 || last <= first || lines[first].Trim() != "/*" || lines[last].Trim() != "*/")
+        {
+            return false;
+        }
+
+        var kept = new List<string>(lines.Length);
+        for (var i = 0; i < lines.Length; i++)
+        {
+            if (i != first && i != last)
+            {
+                kept.Add(lines[i]);
+            }
+        }
+
+        sb.Length = start;
+        sb.Append(string.Join('\n', kept));
+        return true;
+    }
+
+    /// <summary>
     /// Removes the directive lines and the blocks of false flags from the text.
     /// </summary>
     internal string Process(string text, out bool changed)
     {
         var sb = new StringBuilder(text.Length);
         // one entry per open "if": whether its block is kept (and the line number for error messages)
-        var open = new Stack<(bool Keep, int Line, string Tag)>();
+        var open = new Stack<(bool Keep, int Line, string Tag, int Start, bool Outer)>();
         var removedLines = 0;
         var lineNo = 0;
         var pos = 0;
@@ -109,7 +142,11 @@ public partial class TransformCond : IReuseableRewriter
                         throw new InvalidOperationException($"Line {lineNo}: @altools:transform:{tag}:cond:end without matching if");
                     }
 
-                    open.Pop();
+                    var closed = open.Pop();
+                    if (closed.Keep && closed.Outer && UncommentBody(sb, closed.Start))
+                    {
+                        removedLines++;
+                    }
                 }
                 else
                 {
@@ -119,7 +156,7 @@ public partial class TransformCond : IReuseableRewriter
                         throw new InvalidOperationException($"Line {lineNo}: flag '{flag}' is not defined in the configuration");
                     }
 
-                    open.Push((value, lineNo, tag!));
+                    open.Push((value, lineNo, tag!, sb.Length, keep));
                 }
 
                 removedLines++;
