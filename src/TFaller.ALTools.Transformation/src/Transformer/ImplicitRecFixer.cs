@@ -18,7 +18,7 @@ namespace TFaller.ALTools.Transformation.Transformer;
 /// Identifiers are only prefixed if the compiler bound them to the implicitly declared "Rec" variable.
 /// Members of other record variables (also inside a "with" statement), own members of the object,
 /// local variables, parameters and plain field names in properties (e.g. SourceTableView,
-/// SubPageLink) or field arguments (e.g. TestField(Name)) are left untouched.
+/// SubPageLink) or field arguments (e.g. TestField(Name), SetRange(Name, ...), Validate(Name)) are left untouched.
 /// </summary>
 public class ImplicitRecFixer : SyntaxRewriter, IReuseableRewriter
 {
@@ -69,10 +69,35 @@ public class ImplicitRecFixer : SyntaxRewriter, IReuseableRewriter
         return SyntaxFactory.MemberAccessExpression(rec, node.WithoutTrivia()).WithTriviaFrom(node);
     }
 
+    /// <summary>
+    /// True if the identifier is passed to a parameter that expects a member (field) reference,
+    /// e.g. TestField(Name), SetRange(Name, ...), CalcFields(Name), Validate(Name).
+    /// </summary>
+    private bool IsFieldArgument(IdentifierNameSyntax node)
+    {
+        if (node.Parent is not ArgumentListSyntax { Parent: InvocationExpressionSyntax invocation })
+        {
+            return false;
+        }
+
+        if (_model.GetOperation(invocation) is not IInvocationExpression call)
+        {
+            return false;
+        }
+
+        return call.Arguments.Any(a => a.Syntax == node && a.Parameter is { IsMemberReference: true });
+    }
+
     private bool IsImplicitRecMember(IdentifierNameSyntax node)
     {
         // Rec.Name -> "Name" is a member access, not an implicit one
         if (node.Parent is MemberAccessExpressionSyntax access && access.Name == node)
+        {
+            return false;
+        }
+
+        // TestField(Name), SetRange(Name, ...), Validate(Name), ... take the field itself
+        if (IsFieldArgument(node))
         {
             return false;
         }

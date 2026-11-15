@@ -613,6 +613,33 @@ public class ImplicitRecFixerTests
         }
         """
     )]
+    // Explicit Rec receiver, any casing: field argument stays plain
+    [InlineData(
+        """
+        codeunit 50000 MyCodeunit
+        {
+            TableNo = MyTable;
+
+            trigger OnRun()
+            begin
+                Rec.Testfield(Name);
+                Rec.SetRange(Name, 'x');
+            end;
+        }
+        """,
+        """
+        codeunit 50000 MyCodeunit
+        {
+            TableNo = MyTable;
+
+            trigger OnRun()
+            begin
+                Rec.Testfield(Name);
+                Rec.SetRange(Name, 'x');
+            end;
+        }
+        """
+    )]
     // Fields of another table than the source table are never implicit Rec members
     [InlineData(
         """
