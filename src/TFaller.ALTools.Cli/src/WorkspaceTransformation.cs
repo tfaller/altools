@@ -160,6 +160,12 @@ internal static class WorkspaceTransformation
                 continue;
             }
 
+            if (rewriterConfig is RewriterObjectRenamer objectRenamer)
+            {
+                rewriters.Add(Pool(new ObjectRenamer(objectRenamer.GetRenames())));
+                continue;
+            }
+
             Console.Error.WriteLine($"Unknown rewriter type in config: {rewriterConfig.GetType().Name}");
             return 1;
         }

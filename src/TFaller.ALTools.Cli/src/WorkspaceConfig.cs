@@ -70,6 +70,7 @@ internal class WorkspaceConfig
 [JsonDerivedType(typeof(RewriterTempBlobUplifter), "temp-blob-uplifter")]
 [JsonDerivedType(typeof(RewriterImplicitRecFixer), "implicit-rec-fixer")]
 [JsonDerivedType(typeof(RewriterTableFieldRenamer), "table-field-renamer")]
+[JsonDerivedType(typeof(RewriterObjectRenamer), "object-renamer")]
 internal class Rewriter
 {
 }
@@ -146,4 +147,34 @@ internal class TableFieldRenamerField
     /// <summary>New field number, if the field should be renumbered</summary>
     [JsonPropertyName("no")]
     public int? No { get; set; }
+}
+
+
+internal class RewriterObjectRenamer : Rewriter
+{
+    [JsonPropertyName("objects")]
+    public List<ObjectRenamerEntry> Objects { get; set; } = [];
+
+    public List<ObjectRenamer.ObjectRename> GetRenames()
+    {
+        return [.. Objects.Select(o => new ObjectRenamer.ObjectRename(o.Type, o.OldName, o.NewName, o.NewNo))];
+    }
+}
+
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
+internal class ObjectRenamerEntry
+{
+    /// <summary>Kind of the object: codeunit, table or page</summary>
+    [JsonPropertyName("type")]
+    [JsonConverter(typeof(JsonStringEnumConverter<ObjectRenamer.ObjectKind>))]
+    public required ObjectRenamer.ObjectKind Type { get; set; }
+
+    [JsonPropertyName("oldName")]
+    public string OldName { get; set; } = string.Empty;
+
+    [JsonPropertyName("newName")]
+    public string? NewName { get; set; }
+
+    [JsonPropertyName("newNo")]
+    public int? NewNo { get; set; }
 }

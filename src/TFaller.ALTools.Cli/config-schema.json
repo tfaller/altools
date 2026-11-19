@@ -24,7 +24,8 @@
                                 "complex-return-uplifter",
                                 "temp-blob-uplifter",
                                 "implicit-rec-fixer",
-                                "table-field-renamer"
+                                "table-field-renamer",
+                                "object-renamer"
                             ]
                         },
                         "tags": {
@@ -59,6 +60,33 @@
                                                 }
                                             }
                                         }
+                                    }
+                                }
+                            }
+                        },
+                        "objects": {
+                            "type": "array",
+                            "description": "Only for object-renamer: codeunits, tables and pages to rename. Declarations and all references are updated.",
+                            "items": {
+                                "type": "object",
+                                "required": ["type", "oldName"],
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": ["codeunit", "table", "page"]
+                                    },
+                                    "oldName": {
+                                        "type": "string",
+                                        "description": "Current name of the object"
+                                    },
+                                    "newName": {
+                                        "type": "string",
+                                        "description": "New name of the object (optional)"
+                                    },
+                                    "newNo": {
+                                        "type": "integer",
+                                        "description": "New object number (optional)"
                                     }
                                 }
                             }

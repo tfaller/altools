@@ -64,6 +64,7 @@ src/
    TransformParam.cs
    TransformVar.cs
   ImplicitRecFixer.cs
+  ObjectRenamer.cs
   TableFieldRenamer.cs
   TempBlobUplifter.cs
  AppPackageHelper.cs
